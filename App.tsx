@@ -8,23 +8,17 @@
  * @format
  */
 
-import { authorize, refresh, revoke, prefetchConfiguration, AuthConfiguration, AuthorizeResult } from 'react-native-app-auth';
+import { authorize, AuthConfiguration } from 'react-native-app-auth';
 import SpotifyApi from "spotify-web-api-js";
 import React, { useEffect, useState } from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  StatusBar,
-  Button,
-  Text,
-} from 'react-native';
+import { SafeAreaView, StyleSheet, ScrollView, View, StatusBar, Button, Text } from 'react-native';
 
 import {
   Header,
   Colors,
 } from 'react-native/Libraries/NewAppScreen';
+import { Activity, ErrorResponseException } from './app/youtubeApi/youtube-api-models';
+import { Activities } from './app/youtubeApi/youtube-api-activities';
 
 const App = () => {
   const [loginYoutube, setloginYoutube] = useState<boolean>(false);
@@ -33,22 +27,12 @@ const App = () => {
   const [tokenSpotify, settokenSpotify] = useState<string>('');
   const [loadSpotifyPlaylists, setloadSpotifyPlaylists] = useState<boolean>(false);
   const [spotifyPlaylists, setspotifyPlaylists] = useState<globalThis.SpotifyApi.PlaylistObjectSimplified[]>([]);
+  const [loadYoutubeActivities, setloadYoutubeActivities] = useState<boolean>(false);
+  const [youtubeActivities, setyoutubeActivities] = useState<Activity[]>([]);
 
   useEffect(() => {
     if (loginYoutube) {
-      var promise: Promise<AuthorizeResult> = testAuthenticationYoutube();
-      promise
-        .then((res) => {
-          if (res) {
-            settokenYoutube(res.accessToken);
-            console.log('Youtube accessToken => ' + tokenYoutube);
-          } else {
-            console.log('AuthorizeResult is null');
-          }
-        })
-        .catch((err) => {
-          console.log('Error => ' + err);
-        });
+      authenticationYoutube();
     }
     return () => {
       // do nothing
@@ -57,19 +41,7 @@ const App = () => {
 
   useEffect(() => {
     if (loginSpotify) {
-      var promise: Promise<AuthorizeResult> = testAuthenticationSpotify();
-      promise
-        .then((res) => {
-          if (res) {
-            settokenSpotify(res.accessToken);
-            console.log('Spotify accessToken => ' + tokenSpotify);
-          } else {
-            console.log('AuthorizeResult is null');
-          }
-        })
-        .catch((err) => {
-          console.log('Error => ' + err);
-        });
+      authenticationSpotify();
     }
     return () => {
       // do nothing
@@ -78,55 +50,97 @@ const App = () => {
 
   useEffect(() => {
     if (loadSpotifyPlaylists) {
-      var spotifyApi = new SpotifyApi();
-      spotifyApi.setAccessToken(tokenSpotify);
-
-      spotifyApi.getUserPlaylists('gb2dbwss2vvumq0rw8o64zgbc')
-        .then((res) => {
-          if (res.items) {
-            setspotifyPlaylists(res.items);
-            console.log('Playlists loaded ' + res.items.length);
-          } else {
-            console.log('getArtists is null');
-          }
-        })
-        .catch((err) => {
-          console.log('Error => ' + err);
-        });
+      fetchSpotifyPlaylists();
     } else {
       setspotifyPlaylists([]);
     }
+
     return () => {
       // do nothing
     }
   }, [loadSpotifyPlaylists])
 
-  async function testAuthenticationYoutube(): Promise<AuthorizeResult> {
+  useEffect(() => {
+    if (loadYoutubeActivities) {
+      fetchActivities();
+    } else {
+      setyoutubeActivities([]);
+    }
+    return () => {
+      // do nothing
+    }
+  }, [loadYoutubeActivities])
+
+  async function authenticationYoutube() {
     var conf: AuthConfiguration = {
-      clientId: '435243970579-9ehmgu86hc33d883tot5ofgtblt5sg44.apps.googleusercontent.com',
-      //clientSecret: 'Jg7JzzLgdjl0fCy6b5xKvgc-',
+      clientId: '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
       redirectUrl: 'com.lopopitoconverter:/youtubeoauth2callback',
-      scopes: ['https://www.googleapis.com/auth/youtube'],
+      scopes: ['https://www.googleapis.com/auth/youtube.readonly'],
       serviceConfiguration: {
-        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/auth',
+        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
         tokenEndpoint: 'https://oauth2.googleapis.com/token',
       },
     };
-    return await authorize(conf);
+
+    try {
+      var authorizeResult = await authorize(conf);
+      if (authorizeResult) {
+        settokenYoutube(authorizeResult.accessToken);
+      }
+    } catch (error) {
+      console.log('Error => ' + error);
+    }
   }
 
-  async function testAuthenticationSpotify(): Promise<AuthorizeResult> {
+  async function authenticationSpotify() {
     var conf: AuthConfiguration = {
-      clientId: 'f215a46cd2624bdf93203ab0e584350a', // available on the app page
-      clientSecret: '69eae4663c9948a8990bcf600b3de526', // click "show client secret" to see this
-      redirectUrl: 'com.lopopitoconverter:/spotifyoauth2callback', // the redirect you defined after creating the app
-      scopes: ['user-read-email', 'playlist-modify-public', 'user-read-private'], // the scopes you need to access
+      clientId: 'f215a46cd2624bdf93203ab0e584350a',
+      redirectUrl: 'com.lopopitoconverter:/spotifyoauth2callback',
+      scopes: ['user-read-email', 'playlist-modify-public', 'user-read-private'],
       serviceConfiguration: {
         authorizationEndpoint: 'https://accounts.spotify.com/authorize',
         tokenEndpoint: 'https://accounts.spotify.com/api/token',
       },
     };
-    return await authorize(conf);
+
+    try {
+      var authorizeResult = await authorize(conf);
+      if (authorizeResult) {
+        settokenSpotify(authorizeResult.accessToken);
+      }
+    } catch (error) {
+      console.log('Error => ' + error);
+    }
+  }
+
+  async function fetchSpotifyPlaylists() {
+    try {
+      var spotifyApi = new SpotifyApi();
+      spotifyApi.setAccessToken(tokenSpotify);
+
+      var response = await spotifyApi.getUserPlaylists('gb2dbwss2vvumq0rw8o64zgbc');
+      if (response) {
+        setspotifyPlaylists(response.items);
+      }
+    } catch (error) {
+      console.log('Error => ' + error);
+    }
+  }
+
+  async function fetchActivities() {
+    try {
+      var response = await new Activities(tokenYoutube).list({ mine: true, part: ['snippet', 'contentDetails', 'id'] });
+      if (response && response.items) {
+        setyoutubeActivities(response.items);
+      }
+    } catch (error) {
+      if (error instanceof ErrorResponseException) {
+        console.log(error.errorResponse.error.message);
+      }
+      else {
+        console.log('Error => ' + error);
+      }
+    }
   }
 
   return (
@@ -147,6 +161,14 @@ const App = () => {
               {
                 spotifyPlaylists.map((p) => (
                   <Text key={p.name}>{p.name}</Text>
+                ))
+              }
+            </>
+            <Button title={loadYoutubeActivities ? 'Unload Youtube activities' : 'Load Youtube activities'} onPress={() => setloadYoutubeActivities(!loadYoutubeActivities)} color={loadYoutubeActivities ? 'red' : 'green'} />
+            <>
+              {
+                youtubeActivities.map((p) => (
+                  <Text key={p.id}>{p.snippet?.channelTitle}</Text>
                 ))
               }
             </>
