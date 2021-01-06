@@ -13,6 +13,7 @@
     "react": "16.13.1",
     "react-native": "0.63.3",
     "react-native-app-auth": "^6.0.1",
+    "redux": "^4.0.5",
     "spotify-web-api-js": "^1.5.1"
   },
   "devDependencies": {
