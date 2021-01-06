@@ -1,5 +1,11 @@
-import { Base } from "./youtube-api-base";
-import { PlaylistDeleteParameter, PlaylistInsertParameter, PlaylistInsertResponse, PlaylistListParameter, PlaylistListResponse } from "./youtube-api-models";
+import {Base} from './youtube-api-base';
+import {
+  PlaylistDeleteParameter,
+  PlaylistInsertParameter,
+  PlaylistInsertResponse,
+  PlaylistListParameter,
+  PlaylistListResponse,
+} from './youtube-api-models';
 
 export interface IPlaylists {
   list(params: PlaylistListParameter): Promise<PlaylistListResponse>;
@@ -12,11 +18,19 @@ export class Playlists extends Base implements IPlaylists {
     super(token, 'playlists');
   }
 
-  async list(params: PlaylistListParameter): Promise<PlaylistListResponse> | never {
-    return await this.getWebRequest<PlaylistListResponse>(this.buildUri(params));
+  async list(
+    params: PlaylistListParameter,
+  ): Promise<PlaylistListResponse> | never {
+    return await this.getWebRequest<PlaylistListResponse>(
+      this.buildUri(params),
+    );
   }
-  async insert(params: PlaylistInsertParameter): Promise<PlaylistInsertResponse> | never {
-    return await this.postWebRequest<PlaylistListResponse>(this.buildUri(params));
+  async insert(
+    params: PlaylistInsertParameter,
+  ): Promise<PlaylistInsertResponse> | never {
+    return await this.postWebRequest<PlaylistListResponse>(
+      this.buildUri(params),
+    );
   }
   async delete(params: PlaylistDeleteParameter): Promise<any> | never {
     return await this.deleteWebRequest<any>(this.buildUri(params));

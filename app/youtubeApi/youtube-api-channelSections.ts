@@ -1,8 +1,13 @@
-import { Base } from "./youtube-api-base";
-import { ChannelSectionListParameter, ChannelSectionListResponse } from "./youtube-api-models";
+import {Base} from './youtube-api-base';
+import {
+  ChannelSectionListParameter,
+  ChannelSectionListResponse,
+} from './youtube-api-models';
 
 export interface IChannelSections {
-  list(params: ChannelSectionListParameter): Promise<ChannelSectionListResponse>;
+  list(
+    params: ChannelSectionListParameter,
+  ): Promise<ChannelSectionListResponse>;
 }
 
 export class ChannelSections extends Base implements IChannelSections {
@@ -10,7 +15,11 @@ export class ChannelSections extends Base implements IChannelSections {
     super(token, 'channels');
   }
 
-  async list(params: ChannelSectionListParameter): Promise<ChannelSectionListResponse> | never {
-    return await this.getWebRequest<ChannelSectionListResponse>(this.buildUri(params));
+  async list(
+    params: ChannelSectionListParameter,
+  ): Promise<ChannelSectionListResponse> | never {
+    return await this.getWebRequest<ChannelSectionListResponse>(
+      this.buildUri(params),
+    );
   }
 }

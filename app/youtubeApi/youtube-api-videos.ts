@@ -1,5 +1,5 @@
-import { Base } from "./youtube-api-base";
-import { VideoListParameter, VideoListResponse } from "./youtube-api-models";
+import {Base} from './youtube-api-base';
+import {VideoListParameter, VideoListResponse} from './youtube-api-models';
 
 export interface IVideos {
   list(params: VideoListParameter): Promise<VideoListResponse>;

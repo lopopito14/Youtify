@@ -1,5 +1,5 @@
-import { Base } from "./youtube-api-base";
-import { SearchListParameter, SearchListResponse } from "./youtube-api-models";
+import {Base} from './youtube-api-base';
+import {SearchListParameter, SearchListResponse} from './youtube-api-models';
 
 export interface ISearch {
   list(params: SearchListParameter): Promise<SearchListResponse>;

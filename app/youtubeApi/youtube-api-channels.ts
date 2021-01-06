@@ -1,5 +1,5 @@
-import { Base } from "./youtube-api-base";
-import { ChannelListParameter, ChannelListResponse } from "./youtube-api-models";
+import {Base} from './youtube-api-base';
+import {ChannelListParameter, ChannelListResponse} from './youtube-api-models';
 
 export interface IChannels {
   list(params: ChannelListParameter): Promise<ChannelListResponse>;
@@ -10,7 +10,9 @@ export class Channels extends Base implements IChannels {
     super(token, 'channels');
   }
 
-  async list(params: ChannelListParameter): Promise<ChannelListResponse> | never {
+  async list(
+    params: ChannelListParameter,
+  ): Promise<ChannelListResponse> | never {
     return await this.getWebRequest<ChannelListResponse>(this.buildUri(params));
   }
 }

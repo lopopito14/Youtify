@@ -824,7 +824,7 @@ export interface ChannelBannerInsertParameter extends StandardParameters {
 /**
  * A channel banner returned as the response to a channel_banner.insert call.
  */
-export interface ChannelBannerInsertResponse extends ChannelBannerResource { }
+export interface ChannelBannerInsertResponse extends ChannelBannerResource {}
 /**
  * Branding properties of a YouTube channel.
  */
@@ -986,7 +986,7 @@ export interface ChannelListResponse {
    */
   visitorId?: string | null;
 }
-export interface ChannelUpdateResponse extends Channel { }
+export interface ChannelUpdateResponse extends Channel {}
 /**
  * Channel localization setting
  */
@@ -1131,7 +1131,7 @@ export interface ChannelSectionUpdateParameter extends StandardParameters {
    */
   requestBody?: ChannelSection;
 }
-export interface ChannelSectionInsertResponse extends Channel { }
+export interface ChannelSectionInsertResponse extends Channel {}
 export interface ChannelSectionListResponse {
   /**
    * Etag of this resource.
@@ -1154,7 +1154,7 @@ export interface ChannelSectionListResponse {
    */
   visitorId?: string | null;
 }
-export interface ChannelSectionUpdateResponse extends ChannelSection { }
+export interface ChannelSectionUpdateResponse extends ChannelSection {}
 /**
  * ChannelSection localization setting
  */
@@ -1436,7 +1436,8 @@ export interface CommentMarkasspamParameter extends StandardParameters {
    */
   id?: string[];
 }
-export interface CommentSetmoderationstatusParameter extends StandardParameters {
+export interface CommentSetmoderationstatusParameter
+  extends StandardParameters {
   /**
    * If set to true the author of the comment gets added to the ban list. This means all future comments of the author will autmomatically be rejected. Only valid in combination with STATUS_REJECTED.
    */
@@ -1461,8 +1462,8 @@ export interface CommentUpdateParameter extends StandardParameters {
    */
   requestBody?: Comment;
 }
-export interface CommentInsertResponse extends Comment { }
-export interface CommentUpdateResponse extends Comment { }
+export interface CommentInsertResponse extends Comment {}
+export interface CommentUpdateResponse extends Comment {}
 export interface CommentListResponse {
   /**
    * Etag of this resource.
@@ -1655,8 +1656,8 @@ export interface CommentThreadUpdateParameter extends StandardParameters {
    */
   requestBody?: CommentThread;
 }
-export interface CommentThreadInsertResponse extends CommentThread { }
-export interface CommentThreadUpdateResponse extends CommentThread { }
+export interface CommentThreadInsertResponse extends CommentThread {}
+export interface CommentThreadUpdateResponse extends CommentThread {}
 export interface CommentThreadListResponse {
   /**
    * Etag of this resource.
@@ -2708,11 +2709,11 @@ export interface LivebroadcastUpdateParameter extends StandardParameters {
    */
   requestBody?: LiveBroadcast;
 }
-export interface LiveBroadcastBindResponse extends LiveBroadcast { }
-export interface LiveBroadcastControlResponse extends LiveBroadcast { }
-export interface LiveBroadcastInsertResponse extends LiveBroadcast { }
-export interface LiveBroadcastTransitionResponse extends LiveBroadcast { }
-export interface LiveBroadcastUpdateResponse extends LiveBroadcast { }
+export interface LiveBroadcastBindResponse extends LiveBroadcast {}
+export interface LiveBroadcastControlResponse extends LiveBroadcast {}
+export interface LiveBroadcastInsertResponse extends LiveBroadcast {}
+export interface LiveBroadcastTransitionResponse extends LiveBroadcast {}
+export interface LiveBroadcastUpdateResponse extends LiveBroadcast {}
 export interface LiveBroadcastListResponse {
   /**
    * Etag of this resource.
@@ -2873,7 +2874,7 @@ export interface LiveChatBanInsertParameter extends StandardParameters {
    */
   requestBody?: LiveChatBan;
 }
-export interface LiveChatBanInsertResponse extends LiveChatBan { }
+export interface LiveChatBanInsertResponse extends LiveChatBan {}
 export interface LiveChatBanSnippet {
   /**
    * The duration of a ban, only filled if the ban has type TEMPORARY.
@@ -3012,7 +3013,7 @@ export interface LiveChatMessageListParameter extends StandardParameters {
    */
   profileImageSize?: number;
 }
-export interface LiveChatMessageInsertResponse extends LiveChatMessage { }
+export interface LiveChatMessageInsertResponse extends LiveChatMessage {}
 export interface LiveChatMessageListResponse {
   /**
    * Etag of this resource.
@@ -3147,7 +3148,7 @@ export interface LiveChatModeratorListParameter extends StandardParameters {
    */
   part?: string[];
 }
-export interface LiveChatModeratorInsertResponse extends LiveChatModerator { }
+export interface LiveChatModeratorInsertResponse extends LiveChatModerator {}
 export interface LiveChatModeratorListResponse {
   /**
    * Etag of this resource.
@@ -3417,8 +3418,8 @@ export interface LiveStreamUpdateParameter extends StandardParameters {
    */
   requestBody?: LiveStream;
 }
-export interface LiveStreamInsertResponse extends LiveStream { }
-export interface LiveStreamUpdateResponse extends LiveStream  { }
+export interface LiveStreamInsertResponse extends LiveStream {}
+export interface LiveStreamUpdateResponse extends LiveStream {}
 export interface LiveStreamListResponse {
   /**
    * Etag of this resource.
@@ -3876,8 +3877,8 @@ export interface PlaylistItemUpdateParameter extends StandardParameters {
    */
   requestBody?: PlaylistItem;
 }
-export interface PlaylistItemInsertResponse extends PlaylistItem { }
-export interface PlaylistItemUpdateResponse extends PlaylistItem { }
+export interface PlaylistItemInsertResponse extends PlaylistItem {}
+export interface PlaylistItemUpdateResponse extends PlaylistItem {}
 export interface PlaylistItemListResponse {
   etag?: string | null;
   /**
@@ -4042,8 +4043,8 @@ export interface PlaylistUpdateParameter extends StandardParameters {
    */
   requestBody?: Playlist;
 }
-export interface PlaylistInsertResponse extends Playlist { }
-export interface PlaylistUpdateResponse extends Playlist { }
+export interface PlaylistInsertResponse extends Playlist {}
+export interface PlaylistUpdateResponse extends Playlist {}
 export interface PlaylistListResponse {
   /**
    * Etag of this resource.
@@ -4631,7 +4632,7 @@ export interface SubscriptionListParameter extends StandardParameters {
    */
   part?: string[];
 }
-export interface SubscriptionInsertResponse extends Subscription { }
+export interface SubscriptionInsertResponse extends Subscription {}
 export interface SubscriptionListResponse {
   /**
    * Etag of this resource.
@@ -5059,7 +5060,8 @@ export interface VideoAbuseReportReason {
    */
   snippet?: VideoAbuseReportReasonSnippet;
 }
-export interface VideoAbuseReportReasonListParameter extends StandardParameters {
+export interface VideoAbuseReportReasonListParameter
+  extends StandardParameters {
   /**
    *
    */
@@ -5519,8 +5521,8 @@ export interface VideoUpdateParameter extends StandardParameters {
    */
   requestBody?: Video;
 }
-export interface VideoInsertResponse extends Video { }
-export interface VideoUpdateResponse extends Video { }
+export interface VideoInsertResponse extends Video {}
+export interface VideoUpdateResponse extends Video {}
 export interface VideoListResponse {
   /**
    * Etag of this resource.

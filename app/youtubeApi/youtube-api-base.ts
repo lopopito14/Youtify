@@ -1,4 +1,4 @@
-import { ErrorResponse, ErrorResponseException } from "./youtube-api-models";
+import {ErrorResponse, ErrorResponseException} from './youtube-api-models';
 
 export class Base {
   baseUri: string = 'https://youtube.googleapis.com/youtube/v3/';
@@ -28,43 +28,43 @@ export class Base {
   requestInit(method: string): RequestInit {
     return {
       headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer ' + this.token
+        Accept: 'application/json',
+        Authorization: 'Bearer ' + this.token,
       },
-      method: method
-    }
+      method: method,
+    };
   }
 
   async getWebRequest<T>(uri: string): Promise<T> | never {
     const response = await fetch(uri, this.requestInit('get'));
 
     if (!response.ok) {
-      let errorResponse = await response.json() as ErrorResponse;
+      let errorResponse = (await response.json()) as ErrorResponse;
       throw new ErrorResponseException(errorResponse);
     }
 
-    return await response.json() as T;
+    return (await response.json()) as T;
   }
 
   async postWebRequest<T>(uri: string): Promise<T> | never {
     const response = await fetch(uri, this.requestInit('post'));
 
     if (!response.ok) {
-      let errorResponse = await response.json() as ErrorResponse;
+      let errorResponse = (await response.json()) as ErrorResponse;
       throw new ErrorResponseException(errorResponse);
     }
 
-    return await response.json() as T;
+    return (await response.json()) as T;
   }
 
   async deleteWebRequest<T>(uri: string): Promise<T> | never {
     const response = await fetch(uri, this.requestInit('delete'));
 
     if (!response.ok) {
-      let errorResponse = await response.json() as ErrorResponse;
+      let errorResponse = (await response.json()) as ErrorResponse;
       throw new ErrorResponseException(errorResponse);
     }
 
-    return await response.json() as T;
+    return (await response.json()) as T;
   }
 }
