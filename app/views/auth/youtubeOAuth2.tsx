@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
-import { AuthConfiguration, authorize, AuthorizeResult } from "react-native-app-auth";
+import { AuthConfiguration, authorize, AuthorizeResult, refresh, RefreshResult } from "react-native-app-auth";
 import Context from "../../store/context";
-import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSucess } from "../../store/types/youtube_credential_actions";
+import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSucess, youtubeApiRefreshError, youtubeApiRefreshSucess } from "../../store/types/youtube_credential_actions";
 import { CredentialView } from "./credentialView";
 
 interface Props { }
@@ -9,7 +9,7 @@ interface Props { }
 export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
   const { state, dispatch } = useContext(Context);
 
-  async function authorizeYoutube() {
+  function authorizeConfiguration(): AuthConfiguration {
     var conf: AuthConfiguration = {
       clientId:
         '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
@@ -21,9 +21,13 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
       },
     };
 
+    return conf;
+  }
+
+  async function authorizeYoutube() {
     try {
       dispatch(youtubeApiAuthorizeRequest());
-      var authorizeResult: AuthorizeResult = await authorize(conf);
+      var authorizeResult: AuthorizeResult = await authorize(authorizeConfiguration());
       if (authorizeResult) {
         dispatch(youtubeApiAuthorizeSucess(authorizeResult));
       }
@@ -32,8 +36,16 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
     }
   }
 
-  function refreshYoutube() {
-
+  async function refreshYoutube() {
+    try {
+      dispatch(youtubeApiAuthorizeRequest());
+      var refreshResult: RefreshResult = await refresh(authorizeConfiguration(), { refreshToken: state.youtubeState.credential.refreshToken });
+      if (refreshResult) {
+        dispatch(youtubeApiRefreshSucess(refreshResult));
+      }
+    } catch (error) {
+      dispatch(youtubeApiRefreshError(error));
+    }
   }
 
   return (
