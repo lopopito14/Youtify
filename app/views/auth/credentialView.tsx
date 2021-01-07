@@ -24,7 +24,7 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
   }, []);
 
   useEffect(() => {
-    if (props.credential.accessTokenExpirationDate !== '') {
+    if (props.credential.isLogged) {
 
       const currentDate = new Date(Date.now());
       const expirationDate = new Date(props.credential.accessTokenExpirationDate);

@@ -1,13 +1,22 @@
-import React, { useContext } from "react";
+import { Text } from "native-base";
+import React, { useContext, useEffect } from "react";
 import { AuthConfiguration, authorize, AuthorizeResult, refresh, RefreshResult } from "react-native-app-auth";
 import Context from "../../store/context";
 import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSucess, youtubeApiRefreshError, youtubeApiRefreshSucess } from "../../store/types/youtube_credential_actions";
+import { youtubeCurrentProfileError, youtubeCurrentProfileRequest, youtubeCurrentProfileSucess } from "../../store/types/youtube_userProfile_actions";
+import { Channels } from "../../youtubeApi/youtube-api-channels";
 import { CredentialView } from "./credentialView";
 
 interface Props { }
 
 export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
   const { state, dispatch } = useContext(Context);
+
+  useEffect(() => {
+    if (state.youtubeState.credential.isLogged && state.youtubeState.userProfile.channelId == '') {
+      getYoutubeChannelId();
+    }
+  }, [state.youtubeState.credential.isLogged])
 
   function authorizeConfiguration(): AuthConfiguration {
     var conf: AuthConfiguration = {
@@ -48,6 +57,23 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
     }
   }
 
+  async function getYoutubeChannelId() {
+    try {
+      dispatch(youtubeCurrentProfileRequest());
+      var response = await new Channels(state.youtubeState.credential.accessToken).list(
+        {
+          mine: true,
+          part: ['snippet'],
+        }
+      )
+      if (response) {
+        dispatch(youtubeCurrentProfileSucess(response));
+      }
+    } catch (error) {
+      dispatch(youtubeCurrentProfileError(error));
+    }
+  }
+
   return (
     <>
       <CredentialView
@@ -56,6 +82,8 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
         credential={state.youtubeState.credential}
         authorizeDelegate={authorizeYoutube}
         refreshDelegate={refreshYoutube} />
+      <Text>{state.youtubeState.userProfile.title}</Text>
+      <Text>{state.youtubeState.userProfile.channelId}</Text>
     </>
   );
 };

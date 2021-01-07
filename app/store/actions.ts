@@ -1,4 +1,4 @@
-import { TSpotifyCredentialsActions } from './types/spotify_credential_types';
-import { TYoutubeCredentialsActions } from './types/youtube_credential_types';
+import { TSpotifyActions } from './types/spotify_actions';
+import { TYoutubeActions } from './types/youtube_actions';
 
-export type TActions = TYoutubeCredentialsActions | TSpotifyCredentialsActions;
+export type TActions = TYoutubeActions | TSpotifyActions;
