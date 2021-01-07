@@ -1,5 +1,5 @@
+import { Button, Text } from "native-base";
 import React, { useContext, useEffect, useState } from "react";
-import { Button, Text, View } from "react-native";
 import Context from "../../store/context";
 import { Activities } from "../../youtubeApi/youtube-api-activities";
 import { Activity, ErrorResponseException } from "../../youtubeApi/youtube-api-models";
@@ -41,21 +41,22 @@ export const YoutubeActivities: React.FunctionComponent<Props> = () => {
     }
 
     return (
-        <View>
+        <>
             <Button
-                title={
+                onPress={() => setloadYoutubeActivities(!loadYoutubeActivities)}
+                color={loadYoutubeActivities ? 'red' : 'green'}
+            >
+                <Text>{
                     loadYoutubeActivities
                         ? 'Unload Youtube activities'
                         : 'Load Youtube activities'
-                }
-                onPress={() => setloadYoutubeActivities(!loadYoutubeActivities)}
-                color={loadYoutubeActivities ? 'red' : 'green'}
-            />
+                }</Text>
+            </Button>
             <>
                 {youtubeActivities.map((p) => (
                     <Text key={p.id}>{p.snippet?.channelTitle}</Text>
                 ))}
             </>
-        </View>
+        </>
     )
 }

@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { View, Text, Button } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react';
 import Context from '../../store/context';
 import SpotifyApi from 'spotify-web-api-js';
+import { Button, Text } from 'native-base';
 
 interface Props { }
 
@@ -39,21 +39,22 @@ export const SpotifyPlaylists: React.FunctionComponent<Props> = () => {
     }
 
     return (
-        <View>
+        <>
             <Button
-                title={
+                onPress={() => setloadSpotifyPlaylists(!loadSpotifyPlaylists)}
+                color={loadSpotifyPlaylists ? 'red' : 'green'}
+            >
+                <Text>{
                     loadSpotifyPlaylists
                         ? 'Unload Spotify playlists'
                         : 'Load Spotify playlists'
-                }
-                onPress={() => setloadSpotifyPlaylists(!loadSpotifyPlaylists)}
-                color={loadSpotifyPlaylists ? 'red' : 'green'}
-            />
+                }</Text>
+            </Button>
             <>
                 {spotifyPlaylists.map((p) => (
                     <Text key={p.name}>{p.name}</Text>
                 ))}
             </>
-        </View>
+        </>
     )
 }

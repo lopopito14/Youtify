@@ -1,25 +1,15 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Button, Text, View } from "react-native"
+import React, { useContext } from "react";
 import { AuthConfiguration, authorize, AuthorizeResult } from "react-native-app-auth";
 import Context from "../../store/context";
 import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSucess } from "../../store/types/youtube_credential_actions";
+import { CredentialView } from "./credentialView";
 
 interface Props { }
 
 export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
   const { state, dispatch } = useContext(Context);
-  const [loginYoutube, setloginYoutube] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (loginYoutube) {
-      authenticationYoutube();
-    }
-    return () => {
-      // do nothing
-    };
-  }, [loginYoutube]);
-
-  async function authenticationYoutube() {
+  async function authorizeYoutube() {
     var conf: AuthConfiguration = {
       clientId:
         '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
@@ -42,13 +32,18 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
     }
   }
 
+  function refreshYoutube() {
+
+  }
+
   return (
-    <View>
-      <Button
-        title={loginYoutube ? 'Logged Youtube' : 'Login Youtube'}
-        onPress={() => setloginYoutube(!loginYoutube)}
-        color={loginYoutube ? 'red' : 'green'} />
-      <Text>{state.youtubeState.credential.accessToken}</Text>
-    </View>
+    <>
+      <CredentialView
+        title='Youtube'
+        logo={require(`../../images/youtube-logo.png`)}
+        credential={state.youtubeState.credential}
+        authorizeDelegate={authorizeYoutube}
+        refreshDelegate={refreshYoutube} />
+    </>
   );
 };

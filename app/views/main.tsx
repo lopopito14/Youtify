@@ -8,8 +8,8 @@
  * @format
  */
 
-import React, { useReducer } from 'react';
-import { SafeAreaView, StyleSheet, ScrollView, View, StatusBar } from 'react-native';
+import React, { useReducer, useState } from 'react';
+import { StyleSheet, ScrollView, View, StatusBar } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { YoutubeOAuth2 } from './auth/youtubeOAuth2';
 import { SpotifyOAuth2 } from './auth/spotifyOAuth2';
@@ -18,27 +18,103 @@ import { SpotifyPlaylists } from './draft/spotifyPlaylists';
 import { reducer } from '../store/reducer';
 import { InitialState } from '../store/state';
 import Context from '../store/context';
+import { Badge, Button, Footer, FooterTab, Icon, Text } from 'native-base';
 
 interface Props { }
 
+export enum MainView {
+  Home = "HOME",
+  Youtube = "YOUTUBE",
+  Spotify = "SPOTIFY",
+}
+
 export const Main: React.FunctionComponent<Props> = () => {
   const [state, dispatch] = useReducer(reducer, InitialState);
+  const [mainView, setmainView] = useState<MainView>(MainView.Home)
+
+  function homeView(): JSX.Element {
+    return (
+      <>
+        {
+          mainView === MainView.Home &&
+          <>
+            <YoutubeOAuth2 />
+            <SpotifyOAuth2 />
+          </>
+        }
+      </>
+    );
+  }
+
+  function youtubeView(): JSX.Element {
+    return (
+      <>
+        {
+          mainView === MainView.Youtube &&
+          <>
+            <YoutubeActivities />
+          </>
+        }
+      </>
+    );
+  }
+
+  function spotifyView(): JSX.Element {
+    return (
+      <>
+        {
+          mainView === MainView.Spotify &&
+          <>
+            <SpotifyPlaylists />
+          </>
+        }
+      </>
+    );
+  }
+
+  function footer(): JSX.Element {
+
+    const youtubeLoggedIn = state.youtubeState.credential.accessToken !== '';
+    const spotifyLoggedIn = state.spotifyState.credential.accessToken !== '';
+    const isFullLogged = youtubeLoggedIn && spotifyLoggedIn;
+
+    return (
+      <Footer>
+        <FooterTab style={{ backgroundColor: "black" }}>
+          {
+            youtubeLoggedIn &&
+            <Button onPress={() => setmainView(MainView.Youtube)}>
+              <Icon name="youtube-square" type='FontAwesome' style={{ color: "red" }} />
+            </Button>
+          }
+          <Button badge={isFullLogged} vertical={true} onPress={() => setmainView(MainView.Home)}>
+            {isFullLogged && <Badge style={{ backgroundColor: "green" }}><Text>ok</Text></Badge>}
+            <Icon name="home" style={{ color: "white" }} />
+          </Button>
+          {
+            spotifyLoggedIn &&
+            <Button onPress={() => setmainView(MainView.Spotify)}>
+              <Icon name="spotify" type='FontAwesome' style={{ color: "green" }} />
+            </Button>
+          }
+        </FooterTab>
+      </Footer>
+    );
+  }
 
   return (
     <Context.Provider value={{ state, dispatch }}>
       <StatusBar barStyle="light-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <View>
-            <YoutubeOAuth2 />
-            <SpotifyOAuth2 />
-            <YoutubeActivities />
-            <SpotifyPlaylists />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        style={styles.scrollView}>
+        <View>
+          {homeView()}
+          {youtubeView()}
+          {spotifyView()}
+        </View>
+      </ScrollView>
+      {footer()}
     </Context.Provider>
   );
 };
