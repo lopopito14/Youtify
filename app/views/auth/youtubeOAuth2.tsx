@@ -1,4 +1,4 @@
-import { Body, Card, CardItem, Content, H3, Left, Spinner, Text } from "native-base";
+import { Body, Card, CardItem, Spinner } from "native-base";
 import React, { useContext, useEffect } from "react";
 import { Image } from "react-native";
 import { AuthConfiguration, authorize, AuthorizeResult, refresh, RefreshResult } from "react-native-app-auth";
@@ -7,6 +7,7 @@ import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthori
 import { youtubeCurrentProfileError, youtubeCurrentProfileRequest, youtubeCurrentProfileSucess } from "../../store/types/youtube_userProfile_actions";
 import { Channels } from "../../youtubeApi/youtube-api-channels";
 import { CredentialView } from "./credentialView";
+import UserProfileItem from "./userProfileItem";
 
 interface Props { }
 
@@ -76,49 +77,31 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
   }
 
   return (
-    <>
-      <Content>
-        <Card style={{ flex: 0 }}>
-          <CardItem header bordered>
-            <Body>
-              <Image source={require(`../../images/youtube-logo.png`)} style={{ height: 65, width: 220, flex: 1, alignSelf: "center" }} />
-            </Body>
-          </CardItem>
-          <CardItem style={{ alignItems: "center" }}>
-            <CredentialView
-              credential={state.youtubeState.credential}
-              authorizeDelegate={authorizeYoutube}
-              refreshDelegate={refreshYoutube} />
-          </CardItem>
-          {state.youtubeState.userProfile.isLoading &&
-            <CardItem>
-              <Body>
-                <Spinner />
-              </Body>
-            </CardItem>
-          }
-          {state.youtubeState.credential.isLogged && !state.youtubeState.userProfile.isLoading &&
-            <>
-              <CardItem>
-                <Left>
-                  <H3>Name:</H3>
-                </Left>
-                <Body>
-                  <Text>{state.youtubeState.userProfile.title}</Text>
-                </Body>
-              </CardItem>
-              <CardItem>
-                <Left>
-                  <H3>Channel ID:</H3>
-                </Left>
-                <Body>
-                  <Text>{state.youtubeState.userProfile.channelId}</Text>
-                </Body>
-              </CardItem>
-            </>
-          }
-        </Card>
-      </Content>
-    </>
+    <Card style={{ flex: 0 }}>
+      <CardItem header bordered>
+        <Body>
+          <Image source={require(`../../images/youtube-logo.png`)} style={{ height: 65, width: 220, flex: 1, alignSelf: "center" }} />
+        </Body>
+      </CardItem>
+      <CardItem style={{ alignItems: "center" }}>
+        <CredentialView
+          credential={state.youtubeState.credential}
+          authorizeDelegate={authorizeYoutube}
+          refreshDelegate={refreshYoutube} />
+      </CardItem>
+      {state.youtubeState.userProfile.isLoading &&
+        <CardItem>
+          <Body>
+            <Spinner />
+          </Body>
+        </CardItem>
+      }
+      {state.youtubeState.credential.isLogged && !state.youtubeState.userProfile.isLoading &&
+        <>
+          <UserProfileItem title="Name" description={state.youtubeState.userProfile.title} />
+          <UserProfileItem title="Channel ID" description={state.youtubeState.userProfile.channelId} />
+        </>
+      }
+    </Card>
   );
 };
