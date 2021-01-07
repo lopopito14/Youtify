@@ -1,11 +1,8 @@
-import { Body, Button, Card, CardItem, Content, Icon, Left, Right, Text } from "native-base";
+import { Button, H1, H2, Icon, Left, Right, Text } from "native-base";
 import React, { useEffect, useState } from "react";
-import { Image, ImageSourcePropType } from "react-native";
 import { ICredential } from "../../store/state";
 
 interface Props {
-  title: string;
-  logo: ImageSourcePropType;
   credential: ICredential
   authorizeDelegate(): any;
   refreshDelegate(): any;
@@ -57,28 +54,17 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
 
   return (
     <>
-      <Content>
-        <Card style={{ flex: 0 }}>
-          <CardItem first>
-            <Body>
-              <Image source={props.logo} style={{ height: 55, width: 185, flex: 1, alignSelf: "center" }} />
-            </Body>
-          </CardItem>
-          <CardItem style={{ alignItems: "center" }}>
-            <Left>
-              <Button iconLeft rounded success
-                disabled={!canLogOn}
-                onPress={() => logOn()}>
-                <Icon name='sync' type="FontAwesome5" />
-                <Text>Log on</Text>
-              </Button>
-            </Left>
-            <Right>
-              <Text>{remainingTime}</Text>
-            </Right>
-          </CardItem>
-        </Card>
-      </Content>
+      <Left>
+        <Button iconLeft rounded success
+          disabled={!canLogOn}
+          onPress={() => logOn()}>
+          <Icon name='sync' type="FontAwesome5" />
+          <Text>Log on</Text>
+        </Button>
+      </Left>
+      <Right>
+        <H2>{remainingTime}</H2>
+      </Right>
     </>
   );
 };

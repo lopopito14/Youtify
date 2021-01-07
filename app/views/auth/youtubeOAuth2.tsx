@@ -1,5 +1,6 @@
-import { Text } from "native-base";
+import { Body, Card, CardItem, Content, H3, Left, Spinner, Text } from "native-base";
 import React, { useContext, useEffect } from "react";
+import { Image } from "react-native";
 import { AuthConfiguration, authorize, AuthorizeResult, refresh, RefreshResult } from "react-native-app-auth";
 import Context from "../../store/context";
 import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSucess, youtubeApiRefreshError, youtubeApiRefreshSucess } from "../../store/types/youtube_credential_actions";
@@ -76,14 +77,48 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
 
   return (
     <>
-      <CredentialView
-        title='Youtube'
-        logo={require(`../../images/youtube-logo.png`)}
-        credential={state.youtubeState.credential}
-        authorizeDelegate={authorizeYoutube}
-        refreshDelegate={refreshYoutube} />
-      <Text>{state.youtubeState.userProfile.title}</Text>
-      <Text>{state.youtubeState.userProfile.channelId}</Text>
+      <Content>
+        <Card style={{ flex: 0 }}>
+          <CardItem header bordered>
+            <Body>
+              <Image source={require(`../../images/youtube-logo.png`)} style={{ height: 65, width: 220, flex: 1, alignSelf: "center" }} />
+            </Body>
+          </CardItem>
+          <CardItem style={{ alignItems: "center" }}>
+            <CredentialView
+              credential={state.youtubeState.credential}
+              authorizeDelegate={authorizeYoutube}
+              refreshDelegate={refreshYoutube} />
+          </CardItem>
+          {state.youtubeState.userProfile.isLoading &&
+            <CardItem>
+              <Body>
+                <Spinner />
+              </Body>
+            </CardItem>
+          }
+          {state.youtubeState.credential.isLogged && !state.youtubeState.userProfile.isLoading &&
+            <>
+              <CardItem>
+                <Left>
+                  <H3>Name:</H3>
+                </Left>
+                <Body>
+                  <Text>{state.youtubeState.userProfile.title}</Text>
+                </Body>
+              </CardItem>
+              <CardItem>
+                <Left>
+                  <H3>Channel ID:</H3>
+                </Left>
+                <Body>
+                  <Text>{state.youtubeState.userProfile.channelId}</Text>
+                </Body>
+              </CardItem>
+            </>
+          }
+        </Card>
+      </Content>
     </>
   );
 };

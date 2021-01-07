@@ -19,6 +19,7 @@ export const InitialState: TState = {
       refreshToken: '',
     },
     userProfile: {
+      isLoading: false,
       country: '',
       displayName: '',
       email: '',
@@ -37,6 +38,7 @@ export const InitialState: TState = {
       refreshToken: '',
     },
     userProfile: {
+      isLoading: false,
       title: '',
       channelId: ''
     },
@@ -66,18 +68,22 @@ export interface ICredential {
   accessTokenExpirationDate: string;
 }
 
-export interface ISpotifyProfile {
+export interface ISpotifyProfile extends ILoading {
   country: string;
   displayName: string;
   email: string;
   id: string;
 }
 
-export interface IYoutubeProfile {
+export interface IYoutubeProfile extends ILoading {
   title: string;
   channelId: string;
 }
 
 export interface ISpotifyPlaylist {
   playlists: SpotifyApi.PlaylistObjectSimplified[];
+}
+
+export interface ILoading {
+  isLoading: boolean;
 }

@@ -14,11 +14,12 @@ const reducer: Reducer<ISpotifyProfile, TActions> = (state: ISpotifyProfile = In
 
     switch (spotifyAction.type) {
         case Types.SPOTIFY_CURRENT_PROFILE_REQUEST:
-            return state;
+            return { ...state, isLoading: true };
 
         case Types.SPOTIFY_CURRENT_PROFILE_SUCCEESS:
             return {
                 ...state,
+                isLoading: false,
                 country: spotifyAction.payload.country,
                 displayName: spotifyAction.payload.display_name ? spotifyAction.payload.display_name : 'Not available',
                 email: spotifyAction.payload.email,
@@ -26,7 +27,7 @@ const reducer: Reducer<ISpotifyProfile, TActions> = (state: ISpotifyProfile = In
             };
 
         case Types.SPOTIFY_CURRENT_PROFILE_ERROR:
-            return state;
+            return { ...state, isLoading: false };
 
         default:
             return state;
