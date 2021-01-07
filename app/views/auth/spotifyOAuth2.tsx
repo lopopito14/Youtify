@@ -9,9 +9,11 @@ import { Body, Card, CardItem, Spinner } from "native-base";
 import { Image } from "react-native";
 import UserProfileItem from "./userProfileItem";
 
-interface Props { }
+interface Props {
+  authorizeConfiguration: AuthConfiguration;
+}
 
-export const SpotifyOAuth2: React.FunctionComponent<Props> = () => {
+export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
   const { state, dispatch } = useContext(Context);
 
   useEffect(() => {
@@ -20,24 +22,10 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = () => {
     }
   }, [state.spotifyState.credential.isLogged])
 
-  const authorizeConfiguration: AuthConfiguration = {
-    clientId: 'f215a46cd2624bdf93203ab0e584350a',
-    redirectUrl: 'com.lopopitoconverter:/spotifyoauth2callback',
-    scopes: [
-      'user-read-email',
-      'playlist-modify-public',
-      'user-read-private',
-    ],
-    serviceConfiguration: {
-      authorizationEndpoint: 'https://accounts.spotify.com/authorize',
-      tokenEndpoint: 'https://accounts.spotify.com/api/token',
-    },
-  }
-
   async function authorizeSpotify() {
     try {
       dispatch(spotifyApiAuthorizeRequest());
-      var authorizeResult = await authorize(authorizeConfiguration);
+      var authorizeResult = await authorize(props.authorizeConfiguration);
       if (authorizeResult) {
         dispatch(spotifyApiAuthorizeSucess(authorizeResult))
       }
@@ -49,7 +37,7 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = () => {
   async function refreshSpotify() {
     try {
       dispatch(spotifyApiRefreshRequest());
-      var refreshResult = await refresh(authorizeConfiguration, { refreshToken: state.spotifyState.credential.refreshToken });
+      var refreshResult = await refresh(props.authorizeConfiguration, { refreshToken: state.spotifyState.credential.refreshToken });
       if (refreshResult) {
         dispatch(spotifyApiRefreshSucess(refreshResult));
       }
@@ -63,7 +51,7 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = () => {
       dispatch(spotifyCurrentProfileRequest());
       var spotifyApi = new SpotifyApi();
       spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
-      var getMeResult = await spotifyApi.getMe(authorizeConfiguration);
+      var getMeResult = await spotifyApi.getMe(props.authorizeConfiguration);
       if (getMeResult) {
         dispatch(spotifyCurrentProfileSucess(getMeResult));
       }

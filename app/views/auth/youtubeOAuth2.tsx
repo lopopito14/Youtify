@@ -9,9 +9,11 @@ import { Channels } from "../../youtubeApi/youtube-api-channels";
 import { CredentialView } from "./credentialView";
 import UserProfileItem from "./userProfileItem";
 
-interface Props { }
+interface Props {
+  authorizeConfiguration: AuthConfiguration;
+}
 
-export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
+export const YoutubeOAuth2: React.FunctionComponent<Props> = (props: Props) => {
   const { state, dispatch } = useContext(Context);
 
   useEffect(() => {
@@ -20,25 +22,10 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
     }
   }, [state.youtubeState.credential.isLogged])
 
-  function authorizeConfiguration(): AuthConfiguration {
-    var conf: AuthConfiguration = {
-      clientId:
-        '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
-      redirectUrl: 'com.lopopitoconverter:/youtubeoauth2callback',
-      scopes: ['https://www.googleapis.com/auth/youtube.readonly'],
-      serviceConfiguration: {
-        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-        tokenEndpoint: 'https://oauth2.googleapis.com/token',
-      },
-    };
-
-    return conf;
-  }
-
   async function authorizeYoutube() {
     try {
       dispatch(youtubeApiAuthorizeRequest());
-      var authorizeResult: AuthorizeResult = await authorize(authorizeConfiguration());
+      var authorizeResult: AuthorizeResult = await authorize(props.authorizeConfiguration);
       if (authorizeResult) {
         dispatch(youtubeApiAuthorizeSucess(authorizeResult));
       }
@@ -50,7 +37,7 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = () => {
   async function refreshYoutube() {
     try {
       dispatch(youtubeApiAuthorizeRequest());
-      var refreshResult: RefreshResult = await refresh(authorizeConfiguration(), { refreshToken: state.youtubeState.credential.refreshToken });
+      var refreshResult: RefreshResult = await refresh(props.authorizeConfiguration, { refreshToken: state.youtubeState.credential.refreshToken });
       if (refreshResult) {
         dispatch(youtubeApiRefreshSucess(refreshResult));
       }
