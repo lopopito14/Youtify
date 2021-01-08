@@ -1,4 +1,4 @@
-import { Button, H1, H2, Icon, Left, Right, Text } from "native-base";
+import { Button, H2, Icon, Left, Right, Text } from "native-base";
 import React, { useEffect, useState } from "react";
 import { ICredential } from "../../store/state";
 
@@ -55,7 +55,7 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
   return (
     <>
       <Left>
-        <Button iconLeft rounded success
+        <Button iconLeft rounded info
           disabled={!canLogOn}
           onPress={() => logOn()}>
           <Icon name='sync' type="FontAwesome5" />

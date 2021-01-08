@@ -6,6 +6,7 @@ import Context from "../../store/context";
 import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSucess, youtubeApiRefreshError, youtubeApiRefreshSucess } from "../../store/types/youtube_credential_actions";
 import { youtubeCurrentProfileError, youtubeCurrentProfileRequest, youtubeCurrentProfileSucess } from "../../store/types/youtube_userProfile_actions";
 import { Channels } from "../../youtubeApi/youtube-api-channels";
+import { settingsTheme } from "../theme";
 import { CredentialView } from "./credentialView";
 import UserProfileItem from "./userProfileItem";
 
@@ -65,21 +66,21 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 
   return (
     <Card style={{ flex: 0 }}>
-      <CardItem header bordered>
+      <CardItem header>
         <Body>
           <Image source={require(`../../images/youtube-logo.png`)} style={{ height: 65, width: 220, flex: 1, alignSelf: "center" }} />
         </Body>
       </CardItem>
-      <CardItem style={{ alignItems: "center" }}>
+      <CardItem>
         <CredentialView
           credential={state.youtubeState.credential}
           authorizeDelegate={authorizeYoutube}
           refreshDelegate={refreshYoutube} />
       </CardItem>
       {state.youtubeState.userProfile.isLoading &&
-        <CardItem>
+        <CardItem bordered>
           <Body>
-            <Spinner />
+            <Spinner color={settingsTheme.primaryColor} />
           </Body>
         </CardItem>
       }

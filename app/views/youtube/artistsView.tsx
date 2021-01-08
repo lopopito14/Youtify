@@ -1,11 +1,18 @@
-import { H1 } from 'native-base'
+import { Content, H1 } from 'native-base'
 import React from 'react'
+import { ScrollView } from 'react-native'
 
-export interface IProps { }
+export interface IProps {
+    backgroundColor: string;
+}
 
-const ArtistsView: React.FunctionComponent<IProps> = () => {
+const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     return (
-        <H1>Artists</H1>
+        <ScrollView style={{ backgroundColor: props.backgroundColor }}>
+            <Content>
+                <H1>Artists</H1>
+            </Content>
+        </ScrollView>
     )
 }
 

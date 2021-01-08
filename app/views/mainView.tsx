@@ -1,13 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
 import React, { useReducer, useState } from 'react';
 import { StatusBar } from 'react-native';
 import { YoutubeView } from './youtubeView';
@@ -17,6 +7,7 @@ import { InitialState } from '../store/state';
 import Context from '../store/context';
 import { Button, Footer, FooterTab, Icon, Text } from 'native-base';
 import SettingsView from './settingsView';
+import { settingsTheme, spotifyTheme, youtubeTheme } from './theme';
 
 interface Props { }
 
@@ -50,23 +41,23 @@ export const MainView: React.FunctionComponent<Props> = () => {
         _isSelected(MainViewType.Spotify) && <SpotifyView />
       }
       <Footer>
-        <FooterTab style={{ backgroundColor: "white" }}>
+        <FooterTab style={{ backgroundColor: "black" }}>
           {
             youtubeLoggedIn &&
             <Button vertical={true} onPress={() => setselectedView(MainViewType.Youtube)}>
-              <Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: _isSelected(MainViewType.Youtube) ? "red" : "black" }} />
-              <Text style={{ color: _isSelected(MainViewType.Youtube) ? "red" : "black" }}>Youtube</Text>
+              <Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: _isSelected(MainViewType.Youtube) ? youtubeTheme.primaryColor : "white" }} />
+              <Text style={{ color: _isSelected(MainViewType.Youtube) ? youtubeTheme.primaryColor : "white" }}>Youtube</Text>
             </Button>
           }
           <Button vertical={true} onPress={() => setselectedView(MainViewType.Settings)}>
-            <Icon name="cog" style={{ color: _isSelected(MainViewType.Settings) ? "#70D6FF" : "black" }} />
-            <Text style={{ color: _isSelected(MainViewType.Settings) ? "#70D6FF" : "black" }}>Settings</Text>
+            <Icon name="cog" style={{ color: _isSelected(MainViewType.Settings) ? settingsTheme.primaryColor : "white" }} />
+            <Text style={{ color: _isSelected(MainViewType.Settings) ? settingsTheme.primaryColor : "white" }}>Settings</Text>
           </Button>
           {
             spotifyLoggedIn &&
             <Button vertical={true} onPress={() => setselectedView(MainViewType.Spotify)}>
-              <Icon name="spotify" type='FontAwesome' style={{ color: _isSelected(MainViewType.Spotify) ? "#1DB954" : "black" }} />
-              <Text style={{ color: _isSelected(MainViewType.Spotify) ? "#1DB954" : "black" }}>Spotify</Text>
+              <Icon name="spotify" type='FontAwesome' style={{ color: _isSelected(MainViewType.Spotify) ? spotifyTheme.primaryColor : "white" }} />
+              <Text style={{ color: _isSelected(MainViewType.Spotify) ? spotifyTheme.primaryColor : "white" }}>Spotify</Text>
             </Button>
           }
         </FooterTab>

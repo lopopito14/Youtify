@@ -1,26 +1,20 @@
-import { Button, H1, Text } from 'native-base'
+import { Body, Button, Icon, Left, ListItem, Right, Text, Thumbnail } from 'native-base'
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import SpotifyApi from 'spotify-web-api-js';
+import RefreshableList from '../utils/refreshableList';
 
-export interface IProps { }
+export interface IProps {
+    backgroundColor: string;
+}
 
-const PlaylistsView: React.FunctionComponent<IProps> = () => {
-    const [loadSpotifyPlaylists, setloadSpotifyPlaylists] = useState<boolean>(false);
+const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const [spotifyPlaylists, setspotifyPlaylists] = useState<globalThis.SpotifyApi.PlaylistObjectSimplified[]>([]);
     const { state } = useContext(Context);
 
     useEffect(() => {
-        if (loadSpotifyPlaylists) {
-            fetchSpotifyPlaylists();
-        } else {
-            setspotifyPlaylists([]);
-        }
-
-        return () => {
-            // do nothing
-        };
-    }, [loadSpotifyPlaylists]);
+        fetchSpotifyPlaylists();
+    }, []);
 
     async function fetchSpotifyPlaylists() {
         try {
@@ -28,7 +22,7 @@ const PlaylistsView: React.FunctionComponent<IProps> = () => {
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
             var response = await spotifyApi.getUserPlaylists(
-                'gb2dbwss2vvumq0rw8o64zgbc',
+                state.spotifyState.userProfile.id
             );
             if (response) {
                 setspotifyPlaylists(response.items);
@@ -39,24 +33,27 @@ const PlaylistsView: React.FunctionComponent<IProps> = () => {
     }
 
     return (
-        <>
-            <H1>Playlists</H1>
-            <Button
-                onPress={() => setloadSpotifyPlaylists(!loadSpotifyPlaylists)}
-                color={loadSpotifyPlaylists ? 'red' : 'green'}
-            >
-                <Text>{
-                    loadSpotifyPlaylists
-                        ? 'Unload Spotify playlists'
-                        : 'Load Spotify playlists'
-                }</Text>
-            </Button>
-            <>
-                {spotifyPlaylists.map((p) => (
-                    <Text key={p.name}>{p.name}</Text>
-                ))}
-            </>
-        </>
+        <RefreshableList onRefresh={() => console.log('refresh')} backgroundColor={props.backgroundColor} lazyLoading={true} onLoad={() => console.log('lazy loading')}>
+            {spotifyPlaylists.map((p) => (
+                <ListItem thumbnail key={p.id}>
+                    <Left>
+                        {
+                            <Thumbnail source={{ uri: p.images[1].url }} />
+                        }
+                    </Left>
+                    <Body>
+                        <Text style={{ color: "white" }}>{p.name}</Text>
+                        <Text note numberOfLines={1}>{p.tracks.total} tracks</Text>
+                    </Body>
+                    <Right>
+                        <Button iconRight light>
+                            <Text>Manage</Text>
+                            <Icon name='arrow-forward' />
+                        </Button>
+                    </Right>
+                </ListItem>
+            ))}
+        </RefreshableList>
     )
 }
 

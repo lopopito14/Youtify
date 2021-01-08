@@ -4,6 +4,7 @@ import { SpotifyOAuth2 } from './auth/spotifyOAuth2';
 import { Body, Content, Header, Left, Right, Title } from 'native-base';
 import { ScrollView } from 'react-native';
 import { AuthConfiguration } from 'react-native-app-auth';
+import { settingsTheme } from './theme';
 
 interface Props { }
 
@@ -36,9 +37,17 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
 
   return (
     <>
+      <Header noShadow style={{ backgroundColor: settingsTheme.primaryColor }} androidStatusBarColor={settingsTheme.secondaryColor}>
+        <Left />
+        <Body>
+          <Title>Settings</Title>
+        </Body>
+        <Right />
+      </Header>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        style={{ backgroundColor: settingsTheme.secondaryColor }}>
         <Content>
           <YoutubeOAuth2 authorizeConfiguration={youtubeAuthorizeConfiguration} />
           <SpotifyOAuth2 authorizeConfiguration={spotifyAuthorizeConfiguration} />

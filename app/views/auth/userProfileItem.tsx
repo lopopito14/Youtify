@@ -1,6 +1,7 @@
 import { Body, CardItem, H3, Left } from 'native-base';
 import React from 'react'
 import { Text } from 'react-native'
+import { settingsTheme } from '../theme';
 
 interface Props {
     title: string;
@@ -9,7 +10,7 @@ interface Props {
 
 const UserProfileItem: React.FunctionComponent<Props> = (props: Props) => {
     return (
-        <CardItem>
+        <CardItem style={{ backgroundColor: settingsTheme.secondaryBackgroundColor }}>
             <Left>
                 <H3>{props.title}:</H3>
             </Left>

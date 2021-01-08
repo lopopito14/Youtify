@@ -8,6 +8,7 @@ import SpotifyApi from 'spotify-web-api-js';
 import { Body, Card, CardItem, Spinner } from "native-base";
 import { Image } from "react-native";
 import UserProfileItem from "./userProfileItem";
+import { settingsTheme } from "../theme";
 
 interface Props {
   authorizeConfiguration: AuthConfiguration;
@@ -67,16 +68,16 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
           <Image source={require(`../../images/spotify-logo.png`)} style={{ height: 65, width: 220, flex: 1, alignSelf: "center" }} />
         </Body>
       </CardItem>
-      <CardItem style={{ alignItems: "center" }}>
+      <CardItem>
         <CredentialView
           credential={state.spotifyState.credential}
           authorizeDelegate={authorizeSpotify}
           refreshDelegate={refreshSpotify} />
-      </CardItem>
+      </CardItem >
       {state.spotifyState.userProfile.isLoading &&
-        <CardItem>
+        <CardItem bordered>
           <Body>
-            <Spinner />
+            <Spinner color={settingsTheme.primaryColor} />
           </Body>
         </CardItem>
       }
