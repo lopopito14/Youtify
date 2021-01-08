@@ -1,14 +1,14 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { Button, H1, Text } from 'native-base'
+import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import SpotifyApi from 'spotify-web-api-js';
-import { Button, Text } from 'native-base';
 
-interface Props { }
+export interface IProps { }
 
-export const SpotifyPlaylists: React.FunctionComponent<Props> = () => {
+const PlaylistsView: React.FunctionComponent<IProps> = () => {
     const [loadSpotifyPlaylists, setloadSpotifyPlaylists] = useState<boolean>(false);
     const [spotifyPlaylists, setspotifyPlaylists] = useState<globalThis.SpotifyApi.PlaylistObjectSimplified[]>([]);
-    const { state, dispatch } = useContext(Context);
+    const { state } = useContext(Context);
 
     useEffect(() => {
         if (loadSpotifyPlaylists) {
@@ -40,6 +40,7 @@ export const SpotifyPlaylists: React.FunctionComponent<Props> = () => {
 
     return (
         <>
+            <H1>Playlists</H1>
             <Button
                 onPress={() => setloadSpotifyPlaylists(!loadSpotifyPlaylists)}
                 color={loadSpotifyPlaylists ? 'red' : 'green'}
@@ -58,3 +59,5 @@ export const SpotifyPlaylists: React.FunctionComponent<Props> = () => {
         </>
     )
 }
+
+export default PlaylistsView

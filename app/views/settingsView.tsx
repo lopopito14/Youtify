@@ -7,7 +7,7 @@ import { AuthConfiguration } from 'react-native-app-auth';
 
 interface Props { }
 
-export const Home: React.FunctionComponent<Props> = () => {
+export const SettingsView: React.FunctionComponent<Props> = () => {
 
   const youtubeAuthorizeConfiguration: AuthConfiguration = {
     clientId:
@@ -36,13 +36,6 @@ export const Home: React.FunctionComponent<Props> = () => {
 
   return (
     <>
-      <Header style={{ backgroundColor: "black" }}>
-        <Left />
-        <Body>
-          <Title>Home</Title>
-        </Body>
-        <Right />
-      </Header>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}>
@@ -51,9 +44,8 @@ export const Home: React.FunctionComponent<Props> = () => {
           <SpotifyOAuth2 authorizeConfiguration={spotifyAuthorizeConfiguration} />
         </Content>
       </ScrollView>
-
     </>
   );
 };
 
-export default Home;
+export default SettingsView;
