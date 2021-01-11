@@ -10,6 +10,8 @@ target 'LopopitoConverter' do
 
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
+  pod 'RNSound', :path => '../node_modules/react-native-sound'
+
   target 'LopopitoConverterTests' do
     inherit! :complete
     # Pods for testing
