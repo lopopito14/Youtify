@@ -29,7 +29,7 @@ export const SpotifyView: React.FunctionComponent<Props> = () => {
             return "Playlists";
         }
         if (_isSelectedView(SpotifyViewType.Synchronize)) {
-            return "Synchronize playlists";
+            return "Synchronize";
         }
 
         return 'Spotify';

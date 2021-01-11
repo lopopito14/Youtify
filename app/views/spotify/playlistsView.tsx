@@ -1,4 +1,4 @@
-import { Body, Button, Icon, Left, ListItem, Right, Text, Thumbnail } from 'native-base'
+import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base'
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import SpotifyApi from 'spotify-web-api-js';
@@ -9,36 +9,68 @@ export interface IProps {
 }
 
 const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
-    const [spotifyPlaylists, setspotifyPlaylists] = useState<globalThis.SpotifyApi.PlaylistObjectSimplified[]>([]);
+    const [playlists, setPlaylists] = useState<globalThis.SpotifyApi.PlaylistObjectSimplified[]>([]);
+    const [totalTracks, settotalTracks] = useState(0);
     const { state } = useContext(Context);
+    const [isLoading, setisLoading] = useState(false)
 
     useEffect(() => {
-        fetchSpotifyPlaylists();
+        fetchPlaylists();
     }, []);
 
-    async function fetchSpotifyPlaylists() {
+    function onRefresh() {
+        fetchPlaylists();
+    }
+
+    function onLoad() {
+        if (playlists.length < totalTracks) {
+            fetchPlaylists(playlists.length);
+        }
+        else {
+            console.log("all playlists loaded");
+        }
+    }
+
+    async function fetchPlaylists(offset: number = 0) {
         try {
+            setisLoading(true);
+
             var spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
             var response = await spotifyApi.getUserPlaylists(
-                state.spotifyState.userProfile.id
+                state.spotifyState.userProfile.id,
+                {
+                    "limit": 10,
+                    "offset": offset,
+                }
             );
             if (response) {
-                setspotifyPlaylists(response.items);
+                if (offset === 0) {
+                    setPlaylists(response.items);
+                }
+                else {
+                    setPlaylists([...playlists, ...response.items]);
+                }
+
+                settotalTracks(response.total);
             }
         } catch (error) {
             console.log('Error => ' + error);
         }
+        finally {
+            setisLoading(false);
+        }
     }
 
     return (
-        <RefreshableList onRefresh={() => console.log('refresh')} backgroundColor={props.backgroundColor} lazyLoading={true} onLoad={() => console.log('lazy loading')}>
-            {spotifyPlaylists.map((p) => (
+        <RefreshableList onRefresh={onRefresh} backgroundColor={props.backgroundColor} lazyLoading={true} onLoad={onLoad}>
+            {playlists.map((p) => (
                 <ListItem thumbnail key={p.id}>
                     <Left>
                         {
-                            <Thumbnail source={{ uri: p.images[1].url }} />
+                            p.images && p.images.length >= 3 &&
+                            <Thumbnail source={{ uri: p.images[2].url }} />
                         }
                     </Left>
                     <Body>
@@ -53,6 +85,9 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                     </Right>
                 </ListItem>
             ))}
+            {
+                isLoading && <Spinner />
+            }
         </RefreshableList>
     )
 }

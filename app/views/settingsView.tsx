@@ -28,6 +28,7 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
       'user-read-email',
       'playlist-modify-public',
       'user-read-private',
+      'user-follow-read',
     ],
     serviceConfiguration: {
       authorizationEndpoint: 'https://accounts.spotify.com/authorize',

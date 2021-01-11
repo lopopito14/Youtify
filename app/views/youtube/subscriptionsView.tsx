@@ -1,8 +1,8 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base'
 import React, { useContext, useEffect, useState } from 'react';
 import Context from '../../store/context';
-import { ErrorResponseException, Playlist } from '../../youtubeApi/youtube-api-models';
-import { Playlists } from '../../youtubeApi/youtube-api-playlists';
+import { ErrorResponseException, Subscription } from '../../youtubeApi/youtube-api-models';
+import { Subscriptions } from '../../youtubeApi/youtube-api-subscriptions';
 import { youtubeTheme } from '../theme';
 import RefreshableList from '../utils/refreshableList';
 
@@ -10,43 +10,43 @@ export interface IProps {
     backgroundColor: string;
 }
 
-const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
-    const [playlists, setplaylists] = useState<Playlist[]>([]);
+const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
+    const [subscriptions, setsubscriptions] = useState<Subscription[]>([]);
     const { state } = useContext(Context);
     const [loaded, setLoaded] = useState(false);
     const [pageToken, setpageToken] = useState<string | undefined>(undefined);
 
     useEffect(() => {
-        fetchPlaylists();
+        fetchSubscriptions();
     }, []);
 
     function onRefresh() {
-        fetchPlaylists();
+        fetchSubscriptions();
     }
 
     function onLoad() {
         if (!loaded) {
-            fetchPlaylists(pageToken);
+            fetchSubscriptions(pageToken);
         }
         else {
-            console.log("all playlists loaded");
+            console.log("all subscriptions loaded");
         }
     }
 
-    async function fetchPlaylists(pageToken: string | undefined = undefined) {
+    async function fetchSubscriptions(pageToken: string | undefined = undefined) {
         try {
-            var response = await new Playlists(state.youtubeState.credential.accessToken).list({
+            var response = await new Subscriptions(state.youtubeState.credential.accessToken).list({
                 channelId: state.youtubeState.userProfile.channelId,
                 part: ['snippet', 'contentDetails'],
-                maxResults: 10,
+                maxResults: 50,
                 pageToken: pageToken
             });
             if (response && response.items) {
                 if (pageToken) {
-                    setplaylists([...playlists, ...response.items]);
+                    setsubscriptions([...subscriptions, ...response.items]);
                 }
                 else {
-                    setplaylists(response.items);
+                    setsubscriptions(response.items);
                 }
 
                 if (response.nextPageToken) {
@@ -67,17 +67,18 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     return (
         <RefreshableList onRefresh={onRefresh} backgroundColor={props.backgroundColor} lazyLoading={true} onLoad={onLoad}>
-            {playlists.map((p, i) => (
+            {subscriptions.map((p, i) => (
                 <ListItem thumbnail key={i}>
                     <Left>
                         {
-                            p.snippet?.thumbnails?.high?.url &&
-                            <Thumbnail source={{ uri: p.snippet?.thumbnails?.high?.url }} />
+                            p.snippet?.thumbnails?.default?.url &&
+                            <Thumbnail source={{ uri: p.snippet?.thumbnails?.default?.url }} />
                         }
                     </Left>
                     <Body>
                         <Text style={{ color: "white" }}>{p.snippet?.title}</Text>
-                        <Text note numberOfLines={1}>{p.contentDetails?.itemCount} items.</Text>
+                        <Text note numberOfLines={3}>{p.snippet?.description}</Text>
+                        <Text note numberOfLines={1}>{p.contentDetails?.totalItemCount} videos</Text>
                     </Body>
                     <Right>
                         <Button iconRight light>
@@ -94,4 +95,4 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     )
 }
 
-export default PlaylistsView
+export default SubscriptionsView

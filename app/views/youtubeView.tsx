@@ -1,7 +1,7 @@
 import { Body, Button, Content, Header, Icon, Left, Right, Text, Title, View } from "native-base";
 import React, { useState } from "react";
 import { youtubeTheme } from "./theme";
-import ArtistsView from "./youtube/artistsView";
+import SubscriptionsView from "./youtube/subscriptionsView";
 import GeneratePlaylistsView from "./youtube/generatePlaylistsView";
 import PlaylistsView from "./youtube/playlistsView";
 
@@ -10,7 +10,7 @@ interface Props { }
 enum YoutubeViewType {
     Menu,
     Playlists,
-    Artists,
+    Subscriptions,
     GeneratePlaylists
 }
 
@@ -22,8 +22,8 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
     }
 
     function _headerTitle() {
-        if (_isSelectedView(YoutubeViewType.Artists)) {
-            return "Artists";
+        if (_isSelectedView(YoutubeViewType.Subscriptions)) {
+            return "Subscriptions";
         }
         if (_isSelectedView(YoutubeViewType.Playlists)) {
             return "Playlists";
@@ -58,8 +58,8 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
                         <Button rounded danger style={{ margin: 10 }} onPress={() => setselectedView(YoutubeViewType.Playlists)}>
                             <Text>Playlists</Text>
                         </Button>
-                        <Button rounded info style={{ margin: 10 }} onPress={() => setselectedView(YoutubeViewType.Artists)}>
-                            <Text>Artists</Text>
+                        <Button rounded info style={{ margin: 10 }} onPress={() => setselectedView(YoutubeViewType.Subscriptions)}>
+                            <Text>Subscriptions</Text>
                         </Button>
                         <Button rounded dark style={{ margin: 10 }} onPress={() => setselectedView(YoutubeViewType.GeneratePlaylists)}>
                             <Text>GeneratePlaylists</Text>
@@ -71,7 +71,7 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
                 _isSelectedView(YoutubeViewType.Playlists) && <PlaylistsView backgroundColor={youtubeTheme.secondaryColor} />
             }
             {
-                _isSelectedView(YoutubeViewType.Artists) && <ArtistsView backgroundColor={youtubeTheme.secondaryColor} />
+                _isSelectedView(YoutubeViewType.Subscriptions) && <SubscriptionsView backgroundColor={youtubeTheme.secondaryColor} />
             }
             {
                 _isSelectedView(YoutubeViewType.GeneratePlaylists) && <GeneratePlaylistsView backgroundColor={youtubeTheme.secondaryColor} />
