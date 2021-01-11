@@ -1,5 +1,4 @@
 import React, { useReducer, useState } from 'react';
-import { StatusBar } from 'react-native';
 import { YoutubeView } from './youtubeView';
 import { SpotifyView } from './spotifyView';
 import { reducer } from '../store/reducer';
@@ -30,7 +29,6 @@ export const MainView: React.FunctionComponent<Props> = () => {
 
   return (
     <Context.Provider value={{ state, dispatch }}>
-      <StatusBar barStyle="light-content" />
       {
         _isSelected(MainViewType.Settings) && <SettingsView />
       }

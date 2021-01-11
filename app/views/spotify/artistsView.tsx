@@ -50,11 +50,11 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
 
             var response = await spotifyApi.getFollowedArtists(option);
             if (response) {
-                if (after === '') {
-                    setFollowedArtists(response.artists.items);
+                if (after) {
+                    setFollowedArtists([...followedArtists, ...response.artists.items]);
                 }
                 else {
-                    setFollowedArtists([...followedArtists, ...response.artists.items]);
+                    setFollowedArtists(response.artists.items);
                 }
 
                 if (response.artists.cursors.after) {
