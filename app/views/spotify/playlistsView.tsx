@@ -3,27 +3,37 @@ import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import SpotifyApi from 'spotify-web-api-js';
 import RefreshableList from '../utils/refreshableList';
+import { spotifyTheme } from '../theme';
+import { SpotifyViewType } from '../spotifyView';
+import PlaylistView from './playlistView';
 
 export interface IProps {
-    backgroundColor: string;
+    selectedView: SpotifyViewType;
+    setselectedView(view: SpotifyViewType): any;
 }
 
-const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
+export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const [playlists, setPlaylists] = useState<globalThis.SpotifyApi.PlaylistObjectSimplified[]>([]);
-    const [totalTracks, settotalTracks] = useState(0);
     const { state } = useContext(Context);
-    const [isLoading, setisLoading] = useState(false)
+    const [loaded, setLoaded] = useState(false);
+    const [selectedPlaylistId, setselectedPlaylistId] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         fetchPlaylists();
     }, []);
+
+    useEffect(() => {
+        if (props.selectedView === SpotifyViewType.Artists) {
+            setselectedPlaylistId(undefined);
+        }
+    }, [props.selectedView])
 
     function onRefresh() {
         fetchPlaylists();
     }
 
     function onLoad() {
-        if (playlists.length < totalTracks) {
+        if (!loaded) {
             fetchPlaylists(playlists.length);
         }
         else {
@@ -33,8 +43,6 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     async function fetchPlaylists(offset: number = 0) {
         try {
-            setisLoading(true);
-
             var spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
@@ -46,49 +54,63 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 }
             );
             if (response) {
+
+                if (playlists.length + response.items.length === response.total) {
+                    setLoaded(true);
+                }
+
                 if (offset === 0) {
                     setPlaylists(response.items);
                 }
                 else {
                     setPlaylists([...playlists, ...response.items]);
                 }
-
-                settotalTracks(response.total);
             }
         } catch (error) {
             console.log('Error => ' + error);
         }
-        finally {
-            setisLoading(false);
-        }
+    }
+
+    function onOpenPlaylist(id: string) {
+        setselectedPlaylistId(id);
+        props.setselectedView(SpotifyViewType.Playlist);
     }
 
     return (
-        <RefreshableList onRefresh={onRefresh} backgroundColor={props.backgroundColor} lazyLoading={true} onLoad={onLoad}>
-            {playlists.map((p) => (
-                <ListItem thumbnail key={p.id}>
-                    <Left>
-                        {
-                            p.images && p.images.length >= 3 &&
-                            <Thumbnail source={{ uri: p.images[2].url }} />
-                        }
-                    </Left>
-                    <Body>
-                        <Text style={{ color: "white" }}>{p.name}</Text>
-                        <Text note numberOfLines={1}>{p.tracks.total} tracks</Text>
-                    </Body>
-                    <Right>
-                        <Button iconRight light>
-                            <Text>Manage</Text>
-                            <Icon name='arrow-forward' />
-                        </Button>
-                    </Right>
-                </ListItem>
-            ))}
+        <>
             {
-                isLoading && <Spinner />
+                props.selectedView === SpotifyViewType.Playlists &&
+                <RefreshableList onRefresh={onRefresh} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={onLoad}>
+                    {playlists.map((p) => (
+                        <ListItem thumbnail key={p.id}>
+                            <Left>
+                                {
+                                    p.images && p.images.length >= 3 &&
+                                    <Thumbnail source={{ uri: p.images[2].url }} />
+                                }
+                            </Left>
+                            <Body>
+                                <Text style={{ color: "white" }}>{p.name}</Text>
+                                <Text note numberOfLines={1}>{p.tracks.total} tracks</Text>
+                            </Body>
+                            <Right>
+                                <Button iconRight light onPress={() => onOpenPlaylist(p.id)}>
+                                    <Text>Manage</Text>
+                                    <Icon name='arrow-forward' />
+                                </Button>
+                            </Right>
+                        </ListItem>
+                    ))}
+                    {
+                        !loaded && <Spinner color={spotifyTheme.primaryColor} />
+                    }
+                </RefreshableList>
             }
-        </RefreshableList>
+            {
+                props.selectedView !== SpotifyViewType.Playlists && selectedPlaylistId &&
+                <PlaylistView selectedView={props.selectedView} setselectedView={props.setselectedView} playlistId={selectedPlaylistId} />
+            }
+        </>
     )
 }
 

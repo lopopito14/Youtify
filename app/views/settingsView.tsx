@@ -29,6 +29,7 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
       'playlist-modify-public',
       'user-read-private',
       'user-follow-read',
+      'user-follow-modify'
     ],
     serviceConfiguration: {
       authorizationEndpoint: 'https://accounts.spotify.com/authorize',
@@ -43,7 +44,6 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
         <Body>
           <Title>Settings</Title>
         </Body>
-        <Right />
       </Header>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
