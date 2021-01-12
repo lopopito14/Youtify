@@ -106,7 +106,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     <H1>{playlist.name}</H1>
                                 </Body>
                             </CardItem>
-                            <CardItem cardBody style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
+                            <CardItem style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
                                 {
                                     playlist.images.length >= 2 &&
                                     <Thumbnail source={{ uri: playlist.images[0].url }} style={{ height: 300, flex: 1 }} />

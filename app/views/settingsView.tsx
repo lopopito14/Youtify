@@ -1,7 +1,7 @@
 import React, { } from 'react';
 import { YoutubeOAuth2 } from './auth/youtubeOAuth2';
 import { SpotifyOAuth2 } from './auth/spotifyOAuth2';
-import { Body, Content, Header, Left, Right, Title } from 'native-base';
+import { Body, Content, Header, Left, Title } from 'native-base';
 import { ScrollView } from 'react-native';
 import { AuthConfiguration } from 'react-native-app-auth';
 import { settingsTheme } from './theme';

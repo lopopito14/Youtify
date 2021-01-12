@@ -1,4 +1,4 @@
-import { Body, Button, Header, Icon, Left, Right, Title } from "native-base";
+import { Body, Button, Header, Icon, Left, Title } from "native-base";
 import React, { useState } from "react";
 import { youtubeTheme } from "./theme";
 import { YoutubeMenuView } from "./youtube/youtubeMenuView";
@@ -8,6 +8,7 @@ interface Props { }
 export enum YoutubeViewType {
     Menu,
     Playlists,
+    Playlist,
     Subscriptions,
     GeneratePlaylists
 }
@@ -26,6 +27,9 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
         if (_isSelectedView(YoutubeViewType.Playlists)) {
             return "Playlists";
         }
+        if (_isSelectedView(YoutubeViewType.Playlist)) {
+            return "Playlist";
+        }
         if (_isSelectedView(YoutubeViewType.GeneratePlaylists)) {
             return "Generate playlists";
         }
@@ -34,7 +38,12 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
     }
 
     function onBackButtonPressed() {
-        setselectedView(YoutubeViewType.Menu);
+        if (selectedView === YoutubeViewType.Playlist) {
+            setselectedView(YoutubeViewType.Playlists);
+        }
+        else {
+            setselectedView(YoutubeViewType.Menu);
+        }
     }
 
     return (
@@ -51,7 +60,6 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
                 <Body>
                     <Title>{_headerTitle()}</Title>
                 </Body>
-                <Right />
             </Header>
 
             <YoutubeMenuView selectedView={selectedView} setselectedView={setselectedView} />

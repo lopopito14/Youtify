@@ -6,6 +6,7 @@ import { Playlists } from '../../youtubeApi/youtube-api-playlists';
 import { youtubeTheme } from '../theme';
 import RefreshableList from '../utils/refreshableList';
 import { YoutubeViewType } from '../youtubeView';
+import PlaylistView from './playlistView';
 
 export interface IProps {
     selectedView: YoutubeViewType;
@@ -17,31 +18,32 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { state } = useContext(Context);
     const [loaded, setLoaded] = useState(false);
     const [pageToken, setpageToken] = useState<string | undefined>(undefined);
+    const [selectedPlaylist, setselectedPlaylist] = useState<Playlist | undefined>(undefined);
 
     useEffect(() => {
-        fetchPlaylists();
+        _fetchPlaylists();
     }, []);
 
-    // useEffect(() => {
-    //     if (props.selectedView === YoutubeViewType.Playlists) {
-    //         setpageToken(undefined);
-    //     }
-    // }, [props.selectedView])
+    useEffect(() => {
+        if (props.selectedView === YoutubeViewType.Playlists) {
+            setselectedPlaylist(undefined);
+        }
+    }, [props.selectedView]);
 
-    function onRefresh() {
-        fetchPlaylists();
+    function _onRefresh() {
+        _fetchPlaylists();
     }
 
-    function onLoad() {
+    function _onLoad() {
         if (!loaded) {
-            fetchPlaylists(pageToken);
+            _fetchPlaylists(pageToken);
         }
         else {
             console.log("all playlists loaded");
         }
     }
 
-    async function fetchPlaylists(pageToken: string | undefined = undefined) {
+    async function _fetchPlaylists(pageToken: string | undefined = undefined) {
         try {
             var response = await new Playlists(state.youtubeState.credential.accessToken).list({
                 channelId: state.youtubeState.userProfile.channelId,
@@ -73,11 +75,16 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
         }
     }
 
+    function _onOpenPlaylist(playlist: Playlist) {
+        setselectedPlaylist(playlist);
+        props.setselectedView(YoutubeViewType.Playlist);
+    }
+
     return (
         <>
             {
                 props.selectedView === YoutubeViewType.Playlists &&
-                <RefreshableList onRefresh={onRefresh} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={onLoad}>
+                <RefreshableList onRefresh={_onRefresh} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={_onLoad}>
                     {
                         playlists.map((p, i) =>
                             <ListItem thumbnail key={i}>
@@ -92,7 +99,7 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     <Text note numberOfLines={1}>{p.contentDetails?.itemCount} videos.</Text>
                                 </Body>
                                 <Right>
-                                    <Button iconRight light>
+                                    <Button iconRight light onPress={() => _onOpenPlaylist(p)}>
                                         <Text>Manage</Text>
                                         <Icon name='arrow-forward' />
                                     </Button>
@@ -104,6 +111,10 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                         !loaded && <Spinner color={youtubeTheme.primaryColor} />
                     }
                 </RefreshableList>
+            }
+            {
+                props.selectedView !== YoutubeViewType.Playlists && selectedPlaylist &&
+                <PlaylistView selectedView={props.selectedView} setselectedView={props.setselectedView} playlist={selectedPlaylist} />
             }
         </>
     )

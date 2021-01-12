@@ -11,11 +11,16 @@ export interface IProps {
 
 const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     return (
-        <ScrollView style={{ backgroundColor: youtubeTheme.secondaryColor }}>
-            <Content>
-                <H1>Generate Playlists</H1>
-            </Content>
-        </ScrollView>
+        <>
+            {
+                props.selectedView === YoutubeViewType.GeneratePlaylists &&
+                <ScrollView style={{ backgroundColor: youtubeTheme.secondaryColor }}>
+                    <Content>
+                        <H1>Generate Playlists</H1>
+                    </Content>
+                </ScrollView>
+            }
+        </>
     )
 }
 
