@@ -5,9 +5,11 @@ import { ErrorResponseException, Subscription } from '../../youtubeApi/youtube-a
 import { Subscriptions } from '../../youtubeApi/youtube-api-subscriptions';
 import { youtubeTheme } from '../theme';
 import RefreshableList from '../utils/refreshableList';
+import { YoutubeViewType } from '../youtubeView';
 
 export interface IProps {
-    backgroundColor: string;
+    selectedView: YoutubeViewType;
+    setselectedView(view: YoutubeViewType): any;
 }
 
 const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
@@ -19,6 +21,12 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
     useEffect(() => {
         fetchSubscriptions();
     }, []);
+
+    // useEffect(() => {
+    //     if (props.selectedView === YoutubeViewType.Subscriptions) {
+    //         setpageToken(undefined);
+    //     }
+    // }, [props.selectedView]);
 
     function onRefresh() {
         fetchSubscriptions();
@@ -66,32 +74,39 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
     }
 
     return (
-        <RefreshableList onRefresh={onRefresh} backgroundColor={props.backgroundColor} lazyLoading={true} onLoad={onLoad}>
-            {subscriptions.map((p, i) => (
-                <ListItem thumbnail key={i}>
-                    <Left>
-                        {
-                            p.snippet?.thumbnails?.default?.url &&
-                            <Thumbnail source={{ uri: p.snippet?.thumbnails?.default?.url }} />
-                        }
-                    </Left>
-                    <Body>
-                        <Text style={{ color: "white" }}>{p.snippet?.title}</Text>
-                        <Text note numberOfLines={3}>{p.snippet?.description}</Text>
-                        <Text note numberOfLines={1}>{p.contentDetails?.totalItemCount} videos</Text>
-                    </Body>
-                    <Right>
-                        <Button iconRight light>
-                            <Text>Manage</Text>
-                            <Icon name='arrow-forward' />
-                        </Button>
-                    </Right>
-                </ListItem>
-            ))}
+        <>
             {
-                !loaded && <Spinner color={youtubeTheme.primaryColor} />
+                props.selectedView === YoutubeViewType.Subscriptions &&
+                <RefreshableList onRefresh={onRefresh} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={onLoad}>
+                    {
+                        subscriptions.map((p, i) =>
+                            <ListItem thumbnail key={i}>
+                                <Left>
+                                    {
+                                        p.snippet?.thumbnails?.default?.url &&
+                                        <Thumbnail source={{ uri: p.snippet?.thumbnails?.default?.url }} />
+                                    }
+                                </Left>
+                                <Body>
+                                    <Text style={{ color: "white" }}>{p.snippet?.title}</Text>
+                                    <Text note numberOfLines={3}>{p.snippet?.description}</Text>
+                                    <Text note numberOfLines={1}>{p.contentDetails?.totalItemCount} videos</Text>
+                                </Body>
+                                <Right>
+                                    <Button iconRight light>
+                                        <Text>Manage</Text>
+                                        <Icon name='arrow-forward' />
+                                    </Button>
+                                </Right>
+                            </ListItem>
+                        )
+                    }
+                    {
+                        !loaded && <Spinner color={youtubeTheme.primaryColor} />
+                    }
+                </RefreshableList>
             }
-        </RefreshableList>
+        </>
     )
 }
 

@@ -1,13 +1,11 @@
-import { Body, Button, Content, Header, Icon, Left, Right, Text, Title, View } from "native-base";
+import { Body, Button, Header, Icon, Left, Right, Title } from "native-base";
 import React, { useState } from "react";
 import { youtubeTheme } from "./theme";
-import SubscriptionsView from "./youtube/subscriptionsView";
-import GeneratePlaylistsView from "./youtube/generatePlaylistsView";
-import PlaylistsView from "./youtube/playlistsView";
+import { YoutubeMenuView } from "./youtube/youtubeMenuView";
 
 interface Props { }
 
-enum YoutubeViewType {
+export enum YoutubeViewType {
     Menu,
     Playlists,
     Subscriptions,
@@ -35,13 +33,17 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
         return 'Youtube';
     }
 
+    function onBackButtonPressed() {
+        setselectedView(YoutubeViewType.Menu);
+    }
+
     return (
         <>
             <Header style={{ backgroundColor: youtubeTheme.primaryColor }} androidStatusBarColor={youtubeTheme.secondaryColor}>
                 <Left>
                     {
                         !_isSelectedView(YoutubeViewType.Menu) &&
-                        <Button transparent onPress={() => setselectedView(YoutubeViewType.Menu)}>
+                        <Button transparent onPress={onBackButtonPressed}>
                             <Icon name='arrow-back' />
                         </Button>
                     }
@@ -51,31 +53,8 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
                 </Body>
                 <Right />
             </Header>
-            {
-                _isSelectedView(YoutubeViewType.Menu) &&
-                <Content>
-                    <View style={{ marginTop: 50 }}>
-                        <Button rounded danger style={{ margin: 10 }} onPress={() => setselectedView(YoutubeViewType.Playlists)}>
-                            <Text>Playlists</Text>
-                        </Button>
-                        <Button rounded info style={{ margin: 10 }} onPress={() => setselectedView(YoutubeViewType.Subscriptions)}>
-                            <Text>Subscriptions</Text>
-                        </Button>
-                        <Button rounded dark style={{ margin: 10 }} onPress={() => setselectedView(YoutubeViewType.GeneratePlaylists)}>
-                            <Text>GeneratePlaylists</Text>
-                        </Button>
-                    </View>
-                </Content>
-            }
-            {
-                _isSelectedView(YoutubeViewType.Playlists) && <PlaylistsView backgroundColor={youtubeTheme.secondaryColor} />
-            }
-            {
-                _isSelectedView(YoutubeViewType.Subscriptions) && <SubscriptionsView backgroundColor={youtubeTheme.secondaryColor} />
-            }
-            {
-                _isSelectedView(YoutubeViewType.GeneratePlaylists) && <GeneratePlaylistsView backgroundColor={youtubeTheme.secondaryColor} />
-            }
+
+            <YoutubeMenuView selectedView={selectedView} setselectedView={setselectedView} />
         </>
     )
 }

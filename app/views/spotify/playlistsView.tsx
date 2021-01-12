@@ -23,10 +23,10 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
     }, []);
 
     useEffect(() => {
-        if (props.selectedView === SpotifyViewType.Artists) {
+        if (props.selectedView === SpotifyViewType.Playlists) {
             setselectedPlaylistId(undefined);
         }
-    }, [props.selectedView])
+    }, [props.selectedView]);
 
     function onRefresh() {
         fetchPlaylists();
@@ -81,26 +81,28 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
             {
                 props.selectedView === SpotifyViewType.Playlists &&
                 <RefreshableList onRefresh={onRefresh} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={onLoad}>
-                    {playlists.map((p) => (
-                        <ListItem thumbnail key={p.id}>
-                            <Left>
-                                {
-                                    p.images && p.images.length >= 3 &&
-                                    <Thumbnail source={{ uri: p.images[2].url }} />
-                                }
-                            </Left>
-                            <Body>
-                                <Text style={{ color: "white" }}>{p.name}</Text>
-                                <Text note numberOfLines={1}>{p.tracks.total} tracks</Text>
-                            </Body>
-                            <Right>
-                                <Button iconRight light onPress={() => onOpenPlaylist(p.id)}>
-                                    <Text>Manage</Text>
-                                    <Icon name='arrow-forward' />
-                                </Button>
-                            </Right>
-                        </ListItem>
-                    ))}
+                    {
+                        playlists.map((p) =>
+                            <ListItem thumbnail key={p.id}>
+                                <Left>
+                                    {
+                                        p.images && p.images.length >= 3 &&
+                                        <Thumbnail source={{ uri: p.images[2].url }} />
+                                    }
+                                </Left>
+                                <Body>
+                                    <Text style={{ color: "white" }}>{p.name}</Text>
+                                    <Text note numberOfLines={1}>{p.tracks.total} tracks</Text>
+                                </Body>
+                                <Right>
+                                    <Button iconRight light onPress={() => onOpenPlaylist(p.id)}>
+                                        <Text>Manage</Text>
+                                        <Icon name='arrow-forward' />
+                                    </Button>
+                                </Right>
+                            </ListItem>
+                        )
+                    }
                     {
                         !loaded && <Spinner color={spotifyTheme.primaryColor} />
                     }
