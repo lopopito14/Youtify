@@ -4,12 +4,14 @@ import { IYoutubeState } from '../state';
 import credentialReducer from './youtube_credential_reducer';
 import userProfileReducer from './youtube_userProfile_reducer';
 import favoriteReducer from './youtube_favorites_reducer';
+import playlistsReducer from './youtube_playlists_reducer';
 
 const reducer: Reducer<IYoutubeState> = combineReducers<IYoutubeState, TActions>
 ({
     credential: credentialReducer,
     userProfile: userProfileReducer,
-    favorite: favoriteReducer
+    favorite: favoriteReducer,
+    playlists: playlistsReducer
 });
 
 export default reducer;

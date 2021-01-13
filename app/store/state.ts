@@ -56,6 +56,9 @@ export const InitialState: TState = {
         progress: 0,
         playlistItems: []
       }
+    },
+    playlists: {
+      yearPlaylist: []
     }
   },
 };
@@ -71,6 +74,7 @@ export interface IYoutubeState {
   credential: ICredential;
   userProfile: IYoutubeProfile;
   favorite: IYoutubeFavorite;
+  playlists: IYoutubePlaylists;
 }
 
 export interface ICredential {
@@ -109,11 +113,25 @@ export interface ISpotifyPlaylist {
   playlists: SpotifyApi.PlaylistObjectSimplified[];
 }
 
+export interface IYoutubePlaylists {
+  yearPlaylist: IYoutubeYearPlaylist[];
+}
+
+export interface IYoutubeYearPlaylist {
+  year: number;
+  playlists: IYoutubeMonthPlaylist[];
+}
+
+export interface IYoutubeMonthPlaylist {
+  month: number;
+  itemsFromFavorites: PlaylistItem[];
+  items: PlaylistItem[];
+}
+
 export interface ILoad {
   loading: boolean;
   loaded: boolean;
 }
-
 
 export interface IProgress {
   progress: number;
