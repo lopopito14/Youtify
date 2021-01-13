@@ -19,7 +19,8 @@ export const InitialState: TState = {
       refreshToken: '',
     },
     userProfile: {
-      isLoading: false,
+      loading: false,
+      loaded: false,
       country: '',
       displayName: '',
       email: '',
@@ -38,12 +39,24 @@ export const InitialState: TState = {
       refreshToken: '',
     },
     userProfile: {
-      isLoading: false,
+      loading: false,
+      loaded: false,
       title: '',
       channelId: ''
     },
-    //playlists: [],
-    //playlistItems: {},
+    favorite: {
+      favoritePlaylist: {
+        loading: false,
+        loaded: false,
+        playlist: {}
+      },
+      favoritePlaylistItems: {
+        loading: false,
+        loaded: false,
+        progress: 0,
+        playlistItems: []
+      }
+    }
   },
 };
 
@@ -57,8 +70,7 @@ export interface ISpotifyState {
 export interface IYoutubeState {
   credential: ICredential;
   userProfile: IYoutubeProfile;
-  // playlists: Playlist[];
-  // playlistItems: Record<string, PlaylistItem[]>;
+  favorite: IYoutubeFavorite;
 }
 
 export interface ICredential {
@@ -68,22 +80,41 @@ export interface ICredential {
   accessTokenExpirationDate: string;
 }
 
-export interface ISpotifyProfile extends ILoading {
+export interface ISpotifyProfile extends ILoad {
   country: string;
   displayName: string;
   email: string;
   id: string;
 }
 
-export interface IYoutubeProfile extends ILoading {
+export interface IYoutubeProfile extends ILoad {
   title: string;
   channelId: string;
+}
+
+export interface IYoutubeFavorite {
+  favoritePlaylist: IYoutubeFavoritePlaylist;
+  favoritePlaylistItems: IYoutubeFavoritePlaylistItems;
+}
+
+export interface IYoutubeFavoritePlaylist extends ILoad {
+  playlist: Playlist;
+}
+
+export interface IYoutubeFavoritePlaylistItems extends ILoad, IProgress {
+  playlistItems: PlaylistItem[];
 }
 
 export interface ISpotifyPlaylist {
   playlists: SpotifyApi.PlaylistObjectSimplified[];
 }
 
-export interface ILoading {
-  isLoading: boolean;
+export interface ILoad {
+  loading: boolean;
+  loaded: boolean;
+}
+
+
+export interface IProgress {
+  progress: number;
 }

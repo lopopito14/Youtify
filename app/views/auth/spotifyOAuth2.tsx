@@ -74,14 +74,16 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
           authorizeDelegate={authorizeSpotify}
           refreshDelegate={refreshSpotify} />
       </CardItem >
-      {state.spotifyState.userProfile.isLoading &&
+      {
+        state.spotifyState.userProfile.loading &&
         <CardItem bordered>
           <Body>
             <Spinner color={settingsTheme.primaryColor} />
           </Body>
         </CardItem>
       }
-      {state.spotifyState.credential.isLogged && !state.spotifyState.userProfile.isLoading &&
+      {
+        state.spotifyState.credential.isLogged && !state.spotifyState.userProfile.loading &&
         <>
           <UserProfileItem title="Country" description={state.spotifyState.userProfile.country} />
           <UserProfileItem title="Name" description={state.spotifyState.userProfile.displayName} />

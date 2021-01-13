@@ -14,14 +14,15 @@ const reducer: Reducer<IYoutubeProfile, TActions> = (state: IYoutubeProfile = In
 
     switch (youtubeAction.type) {
         case Types.YOUTUBE_CURRENT_PROFILE_REQUEST:
-            return { ...state, isLoading: true };
+            return { ...state, loading: true, loaded: false };
 
         case Types.YOUTUBE_CURRENT_PROFILE_SUCCEESS:
             if (youtubeAction.payload.items && youtubeAction.payload.items.length > 0) {
                 const channel = youtubeAction.payload.items[0];
                 return {
                     ...state,
-                    isLoading: false,
+                    loading: false,
+                    loaded: true,
                     title: channel.snippet?.title ? channel.snippet?.title : 'Not Available',
                     channelId: channel.id ? channel.id : 'Not Available',
                 };
@@ -29,7 +30,8 @@ const reducer: Reducer<IYoutubeProfile, TActions> = (state: IYoutubeProfile = In
             return state;
 
         case Types.YOUTUBE_CURRENT_PROFILE_ERROR:
-            return { ...state, isLoading: false };
+            console.error(youtubeAction.payload);
+            return { ...state, loading: false, loaded: false };
 
         default:
             return state;

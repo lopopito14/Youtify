@@ -24,6 +24,9 @@ export const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) 
                         <Button rounded info style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.Subscriptions)}>
                             <Text>Subscriptions</Text>
                         </Button>
+                        <Button rounded dark style={{ margin: 10 }} onPress={() => { }}>
+                            <Text>Adjust Favorites Playlist</Text>
+                        </Button>
                         <Button rounded dark style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.GeneratePlaylists)}>
                             <Text>Generate Playlists</Text>
                         </Button>

@@ -7,6 +7,7 @@ import Context from '../store/context';
 import { Button, Footer, FooterTab, Icon, Text } from 'native-base';
 import SettingsView from './settingsView';
 import { settingsTheme, spotifyTheme, youtubeTheme } from './theme';
+import BackgroundWorkerView from './utils/backgroundWorkerView';
 
 interface Props { }
 
@@ -18,10 +19,7 @@ export enum MainViewType {
 
 export const MainView: React.FunctionComponent<Props> = () => {
   const [state, dispatch] = useReducer(reducer, InitialState);
-  const [selectedView, setselectedView] = useState<MainViewType>(MainViewType.Settings)
-
-  const youtubeLoggedIn = state.youtubeState.credential.accessToken !== '';
-  const spotifyLoggedIn = state.spotifyState.credential.accessToken !== '';
+  const [selectedView, setselectedView] = useState<MainViewType>(MainViewType.Settings);
 
   function _isSelected(view: MainViewType): boolean {
     return selectedView == view;
@@ -29,6 +27,7 @@ export const MainView: React.FunctionComponent<Props> = () => {
 
   return (
     <Context.Provider value={{ state, dispatch }}>
+      <BackgroundWorkerView />
       {
         _isSelected(MainViewType.Settings) && <SettingsView />
       }
@@ -41,22 +40,26 @@ export const MainView: React.FunctionComponent<Props> = () => {
       <Footer>
         <FooterTab style={{ backgroundColor: "black" }}>
           {
-            youtubeLoggedIn &&
-            <Button vertical={true} onPress={() => setselectedView(MainViewType.Youtube)}>
-              <Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: _isSelected(MainViewType.Youtube) ? youtubeTheme.primaryColor : "white" }} />
-              <Text style={{ color: _isSelected(MainViewType.Youtube) ? youtubeTheme.primaryColor : "white" }}>Youtube</Text>
-            </Button>
+            state.youtubeState.credential.isLogged &&
+            <>
+              <Button vertical={true} onPress={() => setselectedView(MainViewType.Youtube)}>
+                <Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: _isSelected(MainViewType.Youtube) ? youtubeTheme.primaryColor : "white" }} />
+                <Text style={{ color: _isSelected(MainViewType.Youtube) ? youtubeTheme.primaryColor : "white" }}>Youtube</Text>
+              </Button>
+            </>
           }
           <Button vertical={true} onPress={() => setselectedView(MainViewType.Settings)}>
             <Icon name="cog" style={{ color: _isSelected(MainViewType.Settings) ? settingsTheme.primaryColor : "white" }} />
             <Text style={{ color: _isSelected(MainViewType.Settings) ? settingsTheme.primaryColor : "white" }}>Settings</Text>
           </Button>
           {
-            spotifyLoggedIn &&
-            <Button vertical={true} onPress={() => setselectedView(MainViewType.Spotify)}>
-              <Icon name="spotify" type='FontAwesome' style={{ color: _isSelected(MainViewType.Spotify) ? spotifyTheme.primaryColor : "white" }} />
-              <Text style={{ color: _isSelected(MainViewType.Spotify) ? spotifyTheme.primaryColor : "white" }}>Spotify</Text>
-            </Button>
+            state.spotifyState.credential.isLogged &&
+            <>
+              <Button vertical={true} onPress={() => setselectedView(MainViewType.Spotify)}>
+                <Icon name="spotify" type='FontAwesome' style={{ color: _isSelected(MainViewType.Spotify) ? spotifyTheme.primaryColor : "white" }} />
+                <Text style={{ color: _isSelected(MainViewType.Spotify) ? spotifyTheme.primaryColor : "white" }}>Spotify</Text>
+              </Button>
+            </>
           }
         </FooterTab>
       </Footer>

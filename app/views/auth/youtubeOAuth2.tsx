@@ -10,18 +10,20 @@ import { settingsTheme } from "../theme";
 import { CredentialView } from "./credentialView";
 import UserProfileItem from "./userProfileItem";
 
-interface Props {
+interface IProps {
   authorizeConfiguration: AuthConfiguration;
 }
 
-export const YoutubeOAuth2: React.FunctionComponent<Props> = (props: Props) => {
+export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) => {
   const { state, dispatch } = useContext(Context);
 
   useEffect(() => {
-    if (state.youtubeState.credential.isLogged && state.youtubeState.userProfile.channelId == '') {
-      getYoutubeChannelId();
+    if (state.youtubeState.credential.isLogged) {
+      if (!state.youtubeState.userProfile.loaded) {
+        getYoutubeChannelId();
+      }
     }
-  }, [state.youtubeState.credential.isLogged])
+  }, [state.youtubeState.credential.isLogged]);
 
   async function authorizeYoutube() {
     try {
@@ -77,14 +79,16 @@ export const YoutubeOAuth2: React.FunctionComponent<Props> = (props: Props) => {
           authorizeDelegate={authorizeYoutube}
           refreshDelegate={refreshYoutube} />
       </CardItem>
-      {state.youtubeState.userProfile.isLoading &&
+      {
+        state.youtubeState.userProfile.loading &&
         <CardItem bordered>
           <Body>
             <Spinner color={settingsTheme.primaryColor} />
           </Body>
         </CardItem>
       }
-      {state.youtubeState.credential.isLogged && !state.youtubeState.userProfile.isLoading &&
+      {
+        state.youtubeState.credential.isLogged && !state.youtubeState.userProfile.loading &&
         <>
           <UserProfileItem title="Name" description={state.youtubeState.userProfile.title} />
           <UserProfileItem title="Channel ID" description={state.youtubeState.userProfile.channelId} />
