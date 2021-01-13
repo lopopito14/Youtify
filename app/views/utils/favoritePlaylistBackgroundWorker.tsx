@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import { youtubeFavoritesError, youtubeFavoritesItemsComplete, youtubeFavoritesItemsError, youtubeFavoritesItemsRequest, youtubeFavoritesItemsSuccess, youtubeFavoritesRequest, youtubeFavoritesSucess } from '../../store/types/youtube_favorites_actions';
+import { youtubePlaylistsFavoritesItemsComplete, youtubePlaylistsFavoritesItemsError, youtubePlaylistsFavoritesItemsRequest, youtubePlaylistsFavoritesItemsSuccess } from '../../store/types/youtube_playlists_actions';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
 import { Playlists } from '../../youtubeApi/youtube-api-playlists';
 
 interface IProps { }
 
-export const BackgroundWorkerView: React.FunctionComponent<IProps> = () => {
+export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> = () => {
     const { state, dispatch } = useContext(Context);
     const [favoritepageToken, setfavoritepageToken] = useState<string | undefined>(undefined);
 
@@ -48,6 +49,7 @@ export const BackgroundWorkerView: React.FunctionComponent<IProps> = () => {
     async function _fetchFavoritePlaylistItems(pageToken: string | undefined = undefined) {
         try {
             dispatch(youtubeFavoritesItemsRequest());
+            dispatch(youtubePlaylistsFavoritesItemsRequest());
             var response = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
                 playlistId: favoritePlaylistName,
                 part: ['snippet', 'contentDetails'],
@@ -55,6 +57,7 @@ export const BackgroundWorkerView: React.FunctionComponent<IProps> = () => {
                 pageToken: pageToken
             });
             if (response && response.items && response.pageInfo?.totalResults) {
+                dispatch(youtubePlaylistsFavoritesItemsSuccess({ items: response.items }));
                 dispatch(youtubeFavoritesItemsSuccess(
                     {
                         progress: 100 * ((state.youtubeState.favorite.favoritePlaylistItems.playlistItems.length + response.items.length) / response.pageInfo?.totalResults),
@@ -64,15 +67,17 @@ export const BackgroundWorkerView: React.FunctionComponent<IProps> = () => {
                     setfavoritepageToken(response.nextPageToken);
                 } else {
                     dispatch(youtubeFavoritesItemsComplete());
+                    dispatch(youtubePlaylistsFavoritesItemsComplete());
                     setfavoritepageToken(undefined);
                 }
             }
         } catch (error) {
             dispatch(youtubeFavoritesItemsError(error));
+            dispatch(youtubePlaylistsFavoritesItemsError(error));
         }
     }
 
     return (<></>)
 }
 
-export default BackgroundWorkerView
+export default FavoritePlaylistBackgroundWorker

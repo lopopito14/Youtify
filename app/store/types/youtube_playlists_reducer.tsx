@@ -15,7 +15,7 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
 
     switch (youtubeAction.type) {
         case Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_REQUEST:
-            return state;
+            return { ...state, loading: true };
 
         case Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_SUCCESS:
             if (youtubeAction.payload) {
@@ -53,6 +53,7 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
                             } else {
                                 yearPlaylist.playlists.push({
                                     month: month,
+                                    exists: null,
                                     items: [],
                                     itemsFromFavorites: items,
                                 })
@@ -63,6 +64,7 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
                                 playlists: [
                                     {
                                         month: month,
+                                        exists: null,
                                         items: [],
                                         itemsFromFavorites: items,
                                     }
@@ -80,8 +82,52 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
             }
             return state;
 
+        case Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_COMPLETE:
+            return { ...state, loading: false, loaded: true };
+
         case Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_ERROR:
             console.error(youtubeAction.payload);
+            return { ...state, loading: false, loaded: false };
+
+        case Types.YOUTUBE_PLAYLISTS_EXISTS:
+            if (youtubeAction.payload) {
+
+                const year = youtubeAction.payload.year;
+                const month = youtubeAction.payload.month;
+
+                const yearPlaylist = state.yearPlaylist.find(p => p.year === year);
+                if (yearPlaylist) {
+
+                    const yearIndex = state.yearPlaylist.indexOf(yearPlaylist);
+                    const monthPlaylist = yearPlaylist.playlists.find(p => p.month === month);
+                    if (monthPlaylist) {
+
+                        const monthIndex = yearPlaylist.playlists.indexOf(monthPlaylist);
+
+                        return {
+                            ...state,
+                            yearPlaylist: [
+                                ...state.yearPlaylist.slice(0, yearIndex),
+                                {
+                                    ...yearPlaylist,
+                                    playlists: [
+                                        ...yearPlaylist.playlists.slice(0, monthIndex),
+                                        {
+                                            ...monthPlaylist,
+                                            exists: youtubeAction.payload.exists
+                                        },
+                                        ...yearPlaylist.playlists.slice(monthIndex + 1),
+                                    ]
+                                },
+                                ...state.yearPlaylist.slice(yearIndex + 1)]
+                        };
+                    } else {
+                        console.error('not found');
+                    }
+                } else {
+                    console.error('not found');
+                }
+            }
             return state;
 
         case Types.YOUTUBE_PLAYLISTS_ITEMS_REQUEST:
@@ -89,35 +135,45 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
 
         case Types.YOUTUBE_PLAYLISTS_ITEMS_SUCCESS:
             if (youtubeAction.payload) {
-                const copy = state.yearPlaylist;
+
                 const year = youtubeAction.payload.year;
                 const month = youtubeAction.payload.month;
-                const yearPlaylist = copy.find(p => p.year === year);
+
+                const yearPlaylist = state.yearPlaylist.find(p => p.year === year);
                 if (yearPlaylist) {
+
+                    const yearIndex = state.yearPlaylist.indexOf(yearPlaylist);
                     const monthPlaylist = yearPlaylist.playlists.find(p => p.month === month);
                     if (monthPlaylist) {
-                        youtubeAction.payload.items.forEach(i => monthPlaylist.items.push(i))
+
+                        const monthIndex = yearPlaylist.playlists.indexOf(monthPlaylist);
+
+                        return {
+                            ...state,
+                            yearPlaylist: [
+                                ...state.yearPlaylist.slice(0, yearIndex),
+                                {
+                                    ...yearPlaylist,
+                                    playlists: [
+                                        ...yearPlaylist.playlists.slice(0, monthIndex),
+                                        {
+                                            ...monthPlaylist,
+                                            items: [
+                                                ...monthPlaylist.items,
+                                                ...youtubeAction.payload.items
+                                            ]
+                                        },
+                                        ...yearPlaylist.playlists.slice(monthIndex + 1),
+                                    ]
+                                },
+                                ...state.yearPlaylist.slice(yearIndex + 1)]
+                        };
                     } else {
-                        yearPlaylist.playlists.push({
-                            month: month,
-                            items: youtubeAction.payload.items,
-                            itemsFromFavorites: [],
-                        })
+                        console.error('impossible');
                     }
                 } else {
-                    copy.push({
-                        year: year,
-                        playlists: [
-                            {
-                                month: month,
-                                items: youtubeAction.payload.items,
-                                itemsFromFavorites: [],
-                            }
-                        ]
-                    })
+                    console.error('impossible');
                 }
-
-                return { ...state, yearPlaylist: copy };
             }
             return state;
 

@@ -7,7 +7,7 @@ import Context from '../store/context';
 import { Button, Footer, FooterTab, Icon, Text } from 'native-base';
 import SettingsView from './settingsView';
 import { settingsTheme, spotifyTheme, youtubeTheme } from './theme';
-import BackgroundWorkerView from './utils/backgroundWorkerView';
+import BackgroundWorker from './utils/backgroundWorker';
 
 interface Props { }
 
@@ -27,7 +27,7 @@ export const MainView: React.FunctionComponent<Props> = () => {
 
   return (
     <Context.Provider value={{ state, dispatch }}>
-      <BackgroundWorkerView />
+      <BackgroundWorker />
       {
         _isSelected(MainViewType.Settings) && <SettingsView />
       }

@@ -1,6 +1,6 @@
 import { ActionCreator } from 'redux';
 import { PlaylistItem } from '../../youtubeApi/youtube-api-models';
-import { IYoutubePlaylistsFavoritesItemsError, IYoutubePlaylistsFavoritesItemsRequest, IYoutubePlaylistsFavoritesItemsSuccess, IYoutubePlaylistsItemsError, IYoutubePlaylistsItemsRequest, IYoutubePlaylistsItemsSuccess, Types } from './youtube_playlists_types';
+import { IYoutubePlaylistsExists, IYoutubePlaylistsFavoritesItemsComplete, IYoutubePlaylistsFavoritesItemsError, IYoutubePlaylistsFavoritesItemsRequest, IYoutubePlaylistsFavoritesItemsSuccess, IYoutubePlaylistsItemsComplete, IYoutubePlaylistsItemsError, IYoutubePlaylistsItemsRequest, IYoutubePlaylistsItemsSuccess, Types } from './youtube_playlists_types';
 
 export const youtubePlaylistsFavoritesItemsRequest: ActionCreator<IYoutubePlaylistsFavoritesItemsRequest> = () => ({
     type: Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_REQUEST,
@@ -13,8 +13,18 @@ export const youtubePlaylistsFavoritesItemsSuccess: ActionCreator<IYoutubePlayli
     payload: result
 });
 
+export const youtubePlaylistsFavoritesItemsComplete: ActionCreator<IYoutubePlaylistsFavoritesItemsComplete> = () => ({
+    type: Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_COMPLETE,
+});
+
 export const youtubePlaylistsFavoritesItemsError: ActionCreator<IYoutubePlaylistsFavoritesItemsError> = (result: any) => ({
     type: Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_ERROR,
+    payload: result
+});
+
+export const youtubePlaylistsExists: ActionCreator<IYoutubePlaylistsExists> = (result: {year: number,
+    month: number, exists: boolean}) => ({
+    type: Types.YOUTUBE_PLAYLISTS_EXISTS,
     payload: result
 });
 
@@ -29,6 +39,10 @@ export const youtubePlaylistsItemsSuccess: ActionCreator<IYoutubePlaylistsItemsS
 }) => ({
     type: Types.YOUTUBE_PLAYLISTS_ITEMS_SUCCESS,
     payload: result
+});
+
+export const youtubePlaylistsItemsComplete: ActionCreator<IYoutubePlaylistsItemsComplete> = () => ({
+    type: Types.YOUTUBE_PLAYLISTS_ITEMS_COMPLETE,
 });
 
 export const youtubePlaylistsItemsError: ActionCreator<IYoutubePlaylistsItemsError> = (result: any) => ({

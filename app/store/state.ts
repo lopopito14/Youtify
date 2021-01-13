@@ -58,6 +58,8 @@ export const InitialState: TState = {
       }
     },
     playlists: {
+      loading: false,
+      loaded: false,
       yearPlaylist: []
     }
   },
@@ -113,7 +115,7 @@ export interface ISpotifyPlaylist {
   playlists: SpotifyApi.PlaylistObjectSimplified[];
 }
 
-export interface IYoutubePlaylists {
+export interface IYoutubePlaylists extends ILoad {
   yearPlaylist: IYoutubeYearPlaylist[];
 }
 
@@ -124,6 +126,7 @@ export interface IYoutubeYearPlaylist {
 
 export interface IYoutubeMonthPlaylist {
   month: number;
+  exists: boolean | null;
   itemsFromFavorites: PlaylistItem[];
   items: PlaylistItem[];
 }
