@@ -1,4 +1,4 @@
-import { Body, Button, Card, CardItem, Content, H3, Icon, Left, List, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base'
+import { Body, Button, Card, CardItem, Content, H1, H2, H3, Icon, Left, List, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base'
 import React, { useContext, useEffect, useState } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
 import Context from '../../store/context'
@@ -119,13 +119,13 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
         <>
             {
                 props.selectedView === YoutubeViewType.GeneratePlaylists &&
-                <ScrollView style={{ backgroundColor: youtubeTheme.primaryBackgroundColor }}>
+                <ScrollView style={{ backgroundColor: youtubeTheme.secondaryColor }}>
                     <Content>
                         {
                             <Card>
-                                <CardItem>
+                                <CardItem bordered style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
                                     <Body>
-                                        <H3>{`Existing monthly playlist (${existingmonthlyPlaylist ? existingmonthlyPlaylist.length : 0}).`}</H3>
+                                        <H1>{`Existing monthly playlist (${existingmonthlyPlaylist ? existingmonthlyPlaylist.length : 0})`}</H1>
                                     </Body>
                                 </CardItem>
                                 {
@@ -138,24 +138,28 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
                                         <List>
                                             {
                                                 existingmonthlyPlaylist.map((f, i) =>
-                                                    <ListItem key={i} thumbnail>
+                                                    <ListItem key={i}>
                                                         <Left>
                                                             {
                                                                 f.snippet?.thumbnails?.default?.url &&
                                                                 <Thumbnail source={{ uri: f.snippet?.thumbnails?.default?.url }} />
                                                             }
+                                                            <Body>
+                                                                <H3>{f.snippet?.title}</H3>
+                                                                {
+                                                                    f.snippet?.publishedAt &&
+                                                                    <Text note>{new Date(f.snippet?.publishedAt).toUTCString()}</Text>
+                                                                }
+                                                            </Body>
                                                         </Left>
-                                                        <Body>
-                                                            <Text>{f.snippet?.title}</Text>
-                                                        </Body>
                                                         <Right>
-                                                            <Button icon light transparent rounded>
-                                                                <Icon name="sync" type="MaterialIcons" style={{ color: "blue" }} />
+                                                            <Button danger rounded color={youtubeTheme.secondaryColor}>
+                                                                <Icon name="delete" type="MaterialCommunityIcons" />
                                                             </Button>
                                                         </Right>
                                                         <Right>
-                                                            <Button icon light transparent rounded>
-                                                                <Icon name="delete" type="MaterialCommunityIcons" style={{ color: "red" }} />
+                                                            <Button info rounded color={youtubeTheme.secondaryColor}>
+                                                                <Icon name="arrow-forward" />
                                                             </Button>
                                                         </Right>
                                                     </ListItem>
@@ -164,9 +168,9 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
                                         </List>
                                     </>
                                 }
-                                <CardItem>
+                                <CardItem bordered style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
                                     <Body>
-                                        <H3>{`Monthly playlist to create (${monthlyPlaylistToCreate ? monthlyPlaylistToCreate.length : 0}).`}</H3>
+                                        <H2>{`Monthly playlist to create (${monthlyPlaylistToCreate ? monthlyPlaylistToCreate.length : 0})`}</H2>
                                     </Body>
                                 </CardItem>
                                 {
@@ -179,14 +183,14 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
                                         <List>
                                             {
                                                 monthlyPlaylistToCreate.map((f, i) =>
-                                                    <ListItem key={i} thumbnail>
-                                                        <Left />
-                                                        <Body>
-                                                            <Text>{f}</Text>
-                                                        </Body>
+                                                    <ListItem key={i}>
+                                                        <Left>
+                                                            <H3>{f}</H3>
+                                                        </Left>
+
                                                         <Right>
-                                                            <Button icon light transparent rounded>
-                                                                <Icon name="add" type="MaterialIcons" style={{ color: "green" }} />
+                                                            <Button success style={{ borderColor: youtubeTheme.secondaryColor }} rounded color={youtubeTheme.secondaryColor} icon>
+                                                                <Icon name="add" type="MaterialIcons" />
                                                             </Button>
                                                         </Right>
                                                     </ListItem>
