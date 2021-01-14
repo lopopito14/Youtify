@@ -53,7 +53,8 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
                             } else {
                                 yearPlaylist.playlists.push({
                                     month: month,
-                                    exists: null,
+                                    playlistId: undefined,
+                                    synchronized: items.length === 0,
                                     items: [],
                                     itemsFromFavorites: items,
                                 })
@@ -64,7 +65,8 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
                                 playlists: [
                                     {
                                         month: month,
-                                        exists: null,
+                                        playlistId: undefined,
+                                        synchronized: items.length === 0,
                                         items: [],
                                         itemsFromFavorites: items,
                                     }
@@ -114,7 +116,8 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
                                         ...yearPlaylist.playlists.slice(0, monthIndex),
                                         {
                                             ...monthPlaylist,
-                                            exists: youtubeAction.payload.exists
+                                            playlistId: youtubeAction.payload.playlistId,
+                                            items: youtubeAction.payload.playlistId ? monthPlaylist.items : []
                                         },
                                         ...yearPlaylist.playlists.slice(monthIndex + 1),
                                     ]
@@ -161,7 +164,8 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
                                             items: [
                                                 ...monthPlaylist.items,
                                                 ...youtubeAction.payload.items
-                                            ]
+                                            ],
+                                            synchronized: (monthPlaylist.itemsFromFavorites.length === (monthPlaylist.items.length + youtubeAction.payload.items.length))
                                         },
                                         ...yearPlaylist.playlists.slice(monthIndex + 1),
                                     ]
@@ -177,8 +181,53 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
             }
             return state;
 
+        case Types.YOUTUBE_PLAYLISTS_ITEMS_COMPLETE:
+            return state;
+
         case Types.YOUTUBE_PLAYLISTS_ITEMS_ERROR:
             console.error(youtubeAction.payload);
+            return state;
+
+        case Types.YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED:
+            if (youtubeAction.payload) {
+
+                const year = youtubeAction.payload.year;
+                const month = youtubeAction.payload.month;
+
+                const yearPlaylist = state.yearPlaylist.find(p => p.year === year);
+                if (yearPlaylist) {
+
+                    const yearIndex = state.yearPlaylist.indexOf(yearPlaylist);
+                    const monthPlaylist = yearPlaylist.playlists.find(p => p.month === month);
+                    if (monthPlaylist) {
+
+                        const monthIndex = yearPlaylist.playlists.indexOf(monthPlaylist);
+
+                        return {
+                            ...state,
+                            yearPlaylist: [
+                                ...state.yearPlaylist.slice(0, yearIndex),
+                                {
+                                    ...yearPlaylist,
+                                    playlists: [
+                                        ...yearPlaylist.playlists.slice(0, monthIndex),
+                                        {
+                                            ...monthPlaylist,
+                                            synchronized: true,
+                                            items: monthPlaylist.itemsFromFavorites
+                                        },
+                                        ...yearPlaylist.playlists.slice(monthIndex + 1),
+                                    ]
+                                },
+                                ...state.yearPlaylist.slice(yearIndex + 1)]
+                        };
+                    } else {
+                        console.error('impossible');
+                    }
+                } else {
+                    console.error('impossible');
+                }
+            }
             return state;
 
         default:

@@ -32,9 +32,10 @@ export class Subscriptions extends Base implements ISubscriptions {
   ): Promise<SubscriptionInsertResponse> | never {
     return await this.postWebRequest<SubscriptionListResponse>(
       this.buildUri(params),
+      params.requestBody
     );
   }
   async delete(params: SubscriptionDeleteParameter): Promise<any> | never {
-    return await this.deleteWebRequest<any>(this.buildUri(params));
+    return await this.deleteWebRequest_(this.buildUri(params));
   }
 }

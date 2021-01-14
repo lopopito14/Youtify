@@ -14,7 +14,10 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
     clientId:
       '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
     redirectUrl: 'com.lopopitoconverter:/youtubeoauth2callback',
-    scopes: ['https://www.googleapis.com/auth/youtube.readonly'],
+    scopes: [
+      'https://www.googleapis.com/auth/youtube.readonly',
+      'https://www.googleapis.com/auth/youtube.force-ssl'
+    ],
     serviceConfiguration: {
       authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
       tokenEndpoint: 'https://oauth2.googleapis.com/token',

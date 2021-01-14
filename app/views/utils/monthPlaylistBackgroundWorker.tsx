@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import { IYoutubeMonthPlaylist } from '../../store/state';
-import { youtubePlaylistsItemsComplete, youtubePlaylistsItemsError, youtubePlaylistsItemsRequest, youtubePlaylistsItemsSuccess } from '../../store/types/youtube_playlists_actions';
+import { youtubePlaylistsItemsClear, youtubePlaylistsItemsComplete, youtubePlaylistsItemsError, youtubePlaylistsItemsRequest, youtubePlaylistsItemsSuccess } from '../../store/types/youtube_playlists_actions';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
 
 interface IProps {
@@ -11,18 +11,15 @@ interface IProps {
 
 export const MonthPlaylistBackgroundWorker: React.FunctionComponent<IProps> = (props: IProps) => {
     const { state, dispatch } = useContext(Context);
-    const [playlistId] = useState<string | undefined>(undefined);
     const [playlistItemPageToken, setplaylistItemPageToken] = useState<string | undefined>(undefined);
 
     useEffect(() => {
-        if (props.playlist.exists) {
-            if (playlistId) {
-                _fetchPlaylistItems();
-            }
+        if (props.playlist.playlistId) {
+            _fetchPlaylistItems();
         } else {
-            // dispatch clear items
+            dispatch(youtubePlaylistsItemsClear({ year: props.year, month: props.playlist.month }))
         }
-    }, [props.playlist.exists, playlistId]);
+    }, [props.playlist.playlistId]);
 
     useEffect(() => {
         if (playlistItemPageToken) {
@@ -34,7 +31,7 @@ export const MonthPlaylistBackgroundWorker: React.FunctionComponent<IProps> = (p
         try {
             dispatch(youtubePlaylistsItemsRequest());
             var response = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
-                playlistId: playlistId,
+                playlistId: props.playlist.playlistId,
                 part: ['snippet', 'contentDetails'],
                 maxResults: 50,
                 pageToken: pageToken

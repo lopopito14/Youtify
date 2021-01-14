@@ -32,9 +32,10 @@ export class PlaylistItems extends Base implements IPlaylistItems {
   ): Promise<PlaylistItemInsertResponse> | never {
     return await this.postWebRequest<PlaylistItemListResponse>(
       this.buildUri(params),
+      params.requestBody
     );
   }
   async delete(params: PlaylistItemDeleteParameter): Promise<any> | never {
-    return await this.deleteWebRequest<any>(this.buildUri(params));
+    return await this.deleteWebRequest_(this.buildUri(params));
   }
 }

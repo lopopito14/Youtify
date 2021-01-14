@@ -25,13 +25,15 @@ export class Base {
     return this.baseUri + this.uriExtension + paramUri;
   }
 
-  requestInit(method: string): RequestInit {
+  requestInit(method: string, body?: any): RequestInit {
     return {
       headers: {
+        'Content-Type': "application/json",
         Accept: 'application/json',
         Authorization: 'Bearer ' + this.token,
       },
       method: method,
+      body: body ? JSON.stringify(body) : null
     };
   }
 
@@ -46,8 +48,8 @@ export class Base {
     return (await response.json()) as T;
   }
 
-  async postWebRequest<T>(uri: string): Promise<T> | never {
-    const response = await fetch(uri, this.requestInit('post'));
+  async postWebRequest<T>(uri: string, body: any): Promise<T> | never {
+    const response = await fetch(uri, this.requestInit('post', body));
 
     if (!response.ok) {
       let errorResponse = (await response.json()) as ErrorResponse;
@@ -66,5 +68,15 @@ export class Base {
     }
 
     return (await response.json()) as T;
+  }
+
+  async deleteWebRequest_(uri: string): Promise<any> | never {
+
+    const response = await fetch(uri, this.requestInit('delete'));
+
+    if (!response.ok) {
+      let errorResponse = (await response.json()) as ErrorResponse;
+      throw new ErrorResponseException(errorResponse);
+    }
   }
 }

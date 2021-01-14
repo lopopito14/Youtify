@@ -126,7 +126,8 @@ export interface IYoutubeYearPlaylist {
 
 export interface IYoutubeMonthPlaylist {
   month: number;
-  exists: boolean | null;
+  playlistId?: string;
+  synchronized: boolean;
   itemsFromFavorites: PlaylistItem[];
   items: PlaylistItem[];
 }

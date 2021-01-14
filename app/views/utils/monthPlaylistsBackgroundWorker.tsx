@@ -71,7 +71,7 @@ export const MonthPlaylistsBackgroundWorker: React.FunctionComponent<IProps> = (
                             {
                                 year: y.year,
                                 month: m.month,
-                                exists: true
+                                playlistId: playlist.id ? playlist.id : undefined
                             }
                         ));
                     } else {
@@ -79,7 +79,7 @@ export const MonthPlaylistsBackgroundWorker: React.FunctionComponent<IProps> = (
                             {
                                 year: y.year,
                                 month: m.month,
-                                exists: false
+                                playlistId: undefined
                             }
                         ));
                     }

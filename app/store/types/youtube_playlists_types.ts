@@ -11,6 +11,8 @@ export enum Types {
     YOUTUBE_PLAYLISTS_ITEMS_SUCCESS = 'YOUTUBE_PLAYLISTS_ITEMS_SUCCESS',
     YOUTUBE_PLAYLISTS_ITEMS_COMPLETE = 'YOUTUBE_PLAYLISTS_ITEMS_COMPLETE',
     YOUTUBE_PLAYLISTS_ITEMS_ERROR = 'YOUTUBE_PLAYLISTS_ITEMS_ERROR',
+    YOUTUBE_PLAYLISTS_ITEMS_CLEAR = 'YOUTUBE_PLAYLISTS_ITEMS_CLEAR',
+    YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED = 'YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED',
 }
 
 export interface IYoutubePlaylistsFavoritesItemsRequest extends Action {
@@ -38,7 +40,7 @@ export interface IYoutubePlaylistsExists extends Action {
     payload: {
         year: number,
         month: number,
-        exists: boolean
+        playlistId?: string
     }
 }
 
@@ -64,4 +66,20 @@ export interface IYoutubePlaylistsItemsError extends Action {
     payload: any;
 }
 
-export type TYoutubePlaylistsActions = IYoutubePlaylistsFavoritesItemsRequest | IYoutubePlaylistsFavoritesItemsSuccess | IYoutubePlaylistsFavoritesItemsComplete | IYoutubePlaylistsFavoritesItemsError | IYoutubePlaylistsExists | IYoutubePlaylistsItemsRequest | IYoutubePlaylistsItemsSuccess | IYoutubePlaylistsItemsComplete | IYoutubePlaylistsItemsError;
+export interface IYoutubePlaylistsItemsClear extends Action {
+    type: Types.YOUTUBE_PLAYLISTS_ITEMS_CLEAR;
+    payload: {
+        year: number,
+        month: number
+    };
+}
+
+export interface IYoutubePlaylistsItemsSynchronized extends Action {
+    type: Types.YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED;
+    payload: {
+        year: number,
+        month: number
+    }
+}
+
+export type TYoutubePlaylistsActions = IYoutubePlaylistsFavoritesItemsRequest | IYoutubePlaylistsFavoritesItemsSuccess | IYoutubePlaylistsFavoritesItemsComplete | IYoutubePlaylistsFavoritesItemsError | IYoutubePlaylistsExists | IYoutubePlaylistsItemsRequest | IYoutubePlaylistsItemsSuccess | IYoutubePlaylistsItemsComplete | IYoutubePlaylistsItemsError | IYoutubePlaylistsItemsClear | IYoutubePlaylistsItemsSynchronized;
