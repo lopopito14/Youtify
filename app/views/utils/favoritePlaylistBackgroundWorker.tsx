@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
-import { youtubeFavoritesError, youtubeFavoritesItemsComplete, youtubeFavoritesItemsError, youtubeFavoritesItemsRequest, youtubeFavoritesItemsSuccess, youtubeFavoritesRequest, youtubeFavoritesSucess } from '../../store/types/youtube_favorites_actions';
 import { youtubePlaylistsFavoritesItemsComplete, youtubePlaylistsFavoritesItemsError, youtubePlaylistsFavoritesItemsRequest, youtubePlaylistsFavoritesItemsSuccess } from '../../store/types/youtube_playlists_actions';
+import { Playlist, PlaylistItem } from '../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
 import { Playlists } from '../../youtubeApi/youtube-api-playlists';
 
@@ -9,16 +9,18 @@ interface IProps { }
 
 export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> = () => {
     const { state, dispatch } = useContext(Context);
+    const [favoritePlaylist, setfavoritePlaylist] = useState<Playlist | undefined>(undefined);
+    const [favoritePlaylistItems, setfavoritePlaylistItems] = useState<PlaylistItem[] | undefined>(undefined);
     const [favoritepageToken, setfavoritepageToken] = useState<string | undefined>(undefined);
 
     const favoritePlaylistName = "FL65Vblm8jhqYm8-0QPi3Z6A";
 
     useEffect(() => {
         if (state.youtubeState.userProfile.loaded) {
-            if (!state.youtubeState.favorite.favoritePlaylist.loaded) {
+            if (!favoritePlaylist) {
                 _fetchFavoritePlaylist();
             }
-            if (!state.youtubeState.favorite.favoritePlaylistItems.loaded) {
+            if (!favoritePlaylistItems) {
                 _fetchFavoritePlaylistItems();
             }
         }
@@ -32,23 +34,21 @@ export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> =
 
     async function _fetchFavoritePlaylist() {
         try {
-            dispatch(youtubeFavoritesRequest());
             var response = await new Playlists(state.youtubeState.credential.accessToken).list({
                 id: [favoritePlaylistName],
                 part: ['snippet', 'contentDetails'],
                 maxResults: 1,
             });
             if (response && response.items && response.items.length === 1) {
-                dispatch(youtubeFavoritesSucess(response.items[0]));
+                setfavoritePlaylist(response.items[0]);
             }
         } catch (error) {
-            dispatch(youtubeFavoritesError(error));
+            console.error(error);
         }
     }
 
     async function _fetchFavoritePlaylistItems(pageToken: string | undefined = undefined) {
         try {
-            dispatch(youtubeFavoritesItemsRequest());
             dispatch(youtubePlaylistsFavoritesItemsRequest());
             var response = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
                 playlistId: favoritePlaylistName,
@@ -58,21 +58,14 @@ export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> =
             });
             if (response && response.items && response.pageInfo?.totalResults) {
                 dispatch(youtubePlaylistsFavoritesItemsSuccess({ items: response.items }));
-                dispatch(youtubeFavoritesItemsSuccess(
-                    {
-                        progress: 100 * ((state.youtubeState.favorite.favoritePlaylistItems.playlistItems.length + response.items.length) / response.pageInfo?.totalResults),
-                        items: response.items
-                    }));
                 if (response.nextPageToken) {
                     setfavoritepageToken(response.nextPageToken);
                 } else {
-                    dispatch(youtubeFavoritesItemsComplete());
                     dispatch(youtubePlaylistsFavoritesItemsComplete());
                     setfavoritepageToken(undefined);
                 }
             }
         } catch (error) {
-            dispatch(youtubeFavoritesItemsError(error));
             dispatch(youtubePlaylistsFavoritesItemsError(error));
         }
     }

@@ -25,11 +25,7 @@ export const InitialState: TState = {
       displayName: '',
       email: '',
       id: ''
-    },
-    // spotifyPlaylist: {
-    //   playlists: [],
-    // },
-    // playlistItems: {},
+    }
   },
   youtubeState: {
     credential: {
@@ -43,19 +39,6 @@ export const InitialState: TState = {
       loaded: false,
       title: '',
       channelId: ''
-    },
-    favorite: {
-      favoritePlaylist: {
-        loading: false,
-        loaded: false,
-        playlist: {}
-      },
-      favoritePlaylistItems: {
-        loading: false,
-        loaded: false,
-        progress: 0,
-        playlistItems: []
-      }
     },
     playlists: {
       loading: false,
@@ -75,7 +58,6 @@ export interface ISpotifyState {
 export interface IYoutubeState {
   credential: ICredential;
   userProfile: IYoutubeProfile;
-  favorite: IYoutubeFavorite;
   playlists: IYoutubePlaylists;
 }
 
@@ -96,19 +78,6 @@ export interface ISpotifyProfile extends ILoad {
 export interface IYoutubeProfile extends ILoad {
   title: string;
   channelId: string;
-}
-
-export interface IYoutubeFavorite {
-  favoritePlaylist: IYoutubeFavoritePlaylist;
-  favoritePlaylistItems: IYoutubeFavoritePlaylistItems;
-}
-
-export interface IYoutubeFavoritePlaylist extends ILoad {
-  playlist: Playlist;
-}
-
-export interface IYoutubeFavoritePlaylistItems extends ILoad, IProgress {
-  playlistItems: PlaylistItem[];
 }
 
 export interface ISpotifyPlaylist {
