@@ -1,7 +1,8 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base'
 import React, { useContext, useEffect, useState } from 'react';
 import Context from '../../store/context';
-import { ErrorResponseException, Subscription } from '../../youtubeApi/youtube-api-models';
+import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
+import { Subscription } from '../../youtubeApi/youtube-api-models';
 import { Subscriptions } from '../../youtubeApi/youtube-api-subscriptions';
 import { youtubeTheme } from '../theme';
 import RefreshableList from '../utils/refreshableList';
@@ -14,7 +15,7 @@ export interface IProps {
 
 const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const [subscriptions, setsubscriptions] = useState<Subscription[]>([]);
-    const { state } = useContext(Context);
+    const { state, dispatch } = useContext(Context);
     const [loaded, setLoaded] = useState(false);
     const [pageToken, setpageToken] = useState<string | undefined>(undefined);
 
@@ -65,11 +66,7 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 }
             }
         } catch (error) {
-            if (error instanceof ErrorResponseException) {
-                console.log(error.errorResponse.error.message);
-            } else {
-                console.log('Error => ' + error);
-            }
+            dispatch(pushYoutubeErrorNotification(error));
         }
     }
 

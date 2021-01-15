@@ -1,6 +1,7 @@
 import { Accordion, Body, Button, Content, H1, H3, Icon, Left, List, ListItem, Right, Spinner, Text } from 'native-base'
 import React, { useContext, useState } from 'react'
 import Context from '../../store/context'
+import { pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../../store/types/notifications_actions'
 import { bindYoutubePlaylist, synchronizeYoutubePlaylistItemsSuccess } from '../../store/types/youtube_playlists_actions'
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems'
 import { Playlists } from '../../youtubeApi/youtube-api-playlists'
@@ -123,9 +124,10 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
                             playlist: response
                         }
                     ));
+                    dispatch(pushYoutubeSuccessNotification(`${createPlaylist.title} created !`));
                 }
             } catch (error) {
-                console.error(error);
+                dispatch(pushYoutubeErrorNotification(error));
             } finally {
                 setcreatePlaylist(undefined);
             }
@@ -141,8 +143,9 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
                         playlist: undefined
                     }
                 ));
+                dispatch(pushYoutubeSuccessNotification(`${deletePlaylist.title} removed !`));
             } catch (error) {
-                console.error(error);
+                dispatch(pushYoutubeErrorNotification(error));
             } finally {
                 setdeletePlaylist(undefined);
             }
@@ -177,9 +180,10 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
                     }
 
                     dispatch(synchronizeYoutubePlaylistItemsSuccess({ year: synchronizePlaylist.year, month: synchronizePlaylist.month }));
+                    dispatch(pushYoutubeSuccessNotification(`${synchronizePlaylist.title} synchronized !`));
                 }
             } catch (error) {
-                console.error(error);
+                dispatch(pushYoutubeErrorNotification(error));
             } finally {
                 setsynchronizePlaylist(undefined);
             }

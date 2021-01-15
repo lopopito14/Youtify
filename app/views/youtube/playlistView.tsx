@@ -4,8 +4,9 @@ import Context from '../../store/context';
 import { youtubeTheme } from '../theme';
 import Sound from 'react-native-sound';
 import { YoutubeViewType } from '../youtubeView';
-import { ErrorResponseException, Playlist, PlaylistItem } from '../../youtubeApi/youtube-api-models';
+import { Playlist, PlaylistItem } from '../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
+import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
 
 interface IProps {
     selectedView: YoutubeViewType;
@@ -15,7 +16,7 @@ interface IProps {
 
 const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     const [playlistItems, setPlaylistItems] = useState<PlaylistItem[]>([]);
-    const { state } = useContext(Context);
+    const { state, dispatch } = useContext(Context);
     const [loaded, setLoaded] = useState(true);
     const [pageToken, setpageToken] = useState<string | undefined>(undefined);
     const [trackIdPlaying, setTrackIdPlaying] = useState<string | undefined>(undefined);
@@ -60,11 +61,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                 }
             }
         } catch (error) {
-            if (error instanceof ErrorResponseException) {
-                console.log(error.errorResponse.error.message);
-            } else {
-                console.log('Error => ' + error);
-            }
+            dispatch(pushYoutubeErrorNotification(error));
         }
     }
 

@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
-import { ErrorResponseException, Playlist } from '../../youtubeApi/youtube-api-models';
+import { pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../../store/types/notifications_actions';
+import { Playlist } from '../../youtubeApi/youtube-api-models';
 import { Playlists } from '../../youtubeApi/youtube-api-playlists';
 import PlaylistBackgroundWorker from './playlistBackgroundWorker';
 
 interface IProps { }
 
 export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = () => {
-    const { state } = useContext(Context);
+    const { state, dispatch } = useContext(Context);
     const [playlists, setplaylists] = useState<Playlist[] | undefined>(undefined);
     const [playlistspageToken, setplaylistspageToken] = useState<string | undefined>(undefined);
 
@@ -49,14 +50,11 @@ export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = () => 
                     setplaylistspageToken(response.nextPageToken);
                 } else {
                     setplaylistspageToken(undefined);
+                    dispatch(pushYoutubeSuccessNotification("My playlists loaded !"));
                 }
             }
         } catch (error) {
-            if (error instanceof ErrorResponseException) {
-                console.log(error.errorResponse.error.message);
-            } else {
-                console.log('Error => ' + error);
-            }
+            dispatch(pushYoutubeErrorNotification(error));
         }
     }
 

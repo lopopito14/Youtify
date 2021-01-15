@@ -1,7 +1,8 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base';
 import React, { useContext, useEffect, useState } from 'react';
 import Context from '../../store/context';
-import { ErrorResponseException, Playlist } from '../../youtubeApi/youtube-api-models';
+import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
+import { Playlist } from '../../youtubeApi/youtube-api-models';
 import { Playlists } from '../../youtubeApi/youtube-api-playlists';
 import { youtubeTheme } from '../theme';
 import RefreshableList from '../utils/refreshableList';
@@ -15,7 +16,7 @@ export interface IProps {
 
 const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const [playlists, setplaylists] = useState<Playlist[]>([]);
-    const { state } = useContext(Context);
+    const { state, dispatch } = useContext(Context);
     const [loaded, setLoaded] = useState(false);
     const [pageToken, setpageToken] = useState<string | undefined>(undefined);
     const [selectedPlaylist, setselectedPlaylist] = useState<Playlist | undefined>(undefined);
@@ -67,11 +68,7 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 }
             }
         } catch (error) {
-            if (error instanceof ErrorResponseException) {
-                console.log(error.errorResponse.error.message);
-            } else {
-                console.log('Error => ' + error);
-            }
+            dispatch(pushYoutubeErrorNotification(error));
         }
     }
 

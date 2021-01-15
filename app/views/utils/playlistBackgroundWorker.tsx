@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import { IYoutubeMonthPlaylist } from '../../store/state';
+import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
 import { bindYoutubePlaylist, bindYoutubePlaylistItemsComplete, bindYoutubePlaylistItemsError, bindYoutubePlaylistItemsRequest, bindYoutubePlaylistItemsSuccess } from '../../store/types/youtube_playlists_actions';
 import { Playlist } from '../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
@@ -70,6 +71,7 @@ export const PlaylistBackgroundWorker: React.FunctionComponent<IProps> = (props:
                 }
             } catch (error) {
                 dispatch(bindYoutubePlaylistItemsError(error));
+                dispatch(pushYoutubeErrorNotification(error));
             }
         }
     }

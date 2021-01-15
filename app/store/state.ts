@@ -4,12 +4,14 @@ export type TState = {
   spotifyState: IProfile<ISpotifyProfile>;
   youtubeState: IProfile<IYoutubeProfile>;
   myPlaylist: IMyPlaylist;
+  notifications: INotifications;
 };
 
 export interface IApplicationState {
   spotifyState: IProfile<ISpotifyProfile>;
   youtubeState: IProfile<IYoutubeProfile>;
   myPlaylist: IMyPlaylist;
+  notifications: INotifications;
 }
 
 export const InitialState: TState = {
@@ -47,6 +49,9 @@ export const InitialState: TState = {
     loaded: false,
     loading: false,
     myPlaylists: []
+  },
+  notifications: {
+    youtubeNotifications: []
   }
 };
 
@@ -101,4 +106,19 @@ export interface ISpotifyPlaylist {
 export interface ILoad {
   loading: boolean;
   loaded: boolean;
+}
+
+export interface INotifications {
+  youtubeNotifications: INotification[];
+}
+
+export interface INotification {
+  message: string;
+  type: NotificationType;
+}
+
+export enum NotificationType {
+  SUCCESS = "SUCCESS",
+  WARNING = "WARNING",
+  ERROR = "ERROR",
 }
