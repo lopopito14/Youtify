@@ -1,6 +1,6 @@
 import { Reducer } from 'redux';
 import { TActions } from '../actions';
-import { ICredential, InitialState, IYoutubeState } from '../state';
+import { ICredential, InitialState } from '../state';
 import { TYoutubeCredentialsActions, Types } from './youtube_credential_types';
 
 const reducer: Reducer<ICredential, TActions> = (state: ICredential = InitialState.youtubeState.credential, action: TActions) => {

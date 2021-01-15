@@ -1,13 +1,15 @@
 import {Playlist, PlaylistItem} from '../youtubeApi/youtube-api-models';
 
 export type TState = {
-  spotifyState: ISpotifyState;
-  youtubeState: IYoutubeState;
+  spotifyState: IProfile<ISpotifyProfile>;
+  youtubeState: IProfile<IYoutubeProfile>;
+  myPlaylist: IMyPlaylist;
 };
 
 export interface IApplicationState {
-  spotifyState: ISpotifyState;
-  youtubeState: IYoutubeState;
+  spotifyState: IProfile<ISpotifyProfile>;
+  youtubeState: IProfile<IYoutubeProfile>;
+  myPlaylist: IMyPlaylist;
 }
 
 export const InitialState: TState = {
@@ -39,26 +41,18 @@ export const InitialState: TState = {
       loaded: false,
       title: '',
       channelId: ''
-    },
-    playlists: {
-      loading: false,
-      loaded: false,
-      yearPlaylist: []
     }
   },
+  myPlaylist: {
+    loaded: false,
+    loading: false,
+    myPlaylists: []
+  }
 };
 
-export interface ISpotifyState {
+export interface IProfile<T> {
   credential: ICredential;
-  userProfile: ISpotifyProfile;
-  // spotifyPlaylist: ISpotifyPlaylist;
-  // playlistItems: Record<string, SpotifyApi.PlaylistTrackObject[]>;
-}
-
-export interface IYoutubeState {
-  credential: ICredential;
-  userProfile: IYoutubeProfile;
-  playlists: IYoutubePlaylists;
+  userProfile: T;
 }
 
 export interface ICredential {
@@ -80,32 +74,31 @@ export interface IYoutubeProfile extends ILoad {
   channelId: string;
 }
 
-export interface ISpotifyPlaylist {
-  playlists: SpotifyApi.PlaylistObjectSimplified[];
-}
-
-export interface IYoutubePlaylists extends ILoad {
-  yearPlaylist: IYoutubeYearPlaylist[];
-}
-
-export interface IYoutubeYearPlaylist {
-  year: number;
-  playlists: IYoutubeMonthPlaylist[];
+export interface IMyPlaylist extends ILoad {
+  myPlaylists: IYoutubeMonthPlaylist[];
 }
 
 export interface IYoutubeMonthPlaylist {
+  year: number,
   month: number;
-  playlistId?: string;
+  title: string;
   synchronized: boolean;
-  itemsFromFavorites: PlaylistItem[];
+  favoriteitems: PlaylistItem[];
+  youtube?: IYoutubePlaylist;
+  spotify?: ISpotifyPlaylist;
+}
+
+export interface IYoutubePlaylist {
+  playlist: Playlist;
   items: PlaylistItem[];
+}
+
+export interface ISpotifyPlaylist {
+  playlist: SpotifyApi.PlaylistObjectSimplified;
+  items: SpotifyApi.PlaylistTrackObject[];
 }
 
 export interface ILoad {
   loading: boolean;
   loaded: boolean;
-}
-
-export interface IProgress {
-  progress: number;
 }

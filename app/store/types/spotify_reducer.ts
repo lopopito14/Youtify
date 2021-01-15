@@ -1,10 +1,10 @@
 import { combineReducers, Reducer } from 'redux';
 import { TActions } from '../actions';
-import { ISpotifyState } from '../state';
+import { ISpotifyProfile, IProfile } from '../state';
 import credentialReducer from './spotify_credential_reducer';
 import userProfileReducer from './spotify_userProfile_reducer';
 
-const reducer: Reducer<ISpotifyState> = combineReducers<ISpotifyState, TActions>
+const reducer: Reducer<IProfile<ISpotifyProfile>> = combineReducers<IProfile<ISpotifyProfile>, TActions>
 ({
     credential: credentialReducer,
     userProfile: userProfileReducer

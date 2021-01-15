@@ -1,10 +1,10 @@
 import { Reducer } from 'redux';
 import { PlaylistItem } from '../../youtubeApi/youtube-api-models';
 import { TActions } from '../actions';
-import { InitialState, IYoutubePlaylists } from '../state';
+import { IMyPlaylist, InitialState, } from '../state';
 import { TYoutubePlaylistsActions, Types } from './youtube_playlists_types';
 
-const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists = InitialState.youtubeState.playlists, action: TActions) => {
+const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialState.myPlaylist, action: TActions) => {
 
     var youtubeAction = action as TYoutubePlaylistsActions;
     if (youtubeAction === null) {
@@ -14,10 +14,10 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
     console.log(youtubeAction.type);
 
     switch (youtubeAction.type) {
-        case Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_REQUEST:
+        case Types.BIND_YOUTUBE_FAVORITE_ITEMS_REQUEST:
             return { ...state, loading: true };
 
-        case Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_SUCCESS:
+        case Types.BIND_YOUTUBE_FAVORITE_ITEMS_SUCCESS:
             if (youtubeAction.payload) {
                 const copy = state;
 
@@ -45,32 +45,16 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
                             continue;
                         }
 
-                        const yearPlaylist = copy.yearPlaylist.find(p => p.year === year);
-                        if (yearPlaylist) {
-                            const monthPlaylist = yearPlaylist.playlists.find(p => p.month === month);
-                            if (monthPlaylist) {
-                                items.forEach(i => monthPlaylist.itemsFromFavorites.push(i))
-                            } else {
-                                yearPlaylist.playlists.push({
-                                    month: month,
-                                    playlistId: undefined,
-                                    synchronized: items.length === 0,
-                                    items: [],
-                                    itemsFromFavorites: items,
-                                })
-                            }
+                        const playlist = copy.myPlaylists.find(p => p.year === year && p.month === month);
+                        if (playlist) {
+                            items.forEach(i => playlist.favoriteitems.push(i));
                         } else {
-                            copy.yearPlaylist.push({
+                            copy.myPlaylists.push({
                                 year: year,
-                                playlists: [
-                                    {
-                                        month: month,
-                                        playlistId: undefined,
-                                        synchronized: items.length === 0,
-                                        items: [],
-                                        itemsFromFavorites: items,
-                                    }
-                                ]
+                                month: month,
+                                title: `Playlist ${year} - ${(month < 10) ? '0' : ''}${month}`,
+                                synchronized: items.length === 0,
+                                favoriteitems: items,
                             })
                         }
 
@@ -84,148 +68,131 @@ const reducer: Reducer<IYoutubePlaylists, TActions> = (state: IYoutubePlaylists 
             }
             return state;
 
-        case Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_COMPLETE:
+        case Types.BIND_YOUTUBE_FAVORITE_ITEMS_COMPLETE:
             return { ...state, loading: false, loaded: true };
 
-        case Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_ERROR:
+        case Types.BIND_YOUTUBE_FAVORITE_ITEMS_ERROR:
             console.error(youtubeAction.payload);
             return { ...state, loading: false, loaded: false };
 
-        case Types.YOUTUBE_PLAYLISTS_EXISTS:
+        case Types.BIND_YOUTUBE_PLAYLIST:
             if (youtubeAction.payload) {
 
                 const year = youtubeAction.payload.year;
                 const month = youtubeAction.payload.month;
 
-                const yearPlaylist = state.yearPlaylist.find(p => p.year === year);
-                if (yearPlaylist) {
+                const playlist = state.myPlaylists.find(p => p.year === year && p.month === month);
+                if (playlist) {
 
-                    const yearIndex = state.yearPlaylist.indexOf(yearPlaylist);
-                    const monthPlaylist = yearPlaylist.playlists.find(p => p.month === month);
-                    if (monthPlaylist) {
+                    const index = state.myPlaylists.indexOf(playlist);
 
-                        const monthIndex = yearPlaylist.playlists.indexOf(monthPlaylist);
+                    if (youtubeAction.payload.playlist) {
 
                         return {
                             ...state,
-                            yearPlaylist: [
-                                ...state.yearPlaylist.slice(0, yearIndex),
+                            myPlaylists: [
+                                ...state.myPlaylists.slice(0, index),
                                 {
-                                    ...yearPlaylist,
-                                    playlists: [
-                                        ...yearPlaylist.playlists.slice(0, monthIndex),
-                                        {
-                                            ...monthPlaylist,
-                                            playlistId: youtubeAction.payload.playlistId,
-                                            items: youtubeAction.payload.playlistId ? monthPlaylist.items : []
-                                        },
-                                        ...yearPlaylist.playlists.slice(monthIndex + 1),
-                                    ]
+                                    ...playlist,
+                                    youtube: {
+                                        playlist: youtubeAction.payload.playlist,
+                                        items: []
+                                    }
                                 },
-                                ...state.yearPlaylist.slice(yearIndex + 1)]
+                                ...state.myPlaylists.slice(index + 1)]
                         };
                     } else {
-                        console.error('not found');
+                        return {
+                            ...state,
+                            myPlaylists: [
+                                ...state.myPlaylists.slice(0, index),
+                                {
+                                    ...playlist,
+                                    youtube: undefined
+                                },
+                                ...state.myPlaylists.slice(index + 1)]
+                        };
                     }
+
+
                 } else {
                     console.error('not found');
                 }
             }
             return state;
 
-        case Types.YOUTUBE_PLAYLISTS_ITEMS_REQUEST:
+        case Types.BIND_YOUTUBE_PLAYLIST_ITEMS_REQUEST:
             return state;
 
-        case Types.YOUTUBE_PLAYLISTS_ITEMS_SUCCESS:
+        case Types.BIND_YOUTUBE_PLAYLIST_ITEMS_SUCCESS:
             if (youtubeAction.payload) {
 
                 const year = youtubeAction.payload.year;
                 const month = youtubeAction.payload.month;
 
-                const yearPlaylist = state.yearPlaylist.find(p => p.year === year);
-                if (yearPlaylist) {
+                const playlist = state.myPlaylists.find(p => p.year === year && p.month === month);
+                if (playlist && playlist.youtube) {
 
-                    const yearIndex = state.yearPlaylist.indexOf(yearPlaylist);
-                    const monthPlaylist = yearPlaylist.playlists.find(p => p.month === month);
-                    if (monthPlaylist) {
+                    const index = state.myPlaylists.indexOf(playlist);
 
-                        const monthIndex = yearPlaylist.playlists.indexOf(monthPlaylist);
-
-                        return {
-                            ...state,
-                            yearPlaylist: [
-                                ...state.yearPlaylist.slice(0, yearIndex),
-                                {
-                                    ...yearPlaylist,
-                                    playlists: [
-                                        ...yearPlaylist.playlists.slice(0, monthIndex),
-                                        {
-                                            ...monthPlaylist,
-                                            items: [
-                                                ...monthPlaylist.items,
-                                                ...youtubeAction.payload.items
-                                            ],
-                                            synchronized: (monthPlaylist.itemsFromFavorites.length === (monthPlaylist.items.length + youtubeAction.payload.items.length))
-                                        },
-                                        ...yearPlaylist.playlists.slice(monthIndex + 1),
+                    return {
+                        ...state,
+                        myPlaylists: [
+                            ...state.myPlaylists.slice(0, index),
+                            {
+                                ...playlist,
+                                youtube: {
+                                    ...playlist.youtube,
+                                    items: [
+                                        ...playlist.youtube?.items,
+                                        ...youtubeAction.payload.items
                                     ]
-                                },
-                                ...state.yearPlaylist.slice(yearIndex + 1)]
-                        };
-                    } else {
-                        console.error('impossible');
-                    }
+                                }
+                            },
+                            ...state.myPlaylists.slice(index + 1)]
+                    };
+
                 } else {
-                    console.error('impossible');
+                    console.error('not found');
                 }
             }
             return state;
 
-        case Types.YOUTUBE_PLAYLISTS_ITEMS_COMPLETE:
+        case Types.BIND_YOUTUBE_PLAYLIST_ITEMS_COMPLETE:
             return state;
 
-        case Types.YOUTUBE_PLAYLISTS_ITEMS_ERROR:
+        case Types.BIND_YOUTUBE_PLAYLIST_ITEMS_ERROR:
             console.error(youtubeAction.payload);
             return state;
 
-        case Types.YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED:
+        case Types.SYNCHRONIZE_YOUTUBE_PLAYLIST_ITEMS_SUCCESS:
             if (youtubeAction.payload) {
 
                 const year = youtubeAction.payload.year;
                 const month = youtubeAction.payload.month;
 
-                const yearPlaylist = state.yearPlaylist.find(p => p.year === year);
-                if (yearPlaylist) {
+                const playlist = state.myPlaylists.find(p => p.year === year && p.month === month);
+                if (playlist && playlist.youtube) {
 
-                    const yearIndex = state.yearPlaylist.indexOf(yearPlaylist);
-                    const monthPlaylist = yearPlaylist.playlists.find(p => p.month === month);
-                    if (monthPlaylist) {
+                    const index = state.myPlaylists.indexOf(playlist);
 
-                        const monthIndex = yearPlaylist.playlists.indexOf(monthPlaylist);
+                    return {
+                        ...state,
+                        myPlaylists: [
+                            ...state.myPlaylists.slice(0, index),
+                            {
+                                ...playlist,
+                                synchronized: true,
+                                youtube: {
+                                    ...playlist.youtube,
+                                    items: playlist.favoriteitems
+                                }
+                            },
+                            ...state.myPlaylists.slice(index + 1)]
+                    };
 
-                        return {
-                            ...state,
-                            yearPlaylist: [
-                                ...state.yearPlaylist.slice(0, yearIndex),
-                                {
-                                    ...yearPlaylist,
-                                    playlists: [
-                                        ...yearPlaylist.playlists.slice(0, monthIndex),
-                                        {
-                                            ...monthPlaylist,
-                                            synchronized: true,
-                                            items: monthPlaylist.itemsFromFavorites
-                                        },
-                                        ...yearPlaylist.playlists.slice(monthIndex + 1),
-                                    ]
-                                },
-                                ...state.yearPlaylist.slice(yearIndex + 1)]
-                        };
-                    } else {
-                        console.error('impossible');
-                    }
                 } else {
-                    console.error('impossible');
+                    console.error('not found');
                 }
             }
             return state;

@@ -1,7 +1,7 @@
 import { Accordion, Body, Button, Content, H1, H3, Icon, Left, List, ListItem, Right, Spinner, Text } from 'native-base'
 import React, { useContext, useState } from 'react'
 import Context from '../../store/context'
-import { youtubePlaylistsExists, youtubePlaylistsItemsSynchronized } from '../../store/types/youtube_playlists_actions'
+import { bindYoutubePlaylist, synchronizeYoutubePlaylistItemsSuccess } from '../../store/types/youtube_playlists_actions'
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems'
 import { Playlists } from '../../youtubeApi/youtube-api-playlists'
 import { youtubeTheme } from '../theme'
@@ -15,52 +15,53 @@ export interface IProps {
 
 const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { state, dispatch } = useContext(Context);
-    const [createPlaylist, setcreatePlaylist] = useState<{ year: number, month: number } | undefined>(undefined);
-    const [deletePlaylist, setdeletePlaylist] = useState<{ year: number, month: number, playlistId: string } | undefined>(undefined);
-    const [synchronizePlaylist, setsynchronizePlaylist] = useState<{ year: number, month: number } | undefined>(undefined);
-
-    function _buildPlaylistName(year: number, month: number): string {
-        return `Playlist ${year} - ${(month < 10) ? '0' + month.toString() : month.toString()}`;
-    }
+    const [createPlaylist, setcreatePlaylist] = useState<{ title: string, year: number, month: number } | undefined>(undefined);
+    const [deletePlaylist, setdeletePlaylist] = useState<{ title: string, year: number, month: number, playlistId: string } | undefined>(undefined);
+    const [synchronizePlaylist, setsynchronizePlaylist] = useState<{ title: string, year: number, month: number } | undefined>(undefined);
 
     function _buildAccordion() {
         var array: { title: JSX.Element, content: JSX.Element }[] = [];
 
-        state.youtubeState.playlists.yearPlaylist.map((f) => {
-            const title = <H1>{f.year}</H1>;
+        const years = [...new Set(state.myPlaylist.myPlaylists.map(p => p.year))];
+
+        years.map((y) => {
+            const title = <H1>{y}</H1>;
             const content =
                 <List>
                     {
-                        f.playlists.map((p, j) =>
+                        state.myPlaylist.myPlaylists.filter(p => p.year === y).map((p, j) =>
                             <ListItem key={j}>
                                 <>
                                     <Left>
                                         <Body>
-                                            <H3>{_buildPlaylistName(f.year, p.month)}</H3>
-                                            <Text note>{p.itemsFromFavorites.length} items to add</Text>
-                                            <Text note>contains {p.items.length} items</Text>
+                                            <H3>{p.title}</H3>
+                                            <Text note>{p.favoriteitems.length} items to add</Text>
+                                            {
+                                                p.youtube &&
+                                                <Text note>contains {p.youtube.items.length} items</Text>
+                                            }
                                         </Body>
                                     </Left>
                                     {
-                                        p.playlistId === undefined &&
+                                        p.youtube === undefined &&
                                         <Right>
-                                            <Button success rounded color={youtubeTheme.secondaryColor} icon onPress={() => setcreatePlaylist({ year: f.year, month: p.month })}>
+                                            <Button success rounded color={youtubeTheme.secondaryColor} icon onPress={() => setcreatePlaylist({ title: p.title, year: y, month: p.month })}>
                                                 <Icon name="add" type="MaterialIcons" />
                                             </Button>
                                         </Right>
                                     }
                                     {
-                                        p.playlistId &&
+                                        p.youtube &&
                                         <>
                                             <Right>
-                                                <Button danger rounded icon onPress={() => setdeletePlaylist({ year: f.year, month: p.month, playlistId: p.playlistId ? p.playlistId : '' })}>
+                                                <Button danger rounded icon onPress={() => setdeletePlaylist({ title: p.title, year: y, month: p.month, playlistId: p.youtube?.playlist?.id ? p.youtube.playlist.id : '' })}>
                                                     <Icon name="delete" type="MaterialCommunityIcons" />
                                                 </Button>
                                             </Right>
                                             {
-                                                p.items.length !== p.itemsFromFavorites.length &&
+                                                p.youtube.items.length !== p.favoriteitems.length &&
                                                 <Right>
-                                                    <Button success rounded icon onPress={() => setsynchronizePlaylist({ year: f.year, month: p.month })}>
+                                                    <Button success rounded icon onPress={() => setsynchronizePlaylist({ title: p.title, year: y, month: p.month })}>
                                                         <Icon name="refresh" type="MaterialCommunityIcons" />
                                                     </Button>
                                                 </Right>
@@ -85,11 +86,11 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
 
     function _modalTitle(): string {
         if (createPlaylist) {
-            return `Create playlist "${_buildPlaylistName(createPlaylist.year, createPlaylist.month)}" ?`;
+            return `Create playlist "${createPlaylist.title}" ?`;
         } else if (deletePlaylist) {
-            return `Delete playlist "${_buildPlaylistName(deletePlaylist.year, deletePlaylist.month)}" ?`;
+            return `Delete playlist "${deletePlaylist.title}" ?`;
         } else if (synchronizePlaylist) {
-            return `Synchronize playlist "${_buildPlaylistName(synchronizePlaylist.year, synchronizePlaylist.month)}" ?`;
+            return `Synchronize playlist "${synchronizePlaylist.title}" ?`;
         }
 
         return '';
@@ -110,16 +111,16 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
                     part: ['snippet'],
                     requestBody: {
                         snippet: {
-                            title: _buildPlaylistName(createPlaylist.year, createPlaylist.month)
+                            title: createPlaylist.title
                         }
                     }
                 });
                 if (response && response.snippet) {
-                    dispatch(youtubePlaylistsExists(
+                    dispatch(bindYoutubePlaylist(
                         {
                             year: createPlaylist.year,
                             month: createPlaylist.month,
-                            playlistId: response.id
+                            playlist: response
                         }
                     ));
                 }
@@ -133,11 +134,11 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
                 await new Playlists(state.youtubeState.credential.accessToken).delete({
                     id: deletePlaylist.playlistId
                 });
-                dispatch(youtubePlaylistsExists(
+                dispatch(bindYoutubePlaylist(
                     {
                         year: deletePlaylist.year,
                         month: deletePlaylist.month,
-                        playlistId: undefined
+                        playlist: undefined
                     }
                 ));
             } catch (error) {
@@ -147,38 +148,35 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
             }
         } else if (synchronizePlaylist) {
             try {
-                const yearPlaylist = state.youtubeState.playlists.yearPlaylist.find(y => y.year === synchronizePlaylist.year);
-                if (yearPlaylist) {
-                    const monthPlaylist = yearPlaylist.playlists.find(m => m.month === synchronizePlaylist.month);
-                    if (monthPlaylist) {
+                const playlist = state.myPlaylist.myPlaylists.find(p => p.year === synchronizePlaylist.year && p.month === synchronizePlaylist.month);
+                if (playlist && playlist.youtube) {
 
-                        const playlistItemsToRemove = monthPlaylist.items.filter(i => !monthPlaylist.itemsFromFavorites.map(i => i.snippet?.resourceId?.videoId).includes(i.snippet?.resourceId?.videoId));
-                        const playlistItemsToAdd = monthPlaylist.itemsFromFavorites.filter(i => !monthPlaylist.items.map(i => i.snippet?.resourceId?.videoId).includes(i.snippet?.resourceId?.videoId));
+                    const playlistItemsToRemove = playlist.youtube.items.filter(i => !playlist.favoriteitems.map(i => i.snippet?.resourceId?.videoId).includes(i.snippet?.resourceId?.videoId));
+                    const playlistItemsToAdd = playlist.favoriteitems.filter(i => !playlist.youtube?.items.map(i => i.snippet?.resourceId?.videoId).includes(i.snippet?.resourceId?.videoId));
 
-                        for (const playlistItemToRemove of playlistItemsToRemove) {
-                            if (playlistItemToRemove.id) {
-                                await new PlaylistItems(state.youtubeState.credential.accessToken).delete({
-                                    id: playlistItemToRemove.id
-                                });
-                            }
+                    for (const playlistItemToRemove of playlistItemsToRemove) {
+                        if (playlistItemToRemove.id) {
+                            await new PlaylistItems(state.youtubeState.credential.accessToken).delete({
+                                id: playlistItemToRemove.id
+                            });
                         }
-
-                        for (const playlistItemToAdd of playlistItemsToAdd) {
-                            if (playlistItemToAdd.id) {
-                                await new PlaylistItems(state.youtubeState.credential.accessToken).insert({
-                                    part: ['snippet'],
-                                    requestBody: {
-                                        snippet: {
-                                            playlistId: monthPlaylist.playlistId,
-                                            resourceId: playlistItemToAdd.snippet?.resourceId
-                                        }
-                                    }
-                                });
-                            }
-                        }
-
-                        dispatch(youtubePlaylistsItemsSynchronized({ year: synchronizePlaylist.year, month: synchronizePlaylist.month }));
                     }
+
+                    for (const playlistItemToAdd of playlistItemsToAdd) {
+                        if (playlistItemToAdd.id) {
+                            await new PlaylistItems(state.youtubeState.credential.accessToken).insert({
+                                part: ['snippet'],
+                                requestBody: {
+                                    snippet: {
+                                        playlistId: playlist.youtube.playlist?.id,
+                                        resourceId: playlistItemToAdd.snippet?.resourceId
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    dispatch(synchronizeYoutubePlaylistItemsSuccess({ year: synchronizePlaylist.year, month: synchronizePlaylist.month }));
                 }
             } catch (error) {
                 console.error(error);
@@ -212,11 +210,11 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
                         visible={_modalVisible()}
                     />
                     {
-                        state.youtubeState.playlists.loaded &&
+                        state.myPlaylist.loaded &&
                         <Accordion dataArray={_buildAccordion()} expanded={0} renderContent={(item) => <>{item.content}</>} />
                     }
                     {
-                        !state.youtubeState.playlists.loaded &&
+                        !state.myPlaylist.loaded &&
                         <Content>
                             <Spinner color={youtubeTheme.primaryColor} />
                         </Content>

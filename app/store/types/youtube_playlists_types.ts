@@ -1,55 +1,54 @@
 import { Action } from "redux";
-import { PlaylistItem } from "../../youtubeApi/youtube-api-models";
+import { Playlist, PlaylistItem } from "../../youtubeApi/youtube-api-models";
 
 export enum Types {
-    YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_REQUEST = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_REQUEST',
-    YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_SUCCESS = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_SUCCESS',
-    YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_COMPLETE = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_COMPLETE',
-    YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_ERROR = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_ERROR',
-    YOUTUBE_PLAYLISTS_EXISTS = 'YOUTUBE_PLAYLISTS_EXISTS',
-    YOUTUBE_PLAYLISTS_ITEMS_REQUEST = 'YOUTUBE_PLAYLISTS_ITEMS_REQUEST',
-    YOUTUBE_PLAYLISTS_ITEMS_SUCCESS = 'YOUTUBE_PLAYLISTS_ITEMS_SUCCESS',
-    YOUTUBE_PLAYLISTS_ITEMS_COMPLETE = 'YOUTUBE_PLAYLISTS_ITEMS_COMPLETE',
-    YOUTUBE_PLAYLISTS_ITEMS_ERROR = 'YOUTUBE_PLAYLISTS_ITEMS_ERROR',
-    YOUTUBE_PLAYLISTS_ITEMS_CLEAR = 'YOUTUBE_PLAYLISTS_ITEMS_CLEAR',
-    YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED = 'YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED',
+    BIND_YOUTUBE_FAVORITE_ITEMS_REQUEST = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_REQUEST',
+    BIND_YOUTUBE_FAVORITE_ITEMS_SUCCESS = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_SUCCESS',
+    BIND_YOUTUBE_FAVORITE_ITEMS_COMPLETE = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_COMPLETE',
+    BIND_YOUTUBE_FAVORITE_ITEMS_ERROR = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_ERROR',
+    BIND_YOUTUBE_PLAYLIST = 'YOUTUBE_PLAYLISTS_EXISTS',
+    BIND_YOUTUBE_PLAYLIST_ITEMS_REQUEST = 'YOUTUBE_PLAYLISTS_ITEMS_REQUEST',
+    BIND_YOUTUBE_PLAYLIST_ITEMS_SUCCESS = 'YOUTUBE_PLAYLISTS_ITEMS_SUCCESS',
+    BIND_YOUTUBE_PLAYLIST_ITEMS_COMPLETE = 'YOUTUBE_PLAYLISTS_ITEMS_COMPLETE',
+    BIND_YOUTUBE_PLAYLIST_ITEMS_ERROR = 'YOUTUBE_PLAYLISTS_ITEMS_ERROR',
+    SYNCHRONIZE_YOUTUBE_PLAYLIST_ITEMS_SUCCESS = 'YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED',
 }
 
-export interface IYoutubePlaylistsFavoritesItemsRequest extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_REQUEST;
+export interface IBindYoutubeFavoriteItemsRequest extends Action {
+    type: Types.BIND_YOUTUBE_FAVORITE_ITEMS_REQUEST;
 }
 
-export interface IYoutubePlaylistsFavoritesItemsSuccess extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_SUCCESS;
+export interface IBindYoutubeFavoriteItemsSuccess extends Action {
+    type: Types.BIND_YOUTUBE_FAVORITE_ITEMS_SUCCESS;
     payload: {
         items: PlaylistItem[]
     };
 }
 
-export interface IYoutubePlaylistsFavoritesItemsComplete extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_COMPLETE;
+export interface IBindYoutubeFavoriteItemsComplete extends Action {
+    type: Types.BIND_YOUTUBE_FAVORITE_ITEMS_COMPLETE;
 }
 
-export interface IYoutubePlaylistsFavoritesItemsError extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_ERROR;
+export interface IBindYoutubeFavoriteItemsError extends Action {
+    type: Types.BIND_YOUTUBE_FAVORITE_ITEMS_ERROR;
     payload: any;
 }
 
-export interface IYoutubePlaylistsExists extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_EXISTS;
+export interface IBindYoutubePlaylist extends Action {
+    type: Types.BIND_YOUTUBE_PLAYLIST;
     payload: {
         year: number,
         month: number,
-        playlistId?: string
+        playlist?: Playlist
     }
 }
 
-export interface IYoutubePlaylistsItemsRequest extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_ITEMS_REQUEST;
+export interface IBindYoutubePlaylistItemsRequest extends Action {
+    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_REQUEST;
 }
 
-export interface IYoutubePlaylistsItemsSuccess extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_ITEMS_SUCCESS;
+export interface IBindYoutubePlaylistItemsSuccess extends Action {
+    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_SUCCESS;
     payload: {
         year: number,
         month: number,
@@ -57,29 +56,21 @@ export interface IYoutubePlaylistsItemsSuccess extends Action {
     };
 }
 
-export interface IYoutubePlaylistsItemsComplete extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_ITEMS_COMPLETE;
+export interface IBindYoutubePlaylistItemsComplete extends Action {
+    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_COMPLETE;
 }
 
-export interface IYoutubePlaylistsItemsError extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_ITEMS_ERROR;
+export interface IBindYoutubePlaylistItemsError extends Action {
+    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_ERROR;
     payload: any;
 }
 
-export interface IYoutubePlaylistsItemsClear extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_ITEMS_CLEAR;
-    payload: {
-        year: number,
-        month: number
-    };
-}
-
-export interface IYoutubePlaylistsItemsSynchronized extends Action {
-    type: Types.YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED;
+export interface ISynchronizeYoutubePlaylistItemsSuccess extends Action {
+    type: Types.SYNCHRONIZE_YOUTUBE_PLAYLIST_ITEMS_SUCCESS;
     payload: {
         year: number,
         month: number
     }
 }
 
-export type TYoutubePlaylistsActions = IYoutubePlaylistsFavoritesItemsRequest | IYoutubePlaylistsFavoritesItemsSuccess | IYoutubePlaylistsFavoritesItemsComplete | IYoutubePlaylistsFavoritesItemsError | IYoutubePlaylistsExists | IYoutubePlaylistsItemsRequest | IYoutubePlaylistsItemsSuccess | IYoutubePlaylistsItemsComplete | IYoutubePlaylistsItemsError | IYoutubePlaylistsItemsClear | IYoutubePlaylistsItemsSynchronized;
+export type TYoutubePlaylistsActions = IBindYoutubeFavoriteItemsRequest | IBindYoutubeFavoriteItemsSuccess | IBindYoutubeFavoriteItemsComplete | IBindYoutubeFavoriteItemsError | IBindYoutubePlaylist | IBindYoutubePlaylistItemsRequest | IBindYoutubePlaylistItemsSuccess | IBindYoutubePlaylistItemsComplete | IBindYoutubePlaylistItemsError | ISynchronizeYoutubePlaylistItemsSuccess;
