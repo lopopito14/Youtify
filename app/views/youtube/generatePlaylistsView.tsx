@@ -2,7 +2,7 @@ import { Accordion, Body, Button, Content, H1, H3, Icon, Left, List, ListItem, R
 import React, { useContext, useState } from 'react'
 import Context from '../../store/context'
 import { pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../../store/types/notifications_actions'
-import { bindYoutubePlaylist, synchronizeYoutubePlaylistItemsSuccess } from '../../store/types/youtube_playlists_actions'
+import { bindYoutubePlaylist, synchronizeYoutubePlaylistItemsSuccess } from '../../store/types/my_playlists_actions'
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems'
 import { Playlists } from '../../youtubeApi/youtube-api-playlists'
 import { youtubeTheme } from '../theme'
@@ -36,10 +36,14 @@ const GeneratePlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =
                                     <Left>
                                         <Body>
                                             <H3>{p.title}</H3>
-                                            <Text note>{p.favoriteitems.length} items to add</Text>
+                                            <Text note>{p.favoriteitems.length} favorite items to add</Text>
                                             {
                                                 p.youtube &&
-                                                <Text note>contains {p.youtube.items.length} items</Text>
+                                                <Text note>youtube contains {p.youtube.items.length} videos</Text>
+                                            }
+                                            {
+                                                p.spotify &&
+                                                <Text note>spotify contains {p.spotify.items.length} tracks</Text>
                                             }
                                         </Body>
                                     </Left>

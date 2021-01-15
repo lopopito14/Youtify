@@ -2,31 +2,31 @@ import { Reducer } from 'redux';
 import { PlaylistItem } from '../../youtubeApi/youtube-api-models';
 import { TActions } from '../actions';
 import { IMyPlaylist, InitialState, } from '../state';
-import { TYoutubePlaylistsActions, Types } from './youtube_playlists_types';
+import { TMyPlaylistsActions, Types } from './my_playlists_types';
 
 const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialState.myPlaylist, action: TActions) => {
 
-    var youtubeAction = action as TYoutubePlaylistsActions;
-    if (youtubeAction === null) {
+    var myPlaylistAction = action as TMyPlaylistsActions;
+    if (myPlaylistAction === null) {
         return state;
     }
 
-    console.log(youtubeAction.type);
+    console.log(myPlaylistAction.type);
 
-    switch (youtubeAction.type) {
+    switch (myPlaylistAction.type) {
         case Types.BIND_YOUTUBE_FAVORITE_ITEMS_REQUEST:
             return { ...state, loading: true };
 
         case Types.BIND_YOUTUBE_FAVORITE_ITEMS_SUCCESS:
-            if (youtubeAction.payload) {
+            if (myPlaylistAction.payload) {
                 const copy = state;
 
                 var year: number | undefined;
                 var month: number | undefined;
                 var items: PlaylistItem[] = [];
 
-                for (let index = 0; index < youtubeAction.payload.items.length; index++) {
-                    const item = youtubeAction.payload.items[index];
+                for (let index = 0; index < myPlaylistAction.payload.items.length; index++) {
+                    const item = myPlaylistAction.payload.items[index];
 
                     if (item.snippet?.publishedAt) {
                         const date = new Date(item.snippet?.publishedAt);
@@ -72,21 +72,20 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
             return { ...state, loading: false, loaded: true };
 
         case Types.BIND_YOUTUBE_FAVORITE_ITEMS_ERROR:
-            console.error(youtubeAction.payload);
             return { ...state, loading: false, loaded: false };
 
         case Types.BIND_YOUTUBE_PLAYLIST:
-            if (youtubeAction.payload) {
+            if (myPlaylistAction.payload) {
 
-                const year = youtubeAction.payload.year;
-                const month = youtubeAction.payload.month;
+                const year = myPlaylistAction.payload.year;
+                const month = myPlaylistAction.payload.month;
 
                 const playlist = state.myPlaylists.find(p => p.year === year && p.month === month);
                 if (playlist) {
 
                     const index = state.myPlaylists.indexOf(playlist);
 
-                    if (youtubeAction.payload.playlist) {
+                    if (myPlaylistAction.payload.playlist) {
 
                         return {
                             ...state,
@@ -95,7 +94,7 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
                                 {
                                     ...playlist,
                                     youtube: {
-                                        playlist: youtubeAction.payload.playlist,
+                                        playlist: myPlaylistAction.payload.playlist,
                                         items: []
                                     }
                                 },
@@ -125,10 +124,10 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
             return state;
 
         case Types.BIND_YOUTUBE_PLAYLIST_ITEMS_SUCCESS:
-            if (youtubeAction.payload) {
+            if (myPlaylistAction.payload) {
 
-                const year = youtubeAction.payload.year;
-                const month = youtubeAction.payload.month;
+                const year = myPlaylistAction.payload.year;
+                const month = myPlaylistAction.payload.month;
 
                 const playlist = state.myPlaylists.find(p => p.year === year && p.month === month);
                 if (playlist && playlist.youtube) {
@@ -145,7 +144,7 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
                                     ...playlist.youtube,
                                     items: [
                                         ...playlist.youtube?.items,
-                                        ...youtubeAction.payload.items
+                                        ...myPlaylistAction.payload.items
                                     ]
                                 }
                             },
@@ -162,14 +161,13 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
             return state;
 
         case Types.BIND_YOUTUBE_PLAYLIST_ITEMS_ERROR:
-            console.error(youtubeAction.payload);
             return state;
 
         case Types.SYNCHRONIZE_YOUTUBE_PLAYLIST_ITEMS_SUCCESS:
-            if (youtubeAction.payload) {
+            if (myPlaylistAction.payload) {
 
-                const year = youtubeAction.payload.year;
-                const month = youtubeAction.payload.month;
+                const year = myPlaylistAction.payload.year;
+                const month = myPlaylistAction.payload.month;
 
                 const playlist = state.myPlaylists.find(p => p.year === year && p.month === month);
                 if (playlist && playlist.youtube) {
@@ -195,6 +193,95 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
                     console.error('not found');
                 }
             }
+            return state;
+
+        case Types.BIND_SPOTIFY_PLAYLIST:
+            if (myPlaylistAction.payload) {
+
+                const year = myPlaylistAction.payload.year;
+                const month = myPlaylistAction.payload.month;
+
+                const playlist = state.myPlaylists.find(p => p.year === year && p.month === month);
+                if (playlist) {
+
+                    const index = state.myPlaylists.indexOf(playlist);
+
+                    if (myPlaylistAction.payload.playlist) {
+
+                        return {
+                            ...state,
+                            myPlaylists: [
+                                ...state.myPlaylists.slice(0, index),
+                                {
+                                    ...playlist,
+                                    spotify: {
+                                        playlist: myPlaylistAction.payload.playlist,
+                                        items: []
+                                    }
+                                },
+                                ...state.myPlaylists.slice(index + 1)]
+                        };
+                    } else {
+                        return {
+                            ...state,
+                            myPlaylists: [
+                                ...state.myPlaylists.slice(0, index),
+                                {
+                                    ...playlist,
+                                    spotify: undefined
+                                },
+                                ...state.myPlaylists.slice(index + 1)]
+                        };
+                    }
+
+
+                } else {
+                    console.error('not found');
+                }
+            }
+            return state;
+
+        case Types.BIND_SPOTIFY_PLAYLIST_TRACKS_REQUEST:
+            return state;
+
+        case Types.BIND_SPOTIFY_PLAYLIST_TRACKS_SUCCESS:
+            if (myPlaylistAction.payload) {
+
+                const year = myPlaylistAction.payload.year;
+                const month = myPlaylistAction.payload.month;
+
+                const playlist = state.myPlaylists.find(p => p.year === year && p.month === month);
+                if (playlist && playlist.spotify) {
+
+                    const index = state.myPlaylists.indexOf(playlist);
+
+                    return {
+                        ...state,
+                        myPlaylists: [
+                            ...state.myPlaylists.slice(0, index),
+                            {
+                                ...playlist,
+                                spotify: {
+                                    ...playlist.spotify,
+                                    items: [
+                                        ...playlist.spotify?.items,
+                                        ...myPlaylistAction.payload.items
+                                    ]
+                                }
+                            },
+                            ...state.myPlaylists.slice(index + 1)]
+                    };
+
+                } else {
+                    console.error('not found');
+                }
+            }
+            return state;
+
+        case Types.BIND_SPOTIFY_PLAYLIST_TRACKS_COMPLETE:
+            return state;
+
+        case Types.BIND_SPOTIFY_PLAYLIST_TRACKS_ERROR:
             return state;
 
         default:

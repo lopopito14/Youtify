@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import { pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../../store/types/notifications_actions';
-import { bindYoutubeFavoriteItemsComplete, bindYoutubeFavoriteItemsError, bindYoutubeFavoriteItemsRequest, bindYoutubeFavoriteItemsSuccess } from '../../store/types/youtube_playlists_actions';
+import { bindYoutubeFavoriteItemsComplete, bindYoutubeFavoriteItemsError, bindYoutubeFavoriteItemsRequest, bindYoutubeFavoriteItemsSuccess } from '../../store/types/my_playlists_actions';
 import { PlaylistItem } from '../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
 

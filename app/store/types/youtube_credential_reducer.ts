@@ -26,7 +26,6 @@ const reducer: Reducer<ICredential, TActions> = (state: ICredential = InitialSta
             };
 
         case Types.YOUTUBE_API_AUTHORIZE_ERROR:
-            console.error(youtubeAction.payload);
             return state;
 
         case Types.YOUTUBE_API_REFRESH_REQUEST:
@@ -42,7 +41,6 @@ const reducer: Reducer<ICredential, TActions> = (state: ICredential = InitialSta
             };
 
         case Types.YOUTUBE_API_REFRESH_ERROR:
-            console.error(youtubeAction.payload);
             return state;
     
         default:

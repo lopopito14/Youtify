@@ -30,7 +30,7 @@ export const MainView: React.FunctionComponent<Props> = () => {
     <Context.Provider value={{ state, dispatch }}>
       <Root>
         <BackgroundWorker />
-        <NotificationToast notifications={state.notifications.youtubeNotifications} />
+        <NotificationToast notifications={state.notifications.notifications} />
         {
           _isSelected(MainViewType.Settings) && <SettingsView />
         }

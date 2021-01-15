@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import { IYoutubeMonthPlaylist } from '../../store/state';
 import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
-import { bindYoutubePlaylist, bindYoutubePlaylistItemsComplete, bindYoutubePlaylistItemsError, bindYoutubePlaylistItemsRequest, bindYoutubePlaylistItemsSuccess } from '../../store/types/youtube_playlists_actions';
+import { bindYoutubePlaylist, bindYoutubePlaylistItemsComplete, bindYoutubePlaylistItemsError, bindYoutubePlaylistItemsRequest, bindYoutubePlaylistItemsSuccess } from '../../store/types/my_playlists_actions';
 import { Playlist } from '../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
 
@@ -11,7 +11,7 @@ interface IProps {
     playlist: IYoutubeMonthPlaylist;
 }
 
-export const PlaylistBackgroundWorker: React.FunctionComponent<IProps> = (props: IProps) => {
+export const YoutubePlaylistBackgroundWorker: React.FunctionComponent<IProps> = (props: IProps) => {
     const { state, dispatch } = useContext(Context);
     const [playlistItemPageToken, setplaylistItemPageToken] = useState<string | undefined>(undefined);
 
@@ -79,4 +79,4 @@ export const PlaylistBackgroundWorker: React.FunctionComponent<IProps> = (props:
     return (<></>)
 }
 
-export default PlaylistBackgroundWorker
+export default YoutubePlaylistBackgroundWorker

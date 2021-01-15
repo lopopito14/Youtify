@@ -51,7 +51,7 @@ export const InitialState: TState = {
     myPlaylists: []
   },
   notifications: {
-    youtubeNotifications: []
+    notifications: []
   }
 };
 
@@ -99,8 +99,8 @@ export interface IYoutubePlaylist {
 }
 
 export interface ISpotifyPlaylist {
-  playlist: SpotifyApi.PlaylistObjectSimplified;
-  items: SpotifyApi.PlaylistTrackObject[];
+  playlist: SpotifyApi.PlaylistObjectFull;
+  items: SpotifyApi.TrackObjectFull[];
 }
 
 export interface ILoad {
@@ -109,7 +109,7 @@ export interface ILoad {
 }
 
 export interface INotifications {
-  youtubeNotifications: INotification[];
+  notifications: INotification[];
 }
 
 export interface INotification {

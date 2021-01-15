@@ -14,11 +14,12 @@ const reducer: Reducer<INotifications, TActions> = (state: INotifications = Init
     console.log(notificationAction.type);
 
     switch (notificationAction.type) {
+        case Types.PUSH_SPOTIFY_SUCCESS_NOTIFICATION:
         case Types.PUSH_YOUTUBE_SUCCESS_NOTIFICATION:
             return {
                 ...state,
-                youtubeNotifications: [
-                    ...state.youtubeNotifications,
+                notifications: [
+                    ...state.notifications,
                     {
                         message: notificationAction.payload,
                         type: NotificationType.SUCCESS
@@ -26,14 +27,15 @@ const reducer: Reducer<INotifications, TActions> = (state: INotifications = Init
                 ]
             }
 
+        case Types.PUSH_SPOTIFY_WARNING_NOTIFICATION:
         case Types.PUSH_YOUTUBE_WARNING_NOTIFICATION:
             return {
                 ...state,
-                youtubeNotifications: [
-                    ...state.youtubeNotifications,
+                notifications: [
+                    ...state.notifications,
                     {
                         message: notificationAction.payload,
-                        type: NotificationType.SUCCESS
+                        type: NotificationType.WARNING
                     }
                 ]
             }
@@ -42,11 +44,11 @@ const reducer: Reducer<INotifications, TActions> = (state: INotifications = Init
             if (notificationAction.payload instanceof ErrorResponseException) {
                 return {
                     ...state,
-                    youtubeNotifications: [
-                        ...state.youtubeNotifications,
+                    notifications: [
+                        ...state.notifications,
                         {
                             message: notificationAction.payload.errorResponse.error.message,
-                            type: NotificationType.SUCCESS
+                            type: NotificationType.ERROR
                         }
                     ]
                 }
@@ -54,20 +56,33 @@ const reducer: Reducer<INotifications, TActions> = (state: INotifications = Init
 
             return {
                 ...state,
-                youtubeNotifications: [
-                    ...state.youtubeNotifications,
+                notifications: [
+                    ...state.notifications,
                     {
                         message: notificationAction.payload,
-                        type: NotificationType.SUCCESS
+                        type: NotificationType.ERROR
                     }
                 ]
             }
 
-        case Types.POP_YOUTUBE_NOTIFICATION:
+        case Types.PUSH_SPOTIFY_ERROR_NOTIFICATION:
             return {
                 ...state,
-                youtubeNotifications: state.youtubeNotifications.slice(1)
+                spotifyNotifications: [
+                    ...state.notifications,
+                    {
+                        message: notificationAction.payload,
+                        type: NotificationType.ERROR
+                    }
+                ]
             }
+
+        case Types.POP_NOTIFICATION:
+            return {
+                ...state,
+                notifications: state.notifications.slice(1)
+            }
+
         default:
             return state;
     }

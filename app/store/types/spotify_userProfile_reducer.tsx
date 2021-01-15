@@ -28,7 +28,6 @@ const reducer: Reducer<ISpotifyProfile, TActions> = (state: ISpotifyProfile = In
             };
 
         case Types.SPOTIFY_CURRENT_PROFILE_ERROR:
-            console.error(spotifyAction.payload);
             return { ...state, loading: false, loaded: false };
 
         default:

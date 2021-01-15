@@ -2,7 +2,7 @@ import { Toast } from 'native-base';
 import React, { FunctionComponent, useContext, useEffect } from 'react'
 import Context from '../../store/context';
 import { INotification, NotificationType } from '../../store/state';
-import { popYoutubeNotification } from '../../store/types/notifications_actions';
+import { popNotification } from '../../store/types/notifications_actions';
 
 interface IProps {
     notifications: INotification[];
@@ -22,7 +22,7 @@ const NotificationToast: FunctionComponent<IProps> = (props: IProps) => {
                         duration: 2000,
                         type: "success",
                         onClose: () => {
-                            dispatch(popYoutubeNotification());
+                            dispatch(popNotification());
                         }
                     });
                     break;
@@ -33,7 +33,7 @@ const NotificationToast: FunctionComponent<IProps> = (props: IProps) => {
                         duration: 2000,
                         type: "warning",
                         onClose: () => {
-                            dispatch(popYoutubeNotification());
+                            dispatch(popNotification());
                         }
                     });
                     break;
@@ -44,7 +44,7 @@ const NotificationToast: FunctionComponent<IProps> = (props: IProps) => {
                         duration: 2000,
                         type: "danger",
                         onClose: () => {
-                            dispatch(popYoutubeNotification());
+                            dispatch(popNotification());
                         }
                     });
                     break;

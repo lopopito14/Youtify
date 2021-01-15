@@ -12,6 +12,11 @@ export enum Types {
     BIND_YOUTUBE_PLAYLIST_ITEMS_COMPLETE = 'YOUTUBE_PLAYLISTS_ITEMS_COMPLETE',
     BIND_YOUTUBE_PLAYLIST_ITEMS_ERROR = 'YOUTUBE_PLAYLISTS_ITEMS_ERROR',
     SYNCHRONIZE_YOUTUBE_PLAYLIST_ITEMS_SUCCESS = 'YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED',
+    BIND_SPOTIFY_PLAYLIST = 'BIND_SPOTIFY_PLAYLIST',
+    BIND_SPOTIFY_PLAYLIST_TRACKS_REQUEST = 'BIND_SPOTIFY_PLAYLIST_TRACKS_REQUEST',
+    BIND_SPOTIFY_PLAYLIST_TRACKS_SUCCESS = 'BIND_SPOTIFY_PLAYLIST_TRACKS_SUCCESS',
+    BIND_SPOTIFY_PLAYLIST_TRACKS_COMPLETE = 'BIND_SPOTIFY_PLAYLIST_TRACKS_COMPLETE',
+    BIND_SPOTIFY_PLAYLIST_TRACKS_ERROR = 'BIND_SPOTIFY_PLAYLIST_TRACKS_ERROR',
 }
 
 export interface IBindYoutubeFavoriteItemsRequest extends Action {
@@ -73,4 +78,35 @@ export interface ISynchronizeYoutubePlaylistItemsSuccess extends Action {
     }
 }
 
-export type TYoutubePlaylistsActions = IBindYoutubeFavoriteItemsRequest | IBindYoutubeFavoriteItemsSuccess | IBindYoutubeFavoriteItemsComplete | IBindYoutubeFavoriteItemsError | IBindYoutubePlaylist | IBindYoutubePlaylistItemsRequest | IBindYoutubePlaylistItemsSuccess | IBindYoutubePlaylistItemsComplete | IBindYoutubePlaylistItemsError | ISynchronizeYoutubePlaylistItemsSuccess;
+export interface IBindSpotifyPlaylist extends Action {
+    type: Types.BIND_SPOTIFY_PLAYLIST;
+    payload: {
+        year: number,
+        month: number,
+        playlist?: globalThis.SpotifyApi.PlaylistObjectFull
+    }
+}
+
+export interface IBindSpotifyPlaylistTracksRequest extends Action {
+    type: Types.BIND_SPOTIFY_PLAYLIST_TRACKS_REQUEST;
+}
+
+export interface IBindSpotifyPlaylistTracksSuccess extends Action {
+    type: Types.BIND_SPOTIFY_PLAYLIST_TRACKS_SUCCESS;
+    payload: {
+        year: number,
+        month: number,
+        items: globalThis.SpotifyApi.TrackObjectFull[]
+    };
+}
+
+export interface IBindSpotifyPlaylistTracksComplete extends Action {
+    type: Types.BIND_SPOTIFY_PLAYLIST_TRACKS_COMPLETE;
+}
+
+export interface IBindSpotifyPlaylistTracksError extends Action {
+    type: Types.BIND_SPOTIFY_PLAYLIST_TRACKS_ERROR;
+    payload: any;
+}
+
+export type TMyPlaylistsActions = IBindYoutubeFavoriteItemsRequest | IBindYoutubeFavoriteItemsSuccess | IBindYoutubeFavoriteItemsComplete | IBindYoutubeFavoriteItemsError | IBindYoutubePlaylist | IBindYoutubePlaylistItemsRequest | IBindYoutubePlaylistItemsSuccess | IBindYoutubePlaylistItemsComplete | IBindYoutubePlaylistItemsError | ISynchronizeYoutubePlaylistItemsSuccess | IBindSpotifyPlaylist | IBindSpotifyPlaylistTracksRequest | IBindSpotifyPlaylistTracksSuccess | IBindSpotifyPlaylistTracksComplete | IBindSpotifyPlaylistTracksError;

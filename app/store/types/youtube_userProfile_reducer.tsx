@@ -30,7 +30,6 @@ const reducer: Reducer<IYoutubeProfile, TActions> = (state: IYoutubeProfile = In
             return state;
 
         case Types.YOUTUBE_CURRENT_PROFILE_ERROR:
-            console.error(youtubeAction.payload);
             return { ...state, loading: false, loaded: false };
 
         default:

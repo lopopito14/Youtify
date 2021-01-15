@@ -1,5 +1,5 @@
 import { ActionCreator } from 'redux';
-import { IPopYoutubeNotification, IPushYoutubeErrorNotification, IPushYoutubeSuccessNotification, IPushYoutubeWarningNotification, Types } from './notifications_types';
+import { IPopNotification, IPushSpotifyErrorNotification, IPushSpotifySuccessNotification, IPushSpotifyWarningNotification, IPushYoutubeErrorNotification, IPushYoutubeSuccessNotification, IPushYoutubeWarningNotification, Types } from './notifications_types';
 
 export const pushYoutubeSuccessNotification: ActionCreator<IPushYoutubeSuccessNotification> = (result: string) => ({
     type: Types.PUSH_YOUTUBE_SUCCESS_NOTIFICATION,
@@ -16,6 +16,21 @@ export const pushYoutubeErrorNotification: ActionCreator<IPushYoutubeErrorNotifi
     payload: result
 });
 
-export const popYoutubeNotification: ActionCreator<IPopYoutubeNotification> = () => ({
-    type: Types.POP_YOUTUBE_NOTIFICATION
+export const popNotification: ActionCreator<IPopNotification> = () => ({
+    type: Types.POP_NOTIFICATION
+});
+
+export const pushSpotifySuccessNotification: ActionCreator<IPushSpotifySuccessNotification> = (result: string) => ({
+    type: Types.PUSH_SPOTIFY_SUCCESS_NOTIFICATION,
+    payload: result
+});
+
+export const pushSpotifyWarningNotification: ActionCreator<IPushSpotifyWarningNotification> = (result: string) => ({
+    type: Types.PUSH_SPOTIFY_WARNING_NOTIFICATION,
+    payload: result
+});
+
+export const pushSpotifyErrorNotification: ActionCreator<IPushSpotifyErrorNotification> = (result: any) => ({
+    type: Types.PUSH_SPOTIFY_ERROR_NOTIFICATION,
+    payload: result
 });
