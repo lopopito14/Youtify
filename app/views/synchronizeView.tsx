@@ -1,230 +1,225 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Context from '../store/context';
-import { Accordion, Body, Button, Content, H1, H3, Header, Icon, Left, List, ListItem, Right, Spinner, Text, Title } from 'native-base';
-import { synchronizeTheme, youtubeTheme } from './theme';
-import ModalPopup, { ModalType } from './utils/modalPopup';
-import { bindYoutubePlaylist, synchronizeYoutubePlaylistItemsSuccess } from '../store/types/my_playlists_actions';
-import { pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../store/types/notifications_actions';
-import { PlaylistItems } from '../youtubeApi/youtube-api-playlistItems';
-import { Playlists } from '../youtubeApi/youtube-api-playlists';
+import { Accordion, Body, Button, Content, H1, Header, Icon, Left, List, ListItem, Right, Spinner, Switch, Text, Title, View } from 'native-base';
+import { synchronizeTheme } from './theme';
+import { IYoutubeMonthPlaylist } from '../store/state';
+import SynchronizePlaylistView from './synchronize/synchronizePlaylistView';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props { }
 
+interface YearFilter {
+  year: number;
+  active: boolean;
+}
+
+export enum SynchronizeViewType {
+  Synchronize,
+  SynchronizePlaylist
+}
+
 export const SynchronizeView: React.FunctionComponent<Props> = () => {
-  const { state, dispatch } = useContext(Context);
-  const [createPlaylist, setcreatePlaylist] = useState<{ title: string, year: number, month: number } | undefined>(undefined);
-  const [deletePlaylist, setdeletePlaylist] = useState<{ title: string, year: number, month: number, playlistId: string } | undefined>(undefined);
-  const [synchronizePlaylist, setsynchronizePlaylist] = useState<{ title: string, year: number, month: number } | undefined>(undefined);
+  const { state } = useContext(Context);
+  const [selectedView, setselectedView] = useState<SynchronizeViewType>(SynchronizeViewType.Synchronize);
+  const [myPlaylist, setMyPlaylist] = useState<IYoutubeMonthPlaylist | undefined>(undefined);
+  const [yearFilter, setYearFilter] = useState<YearFilter[] | undefined>(undefined);
+
+  const yearFilterKey = "synchronize-year-filter";
+
+  useEffect(() => {
+    if (state.myPlaylist.loaded) {
+      buildYearsFilter();
+    }
+  }, [state.myPlaylist.loaded]);
+
+  useEffect(() => {
+    if (yearFilter) {
+      saveYearsFilter();
+    }
+  }, [yearFilter]);
+
+  async function buildYearsFilter() {
+
+    let yearsFilter: YearFilter[] = [];
+
+    const years = [...new Set(state.myPlaylist.myPlaylists.map(p => p.year))];
+
+    years.forEach(y => {
+      yearsFilter.push({ year: y, active: true });
+    });
+
+    try {
+      const value = await AsyncStorage.getItem(yearFilterKey);
+      if (value) {
+        const parsedYearsFilter = JSON.parse(value) as YearFilter[];
+        if (parsedYearsFilter) {
+          parsedYearsFilter.filter(y => !y.active).forEach(p => {
+            let existingItem = yearsFilter.find(y => y.year === p.year);
+            if (existingItem) {
+              const index = yearsFilter.indexOf(existingItem);
+              yearsFilter[index].active = false;
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    setYearFilter(yearsFilter);
+  }
+
+  async function saveYearsFilter() {
+    try {
+      const jsonValue = JSON.stringify(yearFilter);
+      await AsyncStorage.setItem(yearFilterKey, jsonValue);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function _isSelectedView(view: SynchronizeViewType) {
+    return selectedView === view;
+  }
+
+  function _headerTitle() {
+    if (_isSelectedView(SynchronizeViewType.SynchronizePlaylist)) {
+      return "Synchronize Playlist";
+    }
+
+    return 'Synchronize';
+  }
+
+  function onBackButtonPressed() {
+    if (_isSelectedView(SynchronizeViewType.SynchronizePlaylist)) {
+      setselectedView(SynchronizeViewType.Synchronize);
+    }
+  }
+
+  function onOpenSynchronizePlaylist(myPlaylist: IYoutubeMonthPlaylist) {
+    setMyPlaylist(myPlaylist);
+    setselectedView(SynchronizeViewType.SynchronizePlaylist);
+  }
 
   function _buildAccordion() {
     var array: { title: JSX.Element, content: JSX.Element }[] = [];
 
-    const years = [...new Set(state.myPlaylist.myPlaylists.map(p => p.year))];
-
-    years.map((y) => {
-      const title = <H1>{y}</H1>;
-      const content =
-        <List>
-          {
-            state.myPlaylist.myPlaylists.filter(p => p.year === y).map((p, j) =>
-              <ListItem key={j}>
-                <>
-                  <Left>
-                    <Body>
-                      <H3>{p.title}</H3>
-                      <Text note>{p.favoriteitems.length} favorite items to add</Text>
+    const title = <H1>Filtre</H1>;
+    const content =
+      <List>
+        {
+          yearFilter?.map((y, i) =>
+            <ListItem key={i}>
+              <Left>
+                <Text style={{ color: "white" }}>{y.year}</Text>
+              </Left>
+              <Right>
+                <Switch style={{ transform: [{ scale: 1.2 }, { translateX: -40 }] }} thumbColor={"white"} trackColor={{ true: "green", false: "white" }} value={y.active} onValueChange={(v) =>
+                  setYearFilter(
+                    [
+                      ...yearFilter.slice(0, i),
                       {
-                        p.youtube &&
-                        <Text note>youtube contains {p.youtube.items.length} videos</Text>
-                      }
-                      {
-                        p.spotify &&
-                        <Text note>spotify contains {p.spotify.items.length} tracks</Text>
-                      }
-                    </Body>
-                  </Left>
-                  {
-                    p.youtube === undefined &&
-                    <Right>
-                      <Button success rounded color={youtubeTheme.secondaryColor} icon onPress={() => setcreatePlaylist({ title: p.title, year: y, month: p.month })}>
-                        <Icon name="add" type="MaterialIcons" />
-                      </Button>
-                    </Right>
-                  }
-                  {
-                    p.youtube &&
-                    <>
-                      <Right>
-                        <Button danger rounded icon onPress={() => setdeletePlaylist({ title: p.title, year: y, month: p.month, playlistId: p.youtube?.playlist?.id ? p.youtube.playlist.id : '' })}>
-                          <Icon name="delete" type="MaterialCommunityIcons" />
-                        </Button>
-                      </Right>
-                      {
-                        p.youtube.items.length !== p.favoriteitems.length &&
-                        <Right>
-                          <Button success rounded icon onPress={() => setsynchronizePlaylist({ title: p.title, year: y, month: p.month })}>
-                            <Icon name="refresh" type="MaterialCommunityIcons" />
-                          </Button>
-                        </Right>
-                      }
-                      <Right>
-                        <Button info rounded icon>
-                          <Icon name="arrow-forward" />
-                        </Button>
-                      </Right>
-                    </>
-                  }
-                </>
-              </ListItem>
-            )
-          }
-        </List>;
-      array.push({ title: title, content: content });
-    });
+                        active: !yearFilter[i].active,
+                        year: yearFilter[i].year
+                      },
+                      ...yearFilter.slice(i + 1)
+                    ])
+                } />
+              </Right>
+            </ListItem>
+          )
+        }
+      </List>;
+    array.push({ title: title, content: content });
 
     return array;
-  }
-
-  function _modalTitle(): string {
-    if (createPlaylist) {
-      return `Create playlist "${createPlaylist.title}" ?`;
-    } else if (deletePlaylist) {
-      return `Delete playlist "${deletePlaylist.title}" ?`;
-    } else if (synchronizePlaylist) {
-      return `Synchronize playlist "${synchronizePlaylist.title}" ?`;
-    }
-
-    return '';
-  }
-
-  function _modalVisible(): boolean {
-    if (createPlaylist || deletePlaylist || synchronizePlaylist) {
-      return true;
-    }
-
-    return false;
-  }
-
-  async function _modalOkCallback() {
-    if (createPlaylist) {
-      try {
-        var response = await new Playlists(state.youtubeState.credential.accessToken).insert({
-          part: ['snippet'],
-          requestBody: {
-            snippet: {
-              title: createPlaylist.title
-            }
-          }
-        });
-        if (response && response.snippet) {
-          dispatch(bindYoutubePlaylist(
-            {
-              year: createPlaylist.year,
-              month: createPlaylist.month,
-              playlist: response
-            }
-          ));
-          dispatch(pushYoutubeSuccessNotification(`${createPlaylist.title} created !`));
-        }
-      } catch (error) {
-        dispatch(pushYoutubeErrorNotification(error));
-      } finally {
-        setcreatePlaylist(undefined);
-      }
-    } else if (deletePlaylist) {
-      try {
-        await new Playlists(state.youtubeState.credential.accessToken).delete({
-          id: deletePlaylist.playlistId
-        });
-        dispatch(bindYoutubePlaylist(
-          {
-            year: deletePlaylist.year,
-            month: deletePlaylist.month,
-            playlist: undefined
-          }
-        ));
-        dispatch(pushYoutubeSuccessNotification(`${deletePlaylist.title} removed !`));
-      } catch (error) {
-        dispatch(pushYoutubeErrorNotification(error));
-      } finally {
-        setdeletePlaylist(undefined);
-      }
-    } else if (synchronizePlaylist) {
-      try {
-        const playlist = state.myPlaylist.myPlaylists.find(p => p.year === synchronizePlaylist.year && p.month === synchronizePlaylist.month);
-        if (playlist && playlist.youtube) {
-
-          const playlistItemsToRemove = playlist.youtube.items.filter(i => !playlist.favoriteitems.map(i => i.snippet?.resourceId?.videoId).includes(i.snippet?.resourceId?.videoId));
-          const playlistItemsToAdd = playlist.favoriteitems.filter(i => !playlist.youtube?.items.map(i => i.snippet?.resourceId?.videoId).includes(i.snippet?.resourceId?.videoId));
-
-          for (const playlistItemToRemove of playlistItemsToRemove) {
-            if (playlistItemToRemove.id) {
-              await new PlaylistItems(state.youtubeState.credential.accessToken).delete({
-                id: playlistItemToRemove.id
-              });
-            }
-          }
-
-          for (const playlistItemToAdd of playlistItemsToAdd) {
-            if (playlistItemToAdd.id) {
-              await new PlaylistItems(state.youtubeState.credential.accessToken).insert({
-                part: ['snippet'],
-                requestBody: {
-                  snippet: {
-                    playlistId: playlist.youtube.playlist?.id,
-                    resourceId: playlistItemToAdd.snippet?.resourceId
-                  }
-                }
-              });
-            }
-          }
-
-          dispatch(synchronizeYoutubePlaylistItemsSuccess({ year: synchronizePlaylist.year, month: synchronizePlaylist.month }));
-          dispatch(pushYoutubeSuccessNotification(`${synchronizePlaylist.title} synchronized !`));
-        }
-      } catch (error) {
-        dispatch(pushYoutubeErrorNotification(error));
-      } finally {
-        setsynchronizePlaylist(undefined);
-      }
-    }
-  }
-
-  function _modalCancelCallback() {
-    if (createPlaylist) {
-      setcreatePlaylist(undefined);
-    } else if (deletePlaylist) {
-      setdeletePlaylist(undefined);
-    } else if (synchronizePlaylist) {
-      setsynchronizePlaylist(undefined);
-    }
   }
 
   return (
     <>
       <Header noShadow style={{ backgroundColor: synchronizeTheme.primaryColor }} androidStatusBarColor={synchronizeTheme.secondaryColor}>
-        <Left />
+        <Left>
+          {
+            !_isSelectedView(SynchronizeViewType.Synchronize) &&
+            <Button transparent onPress={onBackButtonPressed}>
+              <Icon name='arrow-back' />
+            </Button>
+          }
+        </Left>
         <Body>
-          <Title>Synchronize</Title>
+          <Title>{_headerTitle()}</Title>
         </Body>
       </Header>
-      <ModalPopup
-        backgroundColor={synchronizeTheme.primaryBackgroundColor}
-        cancelCallback={_modalCancelCallback}
-        okCallback={_modalOkCallback}
-        title={_modalTitle()}
-        type={ModalType.OkCancel}
-        visible={_modalVisible()}
-      />
       {
-        state.myPlaylist.loaded &&
-        <Accordion style={{ backgroundColor: synchronizeTheme.secondaryBackgroundColor }} dataArray={_buildAccordion()} expanded={0} renderContent={(item) => <>{item.content}</>} />
+        selectedView === SynchronizeViewType.Synchronize &&
+        <>
+          {
+            state.myPlaylist.loaded && yearFilter &&
+            <View style={{ backgroundColor: "black" }}>
+              <Accordion style={{ backgroundColor: synchronizeTheme.secondaryBackgroundColor }} dataArray={_buildAccordion()} expanded={-1} renderContent={(item) => <>{item.content}</>} />
+            </View>
+          }
+          <Content style={{ backgroundColor: "black" }}>
+            {
+              state.myPlaylist.loaded && yearFilter &&
+              <>
+                <List>
+                  {
+                    yearFilter.filter(y => y.active).map((y, i) =>
+                      <View key={i}>
+                        <ListItem itemHeader key={1}>
+                          <H1 style={{ color: "white" }}>{y.year}</H1>
+                        </ListItem>
+                        {
+                          state.myPlaylist.myPlaylists.filter(p => p.year === y.year).map((p, j) =>
+                            <ListItem key={j + 1} thumbnail>
+                              <Left>
+                                {/* <Button warning icon transparent>
+                                  <Icon name='sync' type='Ionicons' />
+                                </Button> */}
+                                <Button success icon transparent>
+                                  <Icon name='check' type='FontAwesome' />
+                                </Button>
+                              </Left>
+                              <Body>
+                                <Left>
+                                  <Text style={{ color: "white" }}>{p.title}</Text>
+                                  <Text note>{p.favoriteitems.length} favorite items to add</Text>
+                                  {
+                                    p.youtube &&
+                                    <Text note>youtube contains {p.youtube.items.length} videos</Text>
+                                  }
+                                  {
+                                    p.spotify &&
+                                    <Text note>spotify contains {p.spotify.items.length} tracks</Text>
+                                  }
+                                </Left>
+                              </Body>
+                              <Right>
+                                <Button iconRight light onPress={() => onOpenSynchronizePlaylist(p)}>
+                                  <Text>Manage</Text>
+                                  <Icon name='arrow-forward' />
+                                </Button>
+                              </Right>
+                            </ListItem>
+                          )
+                        }
+                      </View>
+                    )
+                  }
+                </List>
+              </>
+            }
+            {
+              (!state.myPlaylist.loaded || yearFilter === undefined) && <Spinner color={synchronizeTheme.primaryColor} />
+            }
+
+          </Content>
+        </>
       }
       {
-        !state.myPlaylist.loaded &&
-        <Content>
-          <Spinner color={synchronizeTheme.primaryColor} />
-        </Content>
+        selectedView === SynchronizeViewType.SynchronizePlaylist && myPlaylist &&
+        <SynchronizePlaylistView selectedView={selectedView} setselectedView={setselectedView} myPlaylist={myPlaylist} />
       }
     </>
   )

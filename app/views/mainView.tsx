@@ -88,7 +88,7 @@ export const MainView: React.FunctionComponent<Props> = () => {
                   </>
                 }
                 {
-                  state.youtubeState.credential.isLogged && state.spotifyState.credential.isLogged &&
+                  (state.youtubeState.credential.isLogged || state.spotifyState.credential.isLogged) &&
                   <>
                     <Button vertical={true} onPress={() => setselectedView(MainViewType.Synchronize)}>
                       <Icon name="md-sync-circle" type='Ionicons' style={{ color: "white", opacity: _footerOpacity(MainViewType.Synchronize) }} fontSize={1} />
