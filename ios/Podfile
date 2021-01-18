@@ -18,6 +18,8 @@ target 'LopopitoConverter' do
 
   pod 'appcenter-crashes', :path => '../node_modules/appcenter-crashes'
 
+  pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-async-storage/async-storage'
+
   target 'LopopitoConverterTests' do
     inherit! :complete
     # Pods for testing

@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.13.2",
     "appcenter": "4.0.2",
     "appcenter-analytics": "4.0.2",
     "appcenter-crashes": "4.0.2",
