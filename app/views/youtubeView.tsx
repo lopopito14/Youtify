@@ -9,8 +9,7 @@ export enum YoutubeViewType {
     Menu,
     Playlists,
     Playlist,
-    Subscriptions,
-    GeneratePlaylists
+    Subscriptions
 }
 
 export const YoutubeView: React.FunctionComponent<Props> = () => {
@@ -29,9 +28,6 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
         }
         if (_isSelectedView(YoutubeViewType.Playlist)) {
             return "Playlist";
-        }
-        if (_isSelectedView(YoutubeViewType.GeneratePlaylists)) {
-            return "Generate playlists";
         }
 
         return 'Youtube';

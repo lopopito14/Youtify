@@ -55,7 +55,7 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
   return (
     <>
       <Left>
-        <Button iconLeft rounded info
+        <Button iconLeft rounded success
           disabled={!canLogOn}
           onPress={() => logOn()}>
           <Icon name='sync' type="FontAwesome5" />
@@ -63,7 +63,7 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
         </Button>
       </Left>
       <Right>
-        <H2>{remainingTime}</H2>
+        <Text>{remainingTime}</Text>
       </Right>
     </>
   );

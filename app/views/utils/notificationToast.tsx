@@ -19,7 +19,7 @@ const NotificationToast: FunctionComponent<IProps> = (props: IProps) => {
                 case NotificationType.SUCCESS:
                     Toast.show({
                         text: notification.message,
-                        duration: 2000,
+                        duration: 1000,
                         type: "success",
                         onClose: () => {
                             dispatch(popNotification());
@@ -30,7 +30,7 @@ const NotificationToast: FunctionComponent<IProps> = (props: IProps) => {
                 case NotificationType.WARNING:
                     Toast.show({
                         text: notification.message,
-                        duration: 2000,
+                        duration: 1000,
                         type: "warning",
                         onClose: () => {
                             dispatch(popNotification());
@@ -41,7 +41,7 @@ const NotificationToast: FunctionComponent<IProps> = (props: IProps) => {
                 case NotificationType.ERROR:
                     Toast.show({
                         text: notification.message,
-                        duration: 2000,
+                        duration: 1000,
                         type: "danger",
                         onClose: () => {
                             dispatch(popNotification());

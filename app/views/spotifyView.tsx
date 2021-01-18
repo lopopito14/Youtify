@@ -10,8 +10,7 @@ export enum SpotifyViewType {
     Playlists,
     Playlist,
     Artists,
-    Artist,
-    Synchronize
+    Artist
 }
 
 export const SpotifyView: React.FunctionComponent<Props> = () => {
@@ -33,9 +32,6 @@ export const SpotifyView: React.FunctionComponent<Props> = () => {
         }
         if (_isSelectedView(SpotifyViewType.Playlist)) {
             return "Playlist";
-        }
-        if (_isSelectedView(SpotifyViewType.Synchronize)) {
-            return "Synchronize";
         }
 
         return 'Spotify';

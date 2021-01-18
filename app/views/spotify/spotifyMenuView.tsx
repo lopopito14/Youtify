@@ -3,7 +3,6 @@ import { Button, Content, Text, View } from 'native-base';
 import { SpotifyViewType } from '../spotifyView';
 import PlaylistsView from './playlistsView';
 import ArtistsView from './artistsView';
-import SynchronizeView from './synchronizeView';
 
 interface IProps {
     selectedView: SpotifyViewType;
@@ -24,9 +23,6 @@ export const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) 
                         <Button rounded info style={{ margin: 10 }} onPress={() => props.setselectedView(SpotifyViewType.Artists)}>
                             <Text>Artists</Text>
                         </Button>
-                        <Button rounded dark style={{ margin: 10 }} onPress={() => props.setselectedView(SpotifyViewType.Synchronize)}>
-                            <Text>Synchronize</Text>
-                        </Button>
                     </View>
                 </Content>
             }
@@ -35,7 +31,6 @@ export const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) 
                 <>
                     <PlaylistsView selectedView={props.selectedView} setselectedView={props.setselectedView} />
                     <ArtistsView selectedView={props.selectedView} setselectedView={props.setselectedView} />
-                    <SynchronizeView selectedView={props.selectedView} setselectedView={props.setselectedView} />
                 </>
             }
         </>
