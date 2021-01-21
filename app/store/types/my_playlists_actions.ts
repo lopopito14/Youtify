@@ -1,6 +1,6 @@
 import { ActionCreator } from 'redux';
-import { Playlist, PlaylistItem } from '../../youtubeApi/youtube-api-models';
-import { IBindSpotifyPlaylist, IBindSpotifyPlaylistTracksComplete as IBindSpotifyPlaylistTracksComplete, IBindSpotifyPlaylistTracksError as IBindSpotifyPlaylistTracksError, IBindSpotifyPlaylistTracksRequest as IBindSpotifyPlaylistTracksRequest, IBindSpotifyPlaylistTracksSuccess as IBindSpotifyPlaylistTracksSuccess, IBindYoutubeFavoriteItemsComplete, IBindYoutubeFavoriteItemsError, IBindYoutubeFavoriteItemsRequest, IBindYoutubeFavoriteItemsSuccess, IBindYoutubePlaylist, IBindYoutubePlaylistItemsComplete, IBindYoutubePlaylistItemsError, IBindYoutubePlaylistItemsRequest, IBindYoutubePlaylistItemsSuccess, ISynchronizeYoutubePlaylistItemsSuccess, Types } from './my_playlists_types';
+import { Playlist, PlaylistItem, Video } from '../../youtubeApi/youtube-api-models';
+import { IBindSpotifyPlaylist, IBindSpotifyPlaylistTracksComplete as IBindSpotifyPlaylistTracksComplete, IBindSpotifyPlaylistTracksError as IBindSpotifyPlaylistTracksError, IBindSpotifyPlaylistTracksRequest as IBindSpotifyPlaylistTracksRequest, IBindSpotifyPlaylistTracksSuccess as IBindSpotifyPlaylistTracksSuccess, IBindYoutubeFavoriteItemsComplete, IBindYoutubeFavoriteItemsError, IBindYoutubeFavoriteItemsRequest, IBindYoutubeFavoriteItemsSuccess, IBindYoutubePlaylist, IBindYoutubePlaylistVideosComplete, IBindYoutubePlaylistVideosError, IBindYoutubePlaylistVideosRequest, IBindYoutubePlaylistVideosSuccess, ISynchronizeYoutubePlaylistVideosSuccess, Types } from './my_playlists_types';
 
 export const bindYoutubeFavoriteItemsRequest: ActionCreator<IBindYoutubeFavoriteItemsRequest> = () => ({
     type: Types.BIND_YOUTUBE_FAVORITE_ITEMS_REQUEST,
@@ -31,33 +31,33 @@ export const bindYoutubePlaylist: ActionCreator<IBindYoutubePlaylist> = (result:
     payload: result
 });
 
-export const bindYoutubePlaylistItemsRequest: ActionCreator<IBindYoutubePlaylistItemsRequest> = () => ({
-    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_REQUEST,
+export const bindYoutubePlaylistItemsRequest: ActionCreator<IBindYoutubePlaylistVideosRequest> = () => ({
+    type: Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_REQUEST,
 });
 
-export const bindYoutubePlaylistItemsSuccess: ActionCreator<IBindYoutubePlaylistItemsSuccess> = (result: {
+export const bindYoutubePlaylistVideosSuccess: ActionCreator<IBindYoutubePlaylistVideosSuccess> = (result: {
     year: number,
     month: number,
-    items: PlaylistItem[]
+    videos: Video[]
 }) => ({
-    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_SUCCESS,
+    type: Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_SUCCESS,
     payload: result
 });
 
-export const bindYoutubePlaylistItemsComplete: ActionCreator<IBindYoutubePlaylistItemsComplete> = () => ({
-    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_COMPLETE,
+export const bindYoutubePlaylistVideosComplete: ActionCreator<IBindYoutubePlaylistVideosComplete> = () => ({
+    type: Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_COMPLETE,
 });
 
-export const bindYoutubePlaylistItemsError: ActionCreator<IBindYoutubePlaylistItemsError> = (result: any) => ({
-    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_ERROR,
+export const bindYoutubePlaylistVideosError: ActionCreator<IBindYoutubePlaylistVideosError> = (result: any) => ({
+    type: Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_ERROR,
     payload: result
 });
 
-export const synchronizeYoutubePlaylistItemsSuccess: ActionCreator<ISynchronizeYoutubePlaylistItemsSuccess> = (result: {
+export const synchronizeYoutubePlaylistVideosSuccess: ActionCreator<ISynchronizeYoutubePlaylistVideosSuccess> = (result: {
     year: number,
     month: number
 }) => ({
-    type: Types.SYNCHRONIZE_YOUTUBE_PLAYLIST_ITEMS_SUCCESS,
+    type: Types.SYNCHRONIZE_YOUTUBE_PLAYLIST_VIDEOS_SUCCESS,
     payload: result
 });
 

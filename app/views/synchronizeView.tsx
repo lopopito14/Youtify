@@ -187,11 +187,11 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
                                   <Text note>{p.favoriteitems.length} favorite items to add</Text>
                                   {
                                     p.youtube &&
-                                    <Text note>youtube contains {p.youtube.items.length} videos</Text>
+                                    <Text note>youtube contains {p.youtube.videos.length} videos</Text>
                                   }
                                   {
                                     p.spotify &&
-                                    <Text note>spotify contains {p.spotify.items.length} tracks</Text>
+                                    <Text note>spotify contains {p.spotify.tracks.length} tracks</Text>
                                   }
                                 </Left>
                               </Body>

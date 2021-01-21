@@ -1,17 +1,17 @@
 import { Action } from "redux";
-import { Playlist, PlaylistItem } from "../../youtubeApi/youtube-api-models";
+import { Playlist, PlaylistItem, Video } from "../../youtubeApi/youtube-api-models";
 
 export enum Types {
-    BIND_YOUTUBE_FAVORITE_ITEMS_REQUEST = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_REQUEST',
-    BIND_YOUTUBE_FAVORITE_ITEMS_SUCCESS = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_SUCCESS',
-    BIND_YOUTUBE_FAVORITE_ITEMS_COMPLETE = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_COMPLETE',
-    BIND_YOUTUBE_FAVORITE_ITEMS_ERROR = 'YOUTUBE_PLAYLISTS_FAVORITES_ITEMS_ERROR',
-    BIND_YOUTUBE_PLAYLIST = 'YOUTUBE_PLAYLISTS_EXISTS',
-    BIND_YOUTUBE_PLAYLIST_ITEMS_REQUEST = 'YOUTUBE_PLAYLISTS_ITEMS_REQUEST',
-    BIND_YOUTUBE_PLAYLIST_ITEMS_SUCCESS = 'YOUTUBE_PLAYLISTS_ITEMS_SUCCESS',
-    BIND_YOUTUBE_PLAYLIST_ITEMS_COMPLETE = 'YOUTUBE_PLAYLISTS_ITEMS_COMPLETE',
-    BIND_YOUTUBE_PLAYLIST_ITEMS_ERROR = 'YOUTUBE_PLAYLISTS_ITEMS_ERROR',
-    SYNCHRONIZE_YOUTUBE_PLAYLIST_ITEMS_SUCCESS = 'YOUTUBE_PLAYLISTS_ITEMS_SYNCHRONIZED',
+    BIND_YOUTUBE_FAVORITE_ITEMS_REQUEST = 'BIND_YOUTUBE_FAVORITE_ITEMS_REQUEST',
+    BIND_YOUTUBE_FAVORITE_ITEMS_SUCCESS = 'BIND_YOUTUBE_FAVORITE_ITEMS_SUCCESS',
+    BIND_YOUTUBE_FAVORITE_ITEMS_COMPLETE = 'BIND_YOUTUBE_FAVORITE_ITEMS_COMPLETE',
+    BIND_YOUTUBE_FAVORITE_ITEMS_ERROR = 'BIND_YOUTUBE_FAVORITE_ITEMS_ERROR',
+    BIND_YOUTUBE_PLAYLIST = 'BIND_YOUTUBE_PLAYLIST',
+    BIND_YOUTUBE_PLAYLIST_VIDEOS_REQUEST = 'BIND_YOUTUBE_PLAYLIST_VIDEOS_REQUEST',
+    BIND_YOUTUBE_PLAYLIST_VIDEOS_SUCCESS = 'BIND_YOUTUBE_PLAYLIST_VIDEOS_SUCCESS',
+    BIND_YOUTUBE_PLAYLIST_VIDEOS_COMPLETE = 'BIND_YOUTUBE_PLAYLIST_VIDEOS_COMPLETE',
+    BIND_YOUTUBE_PLAYLIST_VIDEOS_ERROR = 'BIND_YOUTUBE_PLAYLIST_VIDEOS_ERROR',
+    SYNCHRONIZE_YOUTUBE_PLAYLIST_VIDEOS_SUCCESS = 'SYNCHRONIZE_YOUTUBE_PLAYLIST_VIDEOS_SUCCESS',
     BIND_SPOTIFY_PLAYLIST = 'BIND_SPOTIFY_PLAYLIST',
     BIND_SPOTIFY_PLAYLIST_TRACKS_REQUEST = 'BIND_SPOTIFY_PLAYLIST_TRACKS_REQUEST',
     BIND_SPOTIFY_PLAYLIST_TRACKS_SUCCESS = 'BIND_SPOTIFY_PLAYLIST_TRACKS_SUCCESS',
@@ -48,30 +48,30 @@ export interface IBindYoutubePlaylist extends Action {
     }
 }
 
-export interface IBindYoutubePlaylistItemsRequest extends Action {
-    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_REQUEST;
+export interface IBindYoutubePlaylistVideosRequest extends Action {
+    type: Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_REQUEST;
 }
 
-export interface IBindYoutubePlaylistItemsSuccess extends Action {
-    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_SUCCESS;
+export interface IBindYoutubePlaylistVideosSuccess extends Action {
+    type: Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_SUCCESS;
     payload: {
         year: number,
         month: number,
-        items: PlaylistItem[]
+        videos: Video[]
     };
 }
 
-export interface IBindYoutubePlaylistItemsComplete extends Action {
-    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_COMPLETE;
+export interface IBindYoutubePlaylistVideosComplete extends Action {
+    type: Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_COMPLETE;
 }
 
-export interface IBindYoutubePlaylistItemsError extends Action {
-    type: Types.BIND_YOUTUBE_PLAYLIST_ITEMS_ERROR;
+export interface IBindYoutubePlaylistVideosError extends Action {
+    type: Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_ERROR;
     payload: any;
 }
 
-export interface ISynchronizeYoutubePlaylistItemsSuccess extends Action {
-    type: Types.SYNCHRONIZE_YOUTUBE_PLAYLIST_ITEMS_SUCCESS;
+export interface ISynchronizeYoutubePlaylistVideosSuccess extends Action {
+    type: Types.SYNCHRONIZE_YOUTUBE_PLAYLIST_VIDEOS_SUCCESS;
     payload: {
         year: number,
         month: number
@@ -109,4 +109,4 @@ export interface IBindSpotifyPlaylistTracksError extends Action {
     payload: any;
 }
 
-export type TMyPlaylistsActions = IBindYoutubeFavoriteItemsRequest | IBindYoutubeFavoriteItemsSuccess | IBindYoutubeFavoriteItemsComplete | IBindYoutubeFavoriteItemsError | IBindYoutubePlaylist | IBindYoutubePlaylistItemsRequest | IBindYoutubePlaylistItemsSuccess | IBindYoutubePlaylistItemsComplete | IBindYoutubePlaylistItemsError | ISynchronizeYoutubePlaylistItemsSuccess | IBindSpotifyPlaylist | IBindSpotifyPlaylistTracksRequest | IBindSpotifyPlaylistTracksSuccess | IBindSpotifyPlaylistTracksComplete | IBindSpotifyPlaylistTracksError;
+export type TMyPlaylistsActions = IBindYoutubeFavoriteItemsRequest | IBindYoutubeFavoriteItemsSuccess | IBindYoutubeFavoriteItemsComplete | IBindYoutubeFavoriteItemsError | IBindYoutubePlaylist | IBindYoutubePlaylistVideosRequest | IBindYoutubePlaylistVideosSuccess | IBindYoutubePlaylistVideosComplete | IBindYoutubePlaylistVideosError | ISynchronizeYoutubePlaylistVideosSuccess | IBindSpotifyPlaylist | IBindSpotifyPlaylistTracksRequest | IBindSpotifyPlaylistTracksSuccess | IBindSpotifyPlaylistTracksComplete | IBindSpotifyPlaylistTracksError;

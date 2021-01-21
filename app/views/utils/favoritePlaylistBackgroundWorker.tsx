@@ -39,6 +39,21 @@ export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> =
             });
             if (response && response.items && response.pageInfo?.totalResults) {
                 dispatch(bindYoutubeFavoriteItemsSuccess({ items: response.items }));
+
+                const lastItem = response.items[response.items.length - 1];
+
+                // todo => removed in production mode
+                if (lastItem.snippet?.publishedAt) {
+                    const date = new Date(lastItem.snippet?.publishedAt);
+                    const currentYear = date.getFullYear();
+
+                    const limitYear = 2020;
+
+                    if (currentYear < limitYear) {
+                        response.nextPageToken = undefined;
+                    }
+                }
+
                 if (response.nextPageToken) {
                     setfavoritepageToken(response.nextPageToken);
                 } else {

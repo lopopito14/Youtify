@@ -30,6 +30,7 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
     scopes: [
       'user-read-email',
       'playlist-modify-public',
+      'playlist-modify-private',
       'user-read-private',
       'user-follow-read',
       'user-follow-modify'

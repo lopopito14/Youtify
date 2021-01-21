@@ -4,7 +4,7 @@ import React, { useContext, useEffect } from "react";
 import { Image } from "react-native";
 import { AuthConfiguration, authorize, AuthorizeResult, refresh, RefreshResult } from "react-native-app-auth";
 import Context from "../../store/context";
-import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSucess, youtubeApiRefreshError, youtubeApiRefreshSucess } from "../../store/types/youtube_credential_actions";
+import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSucess, youtubeApiRefreshError, youtubeApiRefreshRequest, youtubeApiRefreshSucess } from "../../store/types/youtube_credential_actions";
 import { youtubeCurrentProfileError, youtubeCurrentProfileRequest, youtubeCurrentProfileSucess } from "../../store/types/youtube_userProfile_actions";
 import { Channels } from "../../youtubeApi/youtube-api-channels";
 import { settingsTheme } from "../theme";
@@ -34,7 +34,7 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
       const value = await AsyncStorage.getItem(storageKey);
       if (value !== null) {
         try {
-          dispatch(youtubeApiAuthorizeRequest());
+          dispatch(youtubeApiRefreshRequest());
           var refreshResult: RefreshResult = await refresh(props.authorizeConfiguration, { refreshToken: value });
           if (refreshResult) {
             dispatch(youtubeApiRefreshSucess(refreshResult));

@@ -53,7 +53,6 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
                                 year: year,
                                 month: month,
                                 title: `Playlist ${year} - ${(month < 10) ? '0' : ''}${month}`,
-                                synchronized: items.length === 0,
                                 favoriteitems: items,
                             })
                         }
@@ -95,7 +94,7 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
                                     ...playlist,
                                     youtube: {
                                         playlist: myPlaylistAction.payload.playlist,
-                                        items: []
+                                        videos: []
                                     }
                                 },
                                 ...state.myPlaylists.slice(index + 1)]
@@ -120,10 +119,10 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
             }
             return state;
 
-        case Types.BIND_YOUTUBE_PLAYLIST_ITEMS_REQUEST:
+        case Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_REQUEST:
             return state;
 
-        case Types.BIND_YOUTUBE_PLAYLIST_ITEMS_SUCCESS:
+        case Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_SUCCESS:
             if (myPlaylistAction.payload) {
 
                 const year = myPlaylistAction.payload.year;
@@ -142,9 +141,9 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
                                 ...playlist,
                                 youtube: {
                                     ...playlist.youtube,
-                                    items: [
-                                        ...playlist.youtube?.items,
-                                        ...myPlaylistAction.payload.items
+                                    videos: [
+                                        ...playlist.youtube?.videos,
+                                        ...myPlaylistAction.payload.videos
                                     ]
                                 }
                             },
@@ -157,13 +156,13 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
             }
             return state;
 
-        case Types.BIND_YOUTUBE_PLAYLIST_ITEMS_COMPLETE:
+        case Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_COMPLETE:
             return state;
 
-        case Types.BIND_YOUTUBE_PLAYLIST_ITEMS_ERROR:
+        case Types.BIND_YOUTUBE_PLAYLIST_VIDEOS_ERROR:
             return state;
 
-        case Types.SYNCHRONIZE_YOUTUBE_PLAYLIST_ITEMS_SUCCESS:
+        case Types.SYNCHRONIZE_YOUTUBE_PLAYLIST_VIDEOS_SUCCESS:
             if (myPlaylistAction.payload) {
 
                 const year = myPlaylistAction.payload.year;
@@ -180,10 +179,9 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
                             ...state.myPlaylists.slice(0, index),
                             {
                                 ...playlist,
-                                synchronized: true,
                                 youtube: {
                                     ...playlist.youtube,
-                                    items: playlist.favoriteitems
+                                    // todo videos: add videos from playlist.favoriteitems
                                 }
                             },
                             ...state.myPlaylists.slice(index + 1)]
@@ -216,7 +214,7 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
                                     ...playlist,
                                     spotify: {
                                         playlist: myPlaylistAction.payload.playlist,
-                                        items: []
+                                        tracks: []
                                     }
                                 },
                                 ...state.myPlaylists.slice(index + 1)]
@@ -263,8 +261,8 @@ const reducer: Reducer<IMyPlaylist, TActions> = (state: IMyPlaylist = InitialSta
                                 ...playlist,
                                 spotify: {
                                     ...playlist.spotify,
-                                    items: [
-                                        ...playlist.spotify?.items,
+                                    tracks: [
+                                        ...playlist.spotify.tracks,
                                         ...myPlaylistAction.payload.items
                                     ]
                                 }

@@ -1,4 +1,4 @@
-import {Playlist, PlaylistItem} from '../youtubeApi/youtube-api-models';
+import {Playlist, PlaylistItem, Video} from '../youtubeApi/youtube-api-models';
 
 export type TState = {
   spotifyState: IProfile<ISpotifyProfile>;
@@ -87,7 +87,6 @@ export interface IYoutubeMonthPlaylist {
   year: number,
   month: number;
   title: string;
-  synchronized: boolean;
   favoriteitems: PlaylistItem[];
   youtube?: IYoutubePlaylist;
   spotify?: ISpotifyPlaylist;
@@ -95,12 +94,12 @@ export interface IYoutubeMonthPlaylist {
 
 export interface IYoutubePlaylist {
   playlist: Playlist;
-  items: PlaylistItem[];
+  videos: Video[];
 }
 
 export interface ISpotifyPlaylist {
   playlist: SpotifyApi.PlaylistObjectFull;
-  items: SpotifyApi.TrackObjectFull[];
+  tracks: SpotifyApi.TrackObjectFull[];
 }
 
 export interface ILoad {

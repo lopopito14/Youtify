@@ -2,9 +2,10 @@ import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import { IYoutubeMonthPlaylist } from '../../store/state';
 import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
-import { bindYoutubePlaylist, bindYoutubePlaylistItemsComplete, bindYoutubePlaylistItemsError, bindYoutubePlaylistItemsRequest, bindYoutubePlaylistItemsSuccess } from '../../store/types/my_playlists_actions';
+import { bindYoutubePlaylist, bindYoutubePlaylistVideosComplete, bindYoutubePlaylistVideosError, bindYoutubePlaylistItemsRequest, bindYoutubePlaylistVideosSuccess } from '../../store/types/my_playlists_actions';
 import { Playlist } from '../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
+import { Videos } from '../../youtubeApi/youtube-api-videos';
 
 interface IProps {
     playlists?: Playlist[];
@@ -17,6 +18,7 @@ export const YoutubePlaylistBackgroundWorker: React.FunctionComponent<IProps> = 
 
     useEffect(() => {
         if (props.playlists) {
+
             const playlist = props.playlists.find(p => p.snippet?.title === props.playlist.title);
             if (playlist) {
                 dispatch(bindYoutubePlaylist(
@@ -40,37 +42,57 @@ export const YoutubePlaylistBackgroundWorker: React.FunctionComponent<IProps> = 
 
     useEffect(() => {
         if (props.playlist.youtube?.playlist.id) {
-            _fetchPlaylistItems();
+            _fetchPlaylistVideos();
         }
     }, [props.playlist.youtube?.playlist.id]);
 
     useEffect(() => {
         if (playlistItemPageToken) {
-            _fetchPlaylistItems(playlistItemPageToken);
+            _fetchPlaylistVideos(playlistItemPageToken);
         }
     }, [playlistItemPageToken]);
 
-    async function _fetchPlaylistItems(pageToken: string | undefined = undefined) {
+    async function _fetchPlaylistVideos(pageToken: string | undefined = undefined) {
         if (props.playlist.youtube?.playlist.id) {
             try {
                 dispatch(bindYoutubePlaylistItemsRequest());
+
                 var response = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
                     playlistId: props.playlist.youtube.playlist?.id,
-                    part: ['snippet', 'contentDetails'],
+                    part: ['contentDetails'],
                     maxResults: 50,
                     pageToken: pageToken
                 });
+
                 if (response && response.items && response.pageInfo?.totalResults) {
-                    dispatch(bindYoutubePlaylistItemsSuccess({ year: props.playlist.year, month: props.playlist.month, items: response.items }));
+
+                    let videosIds: string[] = [];
+
+                    response.items.forEach(i => {
+                        if (i.contentDetails?.videoId) {
+                            videosIds.push(i.contentDetails?.videoId);
+                        }
+                    });
+
+                    var anotherResponse = await new Videos(state.youtubeState.credential.accessToken).list({
+                        id: videosIds,
+                        part: ['snippet', 'contentDetails', 'statistics'],
+                        maxResults: 50,
+                    });
+
+                    if (anotherResponse) {
+                        dispatch(bindYoutubePlaylistVideosSuccess({ year: props.playlist.year, month: props.playlist.month, videos: anotherResponse.items }));
+                    }
+
                     if (response.nextPageToken) {
                         setplaylistItemPageToken(response.nextPageToken);
                     } else {
-                        dispatch(bindYoutubePlaylistItemsComplete());
+                        dispatch(bindYoutubePlaylistVideosComplete());
                         setplaylistItemPageToken(undefined);
                     }
                 }
             } catch (error) {
-                dispatch(bindYoutubePlaylistItemsError(error));
+                dispatch(bindYoutubePlaylistVideosError(error));
                 dispatch(pushYoutubeErrorNotification(error));
             }
         }
