@@ -3,14 +3,12 @@ import {Playlist, PlaylistItem, Video} from '../youtubeApi/youtube-api-models';
 export type TState = {
   spotifyState: IProfile<ISpotifyProfile>;
   youtubeState: IProfile<IYoutubeProfile>;
-  myPlaylist: IMyPlaylist;
   notifications: INotifications;
 };
 
 export interface IApplicationState {
   spotifyState: IProfile<ISpotifyProfile>;
   youtubeState: IProfile<IYoutubeProfile>;
-  myPlaylist: IMyPlaylist;
   notifications: INotifications;
 }
 
@@ -45,11 +43,6 @@ export const InitialState: TState = {
       channelId: ''
     }
   },
-  myPlaylist: {
-    loaded: false,
-    loading: false,
-    myPlaylists: []
-  },
   notifications: {
     notifications: []
   }
@@ -79,8 +72,24 @@ export interface IYoutubeProfile extends ILoad {
   channelId: string;
 }
 
-export interface IMyPlaylist extends ILoad {
-  myPlaylists: IYoutubeMonthPlaylist[];
+export interface IMyPlaylists extends ILoad {
+  playlists: IYoutubeMonthPlaylist[];
+}
+
+export interface IYoutubePlaylists extends ILoad {
+  playlists: Playlist[];
+}
+
+export interface ISpotifyPlaylists extends ILoad {
+  playlists: SpotifyApi.PlaylistObjectSimplified[];
+}
+
+export interface IYoutubeVideos extends ILoad {
+  videos: Video[];
+}
+
+export interface ISpotifyTracks extends ILoad {
+  tracks: SpotifyApi.TrackObjectFull[];
 }
 
 export interface IYoutubeMonthPlaylist {
@@ -88,18 +97,8 @@ export interface IYoutubeMonthPlaylist {
   month: number;
   title: string;
   favoriteitems: PlaylistItem[];
-  youtube?: IYoutubePlaylist;
-  spotify?: ISpotifyPlaylist;
-}
-
-export interface IYoutubePlaylist {
-  playlist: Playlist;
-  videos: Video[];
-}
-
-export interface ISpotifyPlaylist {
-  playlist: SpotifyApi.PlaylistObjectFull;
-  tracks: SpotifyApi.TrackObjectFull[];
+  youtubePlaylist?: Playlist;
+  spotifyPlaylist?: SpotifyApi.PlaylistObjectSimplified;
 }
 
 export interface ILoad {

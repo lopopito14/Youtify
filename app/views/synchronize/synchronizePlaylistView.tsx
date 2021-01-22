@@ -1,16 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Context from '../../store/context';
-import { Body, Button, Card, CardItem, Content, H1, H3, Icon, Left, List, Right, Separator, Text, Thumbnail } from 'native-base';
+import { Body, Button, Card, CardItem, Content, H1, H3, Icon, Left, List, Right, Separator, Spinner, Text, Thumbnail } from 'native-base';
 import { spotifyTheme, synchronizeTheme, youtubeTheme } from '../theme';
 import ModalPopup, { ModalType } from '../utils/modalPopup';
-import { bindSpotifyPlaylist, bindSpotifyPlaylistItemsSuccess, bindYoutubePlaylist, synchronizeYoutubePlaylistVideosSuccess } from '../../store/types/my_playlists_actions';
 import { pushSpotifyErrorNotification, pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../../store/types/notifications_actions';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
 import { Playlists } from '../../youtubeApi/youtube-api-playlists';
-import { IYoutubeMonthPlaylist } from '../../store/state';
+import { ISpotifyTracks, IYoutubeMonthPlaylist, IYoutubeVideos } from '../../store/state';
 import { SynchronizeViewType } from '../synchronizeView';
 import SpotifyApi from 'spotify-web-api-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Videos } from '../../youtubeApi/youtube-api-videos';
 
 interface IProps {
   selectedView: SynchronizeViewType;
@@ -53,7 +53,23 @@ interface ISynchro {
 
 export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
   const { state, dispatch } = useContext(Context);
+
   const [save, setsave] = useState<IMyPlaylistSave | undefined>(undefined);
+
+  const [youtubeVideos, setYoutubeVideos] = useState<IYoutubeVideos>({
+    loaded: false,
+    loading: false,
+    videos: []
+  });
+  const [playlistItemPageToken, setplaylistItemPageToken] = useState<string | undefined>(undefined);
+
+  const [spotifyTracks, setSpotifyTracks] = useState<ISpotifyTracks>({
+    loaded: false,
+    loading: false,
+    tracks: []
+  });
+  const [spotifyTracksPageOffset, setSpotifyTracksPageOffset] = useState<number | undefined>(undefined);
+
   const [createYoutubePlaylist, setcreateYoutubePlaylist] = useState<{ title: string, year: number, month: number } | undefined>(undefined);
   const [deleteYoutubePlaylist, setdeleteYoutubePlaylist] = useState<{ title: string, year: number, month: number, playlistId: string } | undefined>(undefined);
   const [synchronizeYoutubePlaylist, setsynchronizeYoutubePlaylist] = useState<{ title: string, year: number, month: number } | undefined>(undefined);
@@ -70,6 +86,46 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
       _setSave();
     }
   }, []);
+
+  useEffect(() => {
+    if (props.myPlaylist.youtubePlaylist?.id) {
+      _fetchPlaylistVideos();
+    } else {
+      setYoutubeVideos((prev) => {
+        return {
+          ...prev,
+          loading: false,
+          loaded: true
+        }
+      });
+    }
+  }, [props.myPlaylist.youtubePlaylist?.id]);
+
+  useEffect(() => {
+    if (playlistItemPageToken) {
+      _fetchPlaylistVideos(playlistItemPageToken);
+    }
+  }, [playlistItemPageToken]);
+
+  useEffect(() => {
+    if (props.myPlaylist.spotifyPlaylist?.id) {
+      _fetchPlaylistTracks();
+    } else {
+      setSpotifyTracks((prev) => {
+        return {
+          ...prev,
+          loading: false,
+          loaded: true
+        }
+      });
+    }
+  }, [props.myPlaylist.spotifyPlaylist?.id]);
+
+  useEffect(() => {
+    if (spotifyTracksPageOffset) {
+      _fetchPlaylistTracks(spotifyTracksPageOffset);
+    }
+  }, [spotifyTracksPageOffset]);
 
   async function _getSave() {
     try {
@@ -177,6 +233,157 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
     }
   }
 
+  async function _fetchPlaylistVideos(pageToken: string | undefined = undefined) {
+    if (props.myPlaylist.youtubePlaylist?.id) {
+      try {
+        setYoutubeVideos((prev) => {
+          return {
+            ...prev,
+            loading: true,
+            loaded: false
+          }
+        });
+
+        var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
+          playlistId: props.myPlaylist.youtubePlaylist?.id,
+          part: ['contentDetails'],
+          maxResults: 50,
+          pageToken: pageToken
+        });
+
+        if (playlistItemsResponse) {
+
+          if (playlistItemsResponse.items) {
+            let videosIds: string[] = [];
+
+            playlistItemsResponse.items.forEach(i => {
+              if (i.contentDetails?.videoId) {
+                videosIds.push(i.contentDetails?.videoId);
+              }
+            });
+
+            var videosResponse = await new Videos(state.youtubeState.credential.accessToken).list({
+              id: videosIds,
+              part: ['snippet', 'contentDetails', 'statistics'],
+              maxResults: 50,
+            });
+
+            if (videosResponse && videosResponse.items) {
+              const items = videosResponse.items;
+              setYoutubeVideos((prev) => {
+                return {
+                  ...prev,
+                  videos: [
+                    ...prev.videos,
+                    ...items
+                  ]
+                }
+              });
+            }
+          }
+
+          if (playlistItemsResponse.nextPageToken) {
+            setplaylistItemPageToken(playlistItemsResponse.nextPageToken);
+          } else {
+            setYoutubeVideos((prev) => {
+              return {
+                ...prev,
+                loading: false,
+                loaded: true
+              }
+            });
+            setplaylistItemPageToken(undefined);
+          }
+        }
+      } catch (error) {
+        setYoutubeVideos((prev) => {
+          return {
+            ...prev,
+            loading: false,
+            loaded: false
+          }
+        });
+        dispatch(pushYoutubeErrorNotification(error));
+      }
+    }
+  }
+
+  async function _fetchPlaylistTracks(offset: number | undefined = undefined) {
+    if (props.myPlaylist.spotifyPlaylist?.id) {
+      try {
+        setSpotifyTracks((prev) => {
+          return {
+            ...prev,
+            loading: true,
+            loaded: false
+          }
+        });
+
+        const spotifyApi = new SpotifyApi();
+        spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
+
+        const limit = 50;
+        var options: Object;
+        if (offset) {
+          options = {
+            "market": state.spotifyState.userProfile.country,
+            "limit": limit,
+            "offset": offset,
+          }
+        }
+        else {
+          options = {
+            "market": state.spotifyState.userProfile.country,
+            "limit": limit
+          }
+        }
+
+        var response = await spotifyApi.getPlaylistTracks(props.myPlaylist.spotifyPlaylist.id, options);
+        if (response) {
+
+          var filteredTracks: globalThis.SpotifyApi.TrackObjectFull[] = [];
+          response.items.forEach(t => {
+            if (t.track.type === 'track') {
+              filteredTracks.push(t.track);
+            }
+          });
+
+          setSpotifyTracks((prev) => {
+            return {
+              ...prev,
+              tracks: [
+                ...prev.tracks,
+                ...filteredTracks
+              ]
+            }
+          });
+
+          if (response.next === null) {
+            setSpotifyTracksPageOffset(undefined);
+            setSpotifyTracks((prev) => {
+              return {
+                ...prev,
+                loading: false,
+                loaded: true
+              }
+            });
+          } else {
+            setSpotifyTracksPageOffset(response.offset + limit);
+          }
+        }
+      } catch (error) {
+        setSpotifyTracks((prev) => {
+          return {
+            ...prev,
+            loading: false,
+            loaded: false
+          }
+        });
+        dispatch(pushSpotifyErrorNotification(error));
+      }
+    }
+  }
+
   function _modalTitle(): string {
     if (createYoutubePlaylist) {
       return `Create youtube playlist "${createYoutubePlaylist.title}" ?`;
@@ -231,13 +438,13 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
           }
         });
         if (response && response.snippet) {
-          dispatch(bindYoutubePlaylist(
-            {
-              year: createYoutubePlaylist.year,
-              month: createYoutubePlaylist.month,
-              playlist: response
-            }
-          ));
+          // dispatch(bindYoutubePlaylist(
+          //   {
+          //     year: createYoutubePlaylist.year,
+          //     month: createYoutubePlaylist.month,
+          //     playlist: response
+          //   }
+          // ));
           dispatch(pushYoutubeSuccessNotification(`${createYoutubePlaylist.title} created !`));
         }
       } catch (error) {
@@ -254,13 +461,13 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
         await new Playlists(state.youtubeState.credential.accessToken).delete({
           id: deleteYoutubePlaylist.playlistId
         });
-        dispatch(bindYoutubePlaylist(
-          {
-            year: deleteYoutubePlaylist.year,
-            month: deleteYoutubePlaylist.month,
-            playlist: undefined
-          }
-        ));
+        // dispatch(bindYoutubePlaylist(
+        //   {
+        //     year: deleteYoutubePlaylist.year,
+        //     month: deleteYoutubePlaylist.month,
+        //     playlist: undefined
+        //   }
+        // ));
         dispatch(pushYoutubeSuccessNotification(`${deleteYoutubePlaylist.title} removed !`));
 
         let items: ISaveItem[] = [];
@@ -283,11 +490,10 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
   async function _synchronizeYoutubePlaylist() {
     if (synchronizeYoutubePlaylist) {
       try {
-        const playlist = state.myPlaylist.myPlaylists.find(p => p.year === synchronizeYoutubePlaylist.year && p.month === synchronizeYoutubePlaylist.month);
-        if (playlist && playlist.youtube) {
+        if (props.myPlaylist.youtubePlaylist) {
 
-          const playlistItemsToRemove = playlist.youtube.videos.filter(i => !playlist.favoriteitems.map(i => i.snippet?.resourceId?.videoId).includes(i.id));
-          const playlistItemsToAdd = playlist.favoriteitems.filter(i => !playlist.youtube?.videos.map(i => i.id).includes(i.snippet?.resourceId?.videoId));
+          const playlistItemsToRemove = youtubeVideos.videos.filter(i => !props.myPlaylist.favoriteitems.map(i => i.snippet?.resourceId?.videoId).includes(i.id));
+          const playlistItemsToAdd = props.myPlaylist.favoriteitems.filter(i => !youtubeVideos.videos.map(i => i.id).includes(i.snippet?.resourceId?.videoId));
 
           for (const playlistItemToRemove of playlistItemsToRemove) {
             if (playlistItemToRemove.id) {
@@ -303,7 +509,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
                 part: ['snippet'],
                 requestBody: {
                   snippet: {
-                    playlistId: playlist.youtube.playlist?.id,
+                    playlistId: props.myPlaylist.youtubePlaylist.id,
                     resourceId: playlistItemToAdd.snippet?.resourceId
                   }
                 }
@@ -311,7 +517,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
             }
           }
 
-          dispatch(synchronizeYoutubePlaylistVideosSuccess({ year: synchronizeYoutubePlaylist.year, month: synchronizeYoutubePlaylist.month }));
+          // dispatch(synchronizeYoutubePlaylistVideosSuccess({ year: synchronizeYoutubePlaylist.year, month: synchronizeYoutubePlaylist.month }));
           dispatch(pushYoutubeSuccessNotification(`${synchronizeYoutubePlaylist.title} synchronized !`));
 
           let items: ISaveItem[] = [];
@@ -351,11 +557,11 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
         var response = await spotifyApi.createPlaylist(state.spotifyState.userProfile.id, options);
         if (response) {
 
-          dispatch(bindSpotifyPlaylist({
-            year: createSpotifyPlaylist.year,
-            month: createSpotifyPlaylist.month,
-            playlist: response
-          }));
+          // dispatch(bindSpotifyPlaylist({
+          //   year: createSpotifyPlaylist.year,
+          //   month: createSpotifyPlaylist.month,
+          //   playlist: response
+          // }));
         }
       } catch (error) {
         dispatch(pushSpotifyErrorNotification(error));
@@ -373,7 +579,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
 
         let uris: Object[] = [];
 
-        props.myPlaylist.spotify?.tracks.forEach((t, i) => {
+        spotifyTracks.tracks.forEach((t, i) => {
           uris.push({
             uri: t.uri,
             positions: [i]
@@ -383,11 +589,11 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
         var response = await spotifyApi.removeTracksFromPlaylist(deleteSpotifyPlaylistItems.playlistId, uris);
         if (response) {
 
-          dispatch(bindSpotifyPlaylistItemsSuccess({
-            year: deleteSpotifyPlaylistItems.year,
-            month: deleteSpotifyPlaylistItems.month,
-            items: []
-          }));
+          // dispatch(bindSpotifyPlaylistItemsSuccess({
+          //   year: deleteSpotifyPlaylistItems.year,
+          //   month: deleteSpotifyPlaylistItems.month,
+          //   items: []
+          // }));
         }
 
         let items: ISaveItem[] = [];
@@ -531,7 +737,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
 
         const sync: ISynchro[] = await Promise.all(promises);
 
-        if (props.myPlaylist.spotify?.playlist.id) {
+        if (props.myPlaylist.spotifyPlaylist?.id) {
 
           let uris: string[] = [];
 
@@ -541,7 +747,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
             }
           });
 
-          var respons = await spotifyApi.addTracksToPlaylist(props.myPlaylist.spotify?.playlist.id, uris);
+          var respons = await spotifyApi.addTracksToPlaylist(props.myPlaylist.spotifyPlaylist.id, uris);
           if (respons) {
 
             let copy: ISaveItem[] = [...save.items];
@@ -601,7 +807,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
   function _getYoutubeThumbnail(saveYoutube: ISaveYoutube | undefined): string {
 
     if (saveYoutube) {
-      const item = props.myPlaylist.youtube?.videos.find(i => i.id === saveYoutube.videoId);
+      const item = youtubeVideos.videos.find(i => i.id === saveYoutube.videoId);
       if (item && item.snippet?.thumbnails?.medium?.url) {
         return item.snippet.thumbnails.medium.url;
       }
@@ -613,7 +819,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
 
   function _getYoutubeChannel(saveYoutube: ISaveYoutube): string {
 
-    const item = props.myPlaylist.youtube?.videos.find(i => i.id === saveYoutube.videoId);
+    const item = youtubeVideos.videos.find(i => i.id === saveYoutube.videoId);
     if (item && item.snippet?.channelTitle) {
       return item.snippet.channelTitle;
     }
@@ -623,7 +829,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
 
   function _getYoutubeViewCount(saveYoutube: ISaveYoutube): string {
 
-    const item = props.myPlaylist.youtube?.videos.find(i => i.id === saveYoutube.videoId);
+    const item = youtubeVideos.videos.find(i => i.id === saveYoutube.videoId);
     if (item && item.statistics?.viewCount) {
       return `${item.statistics.viewCount} views`;
     }
@@ -633,7 +839,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
 
   function _getYoutubeDuration(saveYoutube: ISaveYoutube): string {
 
-    const item = props.myPlaylist.youtube?.videos.find(i => i.id === saveYoutube.videoId);
+    const item = youtubeVideos.videos.find(i => i.id === saveYoutube.videoId);
     if (item && item.contentDetails?.duration) {
 
       var regexPtms = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/;
@@ -662,7 +868,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
   function _getSpotifyThumbnail(saveSpotify: ISaveSpotify | undefined): string {
 
     if (saveSpotify) {
-      const item = props.myPlaylist.spotify?.tracks.find(i => i.id === saveSpotify.id);
+      const item = spotifyTracks.tracks.find(i => i.id === saveSpotify.id);
       if (item && item.album.images.length > 0) {
         return item.album.images[0].url;
       }
@@ -674,7 +880,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
 
   function _getSpotifyArtist(saveSpotify: ISaveSpotify) {
 
-    const item = props.myPlaylist.spotify?.tracks.find(i => i.id === saveSpotify.id);
+    const item = spotifyTracks.tracks.find(i => i.id === saveSpotify.id);
     if (item && item.artists.length > 0) {
       return item.artists.map(a => a.name).join(', ');
     }
@@ -684,7 +890,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
 
   function _getSpotifyDuration(saveSpotify: ISaveSpotify): string {
 
-    const item = props.myPlaylist.spotify?.tracks.find(i => i.id === saveSpotify.id);
+    const item = spotifyTracks.tracks.find(i => i.id === saveSpotify.id);
     if (item) {
       const durationDate = new Date(item.duration_ms);
       return `${durationDate.getMinutes()}:${durationDate.getSeconds()}`;
@@ -695,7 +901,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
 
   function _getSpotifyPopularity(saveSpotify: ISaveSpotify): string {
 
-    const item = props.myPlaylist.spotify?.tracks.find(i => i.id === saveSpotify.id);
+    const item = spotifyTracks.tracks.find(i => i.id === saveSpotify.id);
     if (item) {
       return `${item.popularity} (popularity)`;
     }
@@ -736,15 +942,15 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
             </Left>
             <Right>
               {
-                props.myPlaylist.youtube === undefined &&
+                props.myPlaylist.youtubePlaylist === undefined &&
                 <Button light icon rounded onPress={() => setcreateYoutubePlaylist({ title: props.myPlaylist.title, year: props.myPlaylist.year, month: props.myPlaylist.month })} style={{ borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }}>
                   <Icon name="add" type="MaterialIcons" />
                 </Button>
               }
               {
-                props.myPlaylist.youtube &&
+                props.myPlaylist.youtubePlaylist &&
                 <Body style={{ display: 'flex', flexDirection: 'row' }}>
-                  <Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light icon rounded onPress={() => setdeleteYoutubePlaylist({ title: props.myPlaylist.title, year: props.myPlaylist.year, month: props.myPlaylist.month, playlistId: props.myPlaylist.youtube?.playlist?.id ? props.myPlaylist.youtube.playlist.id : '' })} >
+                  <Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light icon rounded onPress={() => setdeleteYoutubePlaylist({ title: props.myPlaylist.title, year: props.myPlaylist.year, month: props.myPlaylist.month, playlistId: props.myPlaylist.youtubePlaylist?.id ? props.myPlaylist.youtubePlaylist.id : '' })} >
                     <Icon name="cross" type="Entypo" />
                   </Button>
                   {
@@ -763,15 +969,15 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
             </Left>
             <Right>
               {
-                props.myPlaylist.spotify === undefined &&
+                props.myPlaylist.spotifyPlaylist === undefined &&
                 <Button light icon rounded onPress={() => setcreateSpotifyPlaylist({ title: props.myPlaylist.title, year: props.myPlaylist.year, month: props.myPlaylist.month })} style={{ borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }}>
                   <Icon name="add" type="MaterialIcons" />
                 </Button>
               }
               {
-                props.myPlaylist.spotify &&
+                props.myPlaylist.spotifyPlaylist &&
                 <Body style={{ display: 'flex', flexDirection: 'row' }}>
-                  <Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light rounded icon onPress={() => setdeleteSpotifyPlaylistItems({ title: props.myPlaylist.title, year: props.myPlaylist.year, month: props.myPlaylist.month, playlistId: props.myPlaylist.spotify?.playlist?.id ? props.myPlaylist.spotify.playlist.id : '' })}>
+                  <Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light rounded icon onPress={() => setdeleteSpotifyPlaylistItems({ title: props.myPlaylist.title, year: props.myPlaylist.year, month: props.myPlaylist.month, playlistId: props.myPlaylist.spotifyPlaylist?.id ? props.myPlaylist.spotifyPlaylist.id : '' })}>
                     <Icon name="cross" type="Entypo" />
                   </Button>
                   {
@@ -799,36 +1005,45 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
                     <H3 style={{ color: "white", overflow: 'hidden' }} numberOfLines={2}>{saveItem.favorite.title}</H3>
                   </Body>
                 </CardItem>
-                <CardItem style={{ backgroundColor: synchronizeTheme.secondaryColor, borderRadius: 0 }}>
-                  <Left style={{ maxWidth: 90 }}>
-                    <Thumbnail source={{ uri: _getYoutubeThumbnail(saveItem.youtube) }} style={{ borderRadius: 20, borderColor: youtubeTheme.primaryColor, borderWidth: 2, width: 80, height: 80 }} />
-                  </Left>
-                  {
-                    saveItem.youtube &&
-                    <Body>
-                      <Text style={{ fontSize: 18, color: "white" }} numberOfLines={2}>{saveItem.youtube.title}</Text>
-                      <Text note numberOfLines={1}>{_getYoutubeChannel(saveItem.youtube)}</Text>
-                      <Text note numberOfLines={1}>{_getYoutubeViewCount(saveItem.youtube)}</Text>
-                      <Text note numberOfLines={1}>{_getYoutubeDuration(saveItem.youtube)}</Text>
-                    </Body>
-                  }
-                </CardItem>
-                <CardItem style={{ backgroundColor: synchronizeTheme.secondaryColor, borderRadius: 0 }}>
-                  <Left style={{ maxWidth: 90 }}>
-                    <Thumbnail source={{ uri: _getSpotifyThumbnail(saveItem.spotify) }} style={{ borderRadius: 20, borderColor: spotifyTheme.primaryColor, borderWidth: 2, width: 80, height: 80 }} />
-                  </Left>
-                  {
-                    saveItem.spotify &&
-                    <>
-                      <Body>
-                        <Text style={{ fontSize: 18, color: "white" }}>{saveItem.spotify.title}</Text>
-                        <Text note>{_getSpotifyArtist(saveItem.spotify)}</Text>
-                        <Text note>{_getSpotifyPopularity(saveItem.spotify)}</Text>
-                        <Text note>{_getSpotifyDuration(saveItem.spotify)}</Text>
-                      </Body>
-                    </>
-                  }
-                </CardItem>
+                {
+                  spotifyTracks.loaded && youtubeVideos.loaded &&
+                  <>
+                    <CardItem style={{ backgroundColor: synchronizeTheme.secondaryColor, borderRadius: 0 }}>
+                      <Left style={{ maxWidth: 90 }}>
+                        <Thumbnail source={{ uri: _getYoutubeThumbnail(saveItem.youtube) }} style={{ borderRadius: 20, borderColor: youtubeTheme.primaryColor, borderWidth: 2, width: 80, height: 80 }} />
+                      </Left>
+                      {
+                        saveItem.youtube &&
+                        <Body>
+                          <Text style={{ fontSize: 18, color: "white" }} numberOfLines={2}>{saveItem.youtube.title}</Text>
+                          <Text note numberOfLines={1}>{_getYoutubeChannel(saveItem.youtube)}</Text>
+                          <Text note numberOfLines={1}>{_getYoutubeViewCount(saveItem.youtube)}</Text>
+                          <Text note numberOfLines={1}>{_getYoutubeDuration(saveItem.youtube)}</Text>
+                        </Body>
+                      }
+                    </CardItem>
+                    <CardItem style={{ backgroundColor: synchronizeTheme.secondaryColor, borderRadius: 0 }}>
+                      <Left style={{ maxWidth: 90 }}>
+                        <Thumbnail source={{ uri: _getSpotifyThumbnail(saveItem.spotify) }} style={{ borderRadius: 20, borderColor: spotifyTheme.primaryColor, borderWidth: 2, width: 80, height: 80 }} />
+                      </Left>
+                      {
+                        saveItem.spotify &&
+                        <>
+                          <Body>
+                            <Text style={{ fontSize: 18, color: "white" }}>{saveItem.spotify.title}</Text>
+                            <Text note>{_getSpotifyArtist(saveItem.spotify)}</Text>
+                            <Text note>{_getSpotifyPopularity(saveItem.spotify)}</Text>
+                            <Text note>{_getSpotifyDuration(saveItem.spotify)}</Text>
+                          </Body>
+                        </>
+                      }
+                    </CardItem>
+                  </>
+                }
+                {
+                  (spotifyTracks.loading || youtubeVideos.loading) &&
+                  <Spinner color={synchronizeTheme.primaryColor} />
+                }
               </Card>
             )
           }

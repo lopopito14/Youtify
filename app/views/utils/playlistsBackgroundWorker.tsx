@@ -1,24 +1,27 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import { pushSpotifyErrorNotification, pushSpotifySuccessNotification, pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../../store/types/notifications_actions';
-import { Playlist } from '../../youtubeApi/youtube-api-models';
 import { Playlists } from '../../youtubeApi/youtube-api-playlists';
-import YoutubePlaylistBackgroundWorker from './youtubePlaylistBackgroundWorker';
 import SpotifyApi from 'spotify-web-api-js';
-import SpotifyPlaylistBackgroundWorker from './spotifyPlaylistBackgroundWorker';
+import { ISpotifyPlaylists, IYoutubePlaylists } from '../../store/state';
 
-interface IProps { }
+interface IProps {
+    youtubePlaylists: IYoutubePlaylists,
+    setYoutubePlaylists: React.Dispatch<React.SetStateAction<IYoutubePlaylists>>,
+    spotifyPlaylists: ISpotifyPlaylists,
+    setSpotifyPlaylists: React.Dispatch<React.SetStateAction<ISpotifyPlaylists>>
+}
 
-export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = () => {
+export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = (props: IProps) => {
     const { state, dispatch } = useContext(Context);
-    const [youtubePlaylists, setYoutubePlaylists] = useState<Playlist[] | undefined>(undefined);
     const [youtubePlaylistsPageToken, setYoutubePlaylistsPageToken] = useState<string | undefined>(undefined);
-    const [spotifyPlaylists, setSpotifyPlaylists] = useState<globalThis.SpotifyApi.PlaylistObjectSimplified[] | undefined>(undefined);
     const [spotifyPlaylistsOffset, setSpotifyPlaylistsOffset] = useState<number | undefined>(undefined);
 
     useEffect(() => {
         if (state.youtubeState.userProfile.loaded) {
-            _fetchYoutubePlaylists();
+            if (!props.youtubePlaylists.loaded) {
+                _fetchYoutubePlaylists();
+            }
         }
     }, [state.youtubeState.userProfile.loaded]);
 
@@ -30,7 +33,9 @@ export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = () => 
 
     useEffect(() => {
         if (state.spotifyState.userProfile.loaded) {
-            _fetchSpotifyPlaylists();
+            if (!props.spotifyPlaylists.loaded) {
+                _fetchSpotifyPlaylists();
+            }
         }
     }, [state.spotifyState.userProfile.loaded]);
 
@@ -46,9 +51,17 @@ export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = () => 
 
     async function _fetchYoutubePlaylists(pageToken: string | undefined = undefined) {
         try {
+            props.setYoutubePlaylists((prev) => {
+                return {
+                    ...prev,
+                    loading: true,
+                    loaded: false
+                }
+            });
+
             var response = await new Playlists(state.youtubeState.credential.accessToken).list({
                 channelId: state.youtubeState.userProfile.channelId,
-                part: ['snippet'],
+                part: ['snippet', 'contentDetails'],
                 maxResults: 50,
                 pageToken: pageToken
             });
@@ -56,26 +69,52 @@ export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = () => 
 
                 const filteredPlaylists = response.items.filter(i => i.snippet?.title && _matchPlaylistName(i.snippet?.title));
 
-                if (youtubePlaylists) {
-                    setYoutubePlaylists([...youtubePlaylists, ...filteredPlaylists])
-                } else {
-                    setYoutubePlaylists(filteredPlaylists)
-                }
+                props.setYoutubePlaylists((prev) => {
+                    return {
+                        ...prev,
+                        playlists: [
+                            ...prev.playlists,
+                            ...filteredPlaylists
+                        ],
+                    }
+                });
 
                 if (response.nextPageToken) {
                     setYoutubePlaylistsPageToken(response.nextPageToken);
                 } else {
                     setYoutubePlaylistsPageToken(undefined);
+                    props.setYoutubePlaylists((prev) => {
+                        return {
+                            ...prev,
+                            loading: false,
+                            loaded: true
+                        }
+                    });
                     dispatch(pushYoutubeSuccessNotification("My YOUTUBE playlists loaded !"));
                 }
             }
         } catch (error) {
+            props.setYoutubePlaylists((prev) => {
+                return {
+                    ...prev,
+                    loading: false,
+                    loaded: false
+                }
+            });
             dispatch(pushYoutubeErrorNotification(error));
         }
     }
 
     async function _fetchSpotifyPlaylists(offset: number | undefined = undefined) {
         try {
+            props.setSpotifyPlaylists((prev) => {
+                return {
+                    ...prev,
+                    loading: true,
+                    loaded: false
+                }
+            });
+
             var spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
@@ -99,44 +138,43 @@ export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = () => 
 
                 const filteredPlaylists = response.items.filter(i => _matchPlaylistName(i.name));
 
-                if (spotifyPlaylists) {
-                    setSpotifyPlaylists([...spotifyPlaylists, ...filteredPlaylists]);
-                }
-                else {
-                    setSpotifyPlaylists(filteredPlaylists);
-                }
+                props.setSpotifyPlaylists((prev) => {
+                    return {
+                        ...prev,
+                        playlists: [
+                            ...prev.playlists,
+                            ...filteredPlaylists
+                        ]
+                    }
+                });
 
                 if (response.next === null) {
                     setSpotifyPlaylistsOffset(undefined);
+                    props.setSpotifyPlaylists((prev) => {
+                        return {
+                            ...prev,
+                            loading: false,
+                            loaded: true
+                        }
+                    });
                     dispatch(pushSpotifySuccessNotification("My SPOTIFY playlists loaded !"));
                 } else {
                     setSpotifyPlaylistsOffset(response.offset + limit);
                 }
             }
         } catch (error) {
+            props.setSpotifyPlaylists((prev) => {
+                return {
+                    ...prev,
+                    loading: false,
+                    loaded: false
+                }
+            });
             dispatch(pushSpotifyErrorNotification(error));
         }
     }
 
-    return (
-        <>
-            {
-                state.myPlaylist.loaded &&
-                <>
-                    {
-                        state.myPlaylist.myPlaylists.map((p, i) =>
-                            <YoutubePlaylistBackgroundWorker key={i} playlist={p} playlists={youtubePlaylists} />
-                        )
-                    }
-                    {
-                        state.myPlaylist.myPlaylists.map((p, i) =>
-                            <SpotifyPlaylistBackgroundWorker key={i * 10} playlist={p} playlists={spotifyPlaylists} />
-                        )
-                    }
-                </>
-            }
-        </>
-    )
+    return (<></>)
 }
 
 export default PlaylistsBackgroundWorker

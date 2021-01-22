@@ -1,22 +1,24 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
 import { pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../../store/types/notifications_actions';
-import { bindYoutubeFavoriteItemsComplete, bindYoutubeFavoriteItemsError, bindYoutubeFavoriteItemsRequest, bindYoutubeFavoriteItemsSuccess } from '../../store/types/my_playlists_actions';
 import { PlaylistItem } from '../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
+import { IMyPlaylists } from '../../store/state';
 
-interface IProps { }
+interface IProps {
+    myPlaylist: IMyPlaylists,
+    setMyPlaylist: React.Dispatch<React.SetStateAction<IMyPlaylists>>
+}
 
-export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> = () => {
+export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> = (props: IProps) => {
     const { state, dispatch } = useContext(Context);
-    const [favoritePlaylistItems] = useState<PlaylistItem[] | undefined>(undefined);
     const [favoritepageToken, setfavoritepageToken] = useState<string | undefined>(undefined);
 
     const favoritePlaylistName = "FL65Vblm8jhqYm8-0QPi3Z6A";
 
     useEffect(() => {
         if (state.youtubeState.userProfile.loaded) {
-            if (!favoritePlaylistItems) {
+            if (!props.myPlaylist.loaded) {
                 _fetchFavoritePlaylistItems();
             }
         }
@@ -30,17 +32,69 @@ export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> =
 
     async function _fetchFavoritePlaylistItems(pageToken: string | undefined = undefined) {
         try {
-            dispatch(bindYoutubeFavoriteItemsRequest());
-            var response = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
+            props.setMyPlaylist((previous) => {
+                return {
+                    ...previous,
+                    loading: true,
+                    loaded: false
+                }
+            });
+
+            var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
                 playlistId: favoritePlaylistName,
                 part: ['snippet', 'contentDetails'],
                 maxResults: 50,
                 pageToken: pageToken
             });
-            if (response && response.items && response.pageInfo?.totalResults) {
-                dispatch(bindYoutubeFavoriteItemsSuccess({ items: response.items }));
+            if (playlistItemsResponse && playlistItemsResponse.items && playlistItemsResponse.pageInfo?.totalResults) {
 
-                const lastItem = response.items[response.items.length - 1];
+                const copy = { ...props.myPlaylist };
+
+                var year: number | undefined;
+                var month: number | undefined;
+                var items: PlaylistItem[] = [];
+
+                for (let index = 0; index < playlistItemsResponse.items.length; index++) {
+                    const item = playlistItemsResponse.items[index];
+
+                    if (item.snippet?.publishedAt) {
+                        const date = new Date(item.snippet?.publishedAt);
+                        const currentYear = date.getFullYear();
+                        const currentMonth = date.getMonth() + 1;
+
+                        if (!year || !month) {
+                            year = date.getFullYear();
+                            month = date.getMonth() + 1;
+                            items.push(item);
+                            continue;
+                        }
+
+                        if (year === currentYear && month === currentMonth) {
+                            items.push(item);
+                            continue;
+                        }
+
+                        const playlist = copy.playlists.find(p => p.year === year && p.month === month);
+                        if (playlist) {
+                            items.forEach(i => playlist.favoriteitems.push(i));
+                        } else {
+                            copy.playlists.push({
+                                year: year,
+                                month: month,
+                                title: `Playlist ${year} - ${(month < 10) ? '0' : ''}${month}`,
+                                favoriteitems: items,
+                            })
+                        }
+
+                        year = currentYear;
+                        month = currentMonth;
+                        items = [item];
+                    }
+                }
+
+                props.setMyPlaylist(copy);
+
+                const lastItem = playlistItemsResponse.items[playlistItemsResponse.items.length - 1];
 
                 // todo => removed in production mode
                 if (lastItem.snippet?.publishedAt) {
@@ -50,20 +104,32 @@ export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> =
                     const limitYear = 2020;
 
                     if (currentYear < limitYear) {
-                        response.nextPageToken = undefined;
+                        playlistItemsResponse.nextPageToken = undefined;
                     }
                 }
 
-                if (response.nextPageToken) {
-                    setfavoritepageToken(response.nextPageToken);
+                if (playlistItemsResponse.nextPageToken) {
+                    setfavoritepageToken(playlistItemsResponse.nextPageToken);
                 } else {
-                    dispatch(bindYoutubeFavoriteItemsComplete());
-                    dispatch(pushYoutubeSuccessNotification("Favorite items dispatched !"));
                     setfavoritepageToken(undefined);
+                    props.setMyPlaylist((previous) => {
+                        return {
+                            ...previous,
+                            loading: false,
+                            loaded: true
+                        }
+                    });
+                    dispatch(pushYoutubeSuccessNotification("Favorite items dispatched !"));
                 }
             }
         } catch (error) {
-            dispatch(bindYoutubeFavoriteItemsError(error));
+            props.setMyPlaylist((previous) => {
+                return {
+                    ...previous,
+                    loading: false,
+                    loaded: false
+                }
+            });
             dispatch(pushYoutubeErrorNotification(error));
         }
     }

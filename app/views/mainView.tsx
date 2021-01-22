@@ -7,7 +7,6 @@ import Context from '../store/context';
 import { Button, Footer, FooterTab, Icon, Root, Text } from 'native-base';
 import SettingsView from './settingsView';
 import { synchronizeTheme, spotifyTheme, youtubeTheme } from './theme';
-import BackgroundWorker from './utils/backgroundWorker';
 import NotificationToast from './utils/notificationToast';
 import { DrawerLayoutAndroid } from 'react-native';
 import { NoneView } from './noneView';
@@ -62,12 +61,7 @@ export const MainView: React.FunctionComponent<Props> = () => {
     <Context.Provider value={{ state, dispatch }}>
       <Root>
 
-        {/* Do some background operations */}
-        <BackgroundWorker />
-
         <DrawerLayoutAndroid drawerWidth={350} drawerLockMode='unlocked' renderNavigationView={() => <SettingsView />}>
-
-          {/* Main Content */}
           <>
             <NotificationToast notifications={state.notifications.notifications} />
             {

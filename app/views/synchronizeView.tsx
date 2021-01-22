@@ -1,10 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
-import Context from '../store/context';
+import React, { useEffect, useState } from 'react';
 import { Accordion, Body, Button, Content, H1, Header, Icon, Left, List, ListItem, Right, Spinner, Switch, Text, Title, View } from 'native-base';
-import { synchronizeTheme } from './theme';
-import { IYoutubeMonthPlaylist } from '../store/state';
+import { spotifyTheme, synchronizeTheme, youtubeTheme } from './theme';
+import { IMyPlaylists, ISpotifyPlaylists, IYoutubeMonthPlaylist, IYoutubePlaylists } from '../store/state';
 import SynchronizePlaylistView from './synchronize/synchronizePlaylistView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import FavoritePlaylistBackgroundWorker from './utils/favoritePlaylistBackgroundWorker';
+import PlaylistsBackgroundWorker from './utils/playlistsBackgroundWorker';
+import PlaylistsDispatcher from './utils/playlistsDispatcher';
 
 interface Props { }
 
@@ -19,18 +21,32 @@ export enum SynchronizeViewType {
 }
 
 export const SynchronizeView: React.FunctionComponent<Props> = () => {
-  const { state } = useContext(Context);
+  const [myPlaylist, setMyPlaylist] = useState<IMyPlaylists>({
+    loaded: false,
+    loading: false,
+    playlists: []
+  })
+  const [youtubePlaylists, setYoutubePlaylists] = useState<IYoutubePlaylists>({
+    loaded: false,
+    loading: false,
+    playlists: []
+  });
+  const [spotifyPlaylists, setSpotifyPlaylists] = useState<ISpotifyPlaylists>({
+    loaded: false,
+    loading: false,
+    playlists: []
+  });
   const [selectedView, setselectedView] = useState<SynchronizeViewType>(SynchronizeViewType.Synchronize);
-  const [myPlaylist, setMyPlaylist] = useState<IYoutubeMonthPlaylist | undefined>(undefined);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<IYoutubeMonthPlaylist | undefined>(undefined);
   const [yearFilter, setYearFilter] = useState<YearFilter[] | undefined>(undefined);
 
   const yearFilterKey = "synchronize-year-filter";
 
   useEffect(() => {
-    if (state.myPlaylist.loaded) {
+    if (myPlaylist.loaded) {
       buildYearsFilter();
     }
-  }, [state.myPlaylist.loaded]);
+  }, [myPlaylist.loaded]);
 
   useEffect(() => {
     if (yearFilter) {
@@ -42,7 +58,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 
     let yearsFilter: YearFilter[] = [];
 
-    const years = [...new Set(state.myPlaylist.myPlaylists.map(p => p.year))];
+    const years = [...new Set(myPlaylist.playlists.map(p => p.year))];
 
     years.forEach(y => {
       yearsFilter.push({ year: y, active: true });
@@ -97,7 +113,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
   }
 
   function onOpenSynchronizePlaylist(myPlaylist: IYoutubeMonthPlaylist) {
-    setMyPlaylist(myPlaylist);
+    setSelectedPlaylist(myPlaylist);
     setselectedView(SynchronizeViewType.SynchronizePlaylist);
   }
 
@@ -114,7 +130,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
                 <Text style={{ color: "white" }}>{y.year}</Text>
               </Left>
               <Right>
-                <Switch style={{ transform: [{ scale: 1.2 }, { translateX: -40 }] }} thumbColor={"white"} trackColor={{ true: "green", false: "white" }} value={y.active} onValueChange={(v) =>
+                <Switch style={{ transform: [{ scale: 1.2 }, { translateX: -40 }] }} thumbColor={"white"} trackColor={{ true: "green", false: "white" }} value={y.active} onValueChange={() =>
                   setYearFilter(
                     [
                       ...yearFilter.slice(0, i),
@@ -150,18 +166,21 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
           <Title>{_headerTitle()}</Title>
         </Body>
       </Header>
+      <FavoritePlaylistBackgroundWorker myPlaylist={myPlaylist} setMyPlaylist={setMyPlaylist} />
+      <PlaylistsBackgroundWorker youtubePlaylists={youtubePlaylists} setYoutubePlaylists={setYoutubePlaylists} spotifyPlaylists={spotifyPlaylists} setSpotifyPlaylists={setSpotifyPlaylists} />
+      <PlaylistsDispatcher myPlaylist={myPlaylist} setMyPlaylist={setMyPlaylist} youtubePlaylists={youtubePlaylists} spotifyPlaylists={spotifyPlaylists} />
       {
         selectedView === SynchronizeViewType.Synchronize &&
         <>
           {
-            state.myPlaylist.loaded && yearFilter &&
+            myPlaylist.loaded && yearFilter &&
             <View style={{ backgroundColor: "black" }}>
               <Accordion style={{ backgroundColor: synchronizeTheme.secondaryBackgroundColor }} dataArray={_buildAccordion()} expanded={-1} renderContent={(item) => <>{item.content}</>} />
             </View>
           }
           <Content style={{ backgroundColor: "black" }}>
             {
-              state.myPlaylist.loaded && yearFilter &&
+              myPlaylist.loaded && yearFilter &&
               <>
                 <List>
                   {
@@ -171,33 +190,36 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
                           <H1 style={{ color: "white" }}>{y.year}</H1>
                         </ListItem>
                         {
-                          state.myPlaylist.myPlaylists.filter(p => p.year === y.year).map((p, j) =>
+                          myPlaylist.playlists.filter(p => p.year === y.year).map((p, j) =>
                             <ListItem key={j + 1} thumbnail>
                               <Left>
-                                {/* <Button warning icon transparent>
-                                  <Icon name='sync' type='Ionicons' />
-                                </Button> */}
-                                <Button success icon transparent>
-                                  <Icon name='check' type='FontAwesome' />
-                                </Button>
+                                {
+                                  (p.youtubePlaylist === undefined || p.spotifyPlaylist === undefined) &&
+                                  <Button warning icon transparent>
+                                    <Icon name='sync' type='FontAwesome5' />
+                                  </Button>
+                                }
+                                {
+                                  p.youtubePlaylist && p.spotifyPlaylist &&
+                                  <Button success icon transparent>
+                                    <Icon name='check' type='FontAwesome' />
+                                  </Button>
+                                }
                               </Left>
                               <Body>
-                                <Left>
-                                  <Text style={{ color: "white" }}>{p.title}</Text>
-                                  <Text note>{p.favoriteitems.length} favorite items to add</Text>
-                                  {
-                                    p.youtube &&
-                                    <Text note>youtube contains {p.youtube.videos.length} videos</Text>
-                                  }
-                                  {
-                                    p.spotify &&
-                                    <Text note>spotify contains {p.spotify.tracks.length} tracks</Text>
-                                  }
-                                </Left>
+                                <Text style={{ color: "white" }}>{p.title}</Text>
+                                <Text note>{p.favoriteitems.length} favorite items</Text>
+                                {
+                                  p.youtubePlaylist &&
+                                  <Text note style={{ color: youtubeTheme.primaryColor }}>youtube contains {p.youtubePlaylist.contentDetails?.itemCount} videos</Text>
+                                }
+                                {
+                                  p.spotifyPlaylist &&
+                                  <Text note style={{ color: spotifyTheme.primaryColor }}>spotify contains {p.spotifyPlaylist.tracks.total} tracks</Text>
+                                }
                               </Body>
                               <Right>
-                                <Button iconRight light onPress={() => onOpenSynchronizePlaylist(p)}>
-                                  <Text>Manage</Text>
+                                <Button icon light onPress={() => onOpenSynchronizePlaylist(p)}>
                                   <Icon name='arrow-forward' />
                                 </Button>
                               </Right>
@@ -211,15 +233,15 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
               </>
             }
             {
-              (!state.myPlaylist.loaded || yearFilter === undefined) && <Spinner color={synchronizeTheme.primaryColor} />
+              (!myPlaylist.loaded || yearFilter === undefined) && <Spinner color={synchronizeTheme.primaryColor} />
             }
 
           </Content>
         </>
       }
       {
-        selectedView === SynchronizeViewType.SynchronizePlaylist && myPlaylist &&
-        <SynchronizePlaylistView selectedView={selectedView} setselectedView={setselectedView} myPlaylist={myPlaylist} />
+        selectedView === SynchronizeViewType.SynchronizePlaylist && selectedPlaylist &&
+        <SynchronizePlaylistView selectedView={selectedView} setselectedView={setselectedView} myPlaylist={selectedPlaylist} />
       }
     </>
   )

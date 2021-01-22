@@ -1,14 +1,23 @@
-import React, { } from 'react';
+import React, { useEffect } from 'react';
 import { YoutubeOAuth2 } from './auth/youtubeOAuth2';
 import { SpotifyOAuth2 } from './auth/spotifyOAuth2';
-import { Body, Content, Header, Left, Title } from 'native-base';
+import { Body, Button, Content, Header, Left, Text, Title } from 'native-base';
 import { ScrollView } from 'react-native';
 import { AuthConfiguration } from 'react-native-app-auth';
 import { settingsTheme } from './theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props { }
 
 export const SettingsView: React.FunctionComponent<Props> = () => {
+
+  const [purgeLocalStorage, setPurgeLocalStorage] = React.useState<boolean>(false);
+
+  useEffect(() => {
+    if (purgeLocalStorage) {
+      _purgeLocalStorage();
+    }
+  }, [purgeLocalStorage]);
 
   const youtubeAuthorizeConfiguration: AuthConfiguration = {
     clientId:
@@ -41,6 +50,26 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
     },
   }
 
+  async function _purgeLocalStorage() {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+
+      let promises = keys.map(async key => {
+        if (key.startsWith('Playlist ')) {
+          await AsyncStorage.removeItem(key);
+        }
+      });
+
+      await Promise.all(promises);
+      console.log("Local playlists purged !");
+
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setPurgeLocalStorage(false);
+    }
+  }
+
   return (
     <>
       <Header noShadow style={{ backgroundColor: settingsTheme.primaryColor }} androidStatusBarColor={settingsTheme.secondaryColor}>
@@ -56,6 +85,9 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
         <Content>
           <YoutubeOAuth2 authorizeConfiguration={youtubeAuthorizeConfiguration} />
           <SpotifyOAuth2 authorizeConfiguration={spotifyAuthorizeConfiguration} />
+          <Button onPress={() => setPurgeLocalStorage(true)}>
+            <Text>Purge local storage</Text>
+          </Button>
         </Content>
       </ScrollView>
     </>
