@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Accordion, Body, Button, Content, H1, Header, Icon, Left, List, ListItem, Right, Spinner, Switch, Text, Title, View } from 'native-base';
 import { spotifyTheme, synchronizeTheme, youtubeTheme } from './theme';
 import { IMyPlaylists, ISpotifyPlaylists, IYoutubeMonthPlaylist, IYoutubePlaylists } from '../store/state';
@@ -7,6 +7,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import FavoritePlaylistBackgroundWorker from './utils/favoritePlaylistBackgroundWorker';
 import PlaylistsBackgroundWorker from './utils/playlistsBackgroundWorker';
 import PlaylistsDispatcher from './utils/playlistsDispatcher';
+import { Playlists } from '../youtubeApi/youtube-api-playlists';
+import Context from '../store/context';
+import { pushSpotifyErrorNotification, pushSpotifySuccessNotification, pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../store/types/notifications_actions';
+import SpotifyApi from 'spotify-web-api-js';
 
 interface Props { }
 
@@ -21,6 +25,8 @@ export enum SynchronizeViewType {
 }
 
 export const SynchronizeView: React.FunctionComponent<Props> = () => {
+  const { state, dispatch } = useContext(Context);
+
   const [myPlaylist, setMyPlaylist] = useState<IMyPlaylists>({
     loaded: false,
     loading: false,
@@ -39,6 +45,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
   const [selectedView, setselectedView] = useState<SynchronizeViewType>(SynchronizeViewType.Synchronize);
   const [selectedPlaylist, setSelectedPlaylist] = useState<IYoutubeMonthPlaylist | undefined>(undefined);
   const [yearFilter, setYearFilter] = useState<YearFilter[] | undefined>(undefined);
+  const [createPlaylists, setCreatePlaylists] = useState<IYoutubeMonthPlaylist | undefined>(undefined);
 
   const yearFilterKey = "synchronize-year-filter";
 
@@ -53,6 +60,12 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
       saveYearsFilter();
     }
   }, [yearFilter]);
+
+  useEffect(() => {
+    if (createPlaylists) {
+      _createPlaylist(createPlaylists);
+    }
+  }, [createPlaylists]);
 
   async function buildYearsFilter() {
 
@@ -109,6 +122,111 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
   function onBackButtonPressed() {
     if (_isSelectedView(SynchronizeViewType.SynchronizePlaylist)) {
       setselectedView(SynchronizeViewType.Synchronize);
+    }
+  }
+
+  async function _createPlaylist(myPlaylist: IYoutubeMonthPlaylist) {
+
+    let youtubePlaylist = myPlaylist.youtubePlaylist;
+    let spotifyPlaylist = myPlaylist.spotifyPlaylist;
+
+    try {
+      if (myPlaylist.spotifyPlaylist === undefined) {
+        try {
+          const spotifyApi = new SpotifyApi();
+          spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
+
+          const options = {
+            "name": myPlaylist.title,
+            "description": "",
+            "public": true,
+          };
+
+          var createSpotifyPlaylistResponse = await spotifyApi.createPlaylist(state.spotifyState.userProfile.id, options);
+          if (createSpotifyPlaylistResponse) {
+
+            setSpotifyPlaylists((prev) => {
+              return {
+                ...prev,
+                playlists: [
+                  ...prev.playlists,
+                  {
+                    ...createSpotifyPlaylistResponse,
+                    tracks: {
+                      href: '',
+                      total: 0
+                    }
+                  }
+                ]
+              }
+            });
+
+            spotifyPlaylist = {
+              ...createSpotifyPlaylistResponse,
+              tracks: {
+                href: '',
+                total: 0
+              }
+            };
+
+            dispatch(pushSpotifySuccessNotification(`Spotify playlist '${myPlaylist.title}' created !`));
+          }
+        } catch (error) {
+          dispatch(pushSpotifyErrorNotification(error));
+        }
+      }
+      if (myPlaylist.youtubePlaylist === undefined) {
+        try {
+          var createYoutubePlaylistResponse = await new Playlists(state.youtubeState.credential.accessToken).insert({
+            part: ['snippet', 'contentDetails'],
+            requestBody: {
+              snippet: {
+                title: myPlaylist.title
+              }
+            }
+          });
+          if (createYoutubePlaylistResponse && createYoutubePlaylistResponse.snippet) {
+
+            setYoutubePlaylists((prev) => {
+              return {
+                ...prev,
+                playlists: [
+                  ...prev.playlists,
+                  createYoutubePlaylistResponse
+                ]
+              }
+            });
+
+            youtubePlaylist = createYoutubePlaylistResponse;
+
+            dispatch(pushYoutubeSuccessNotification(`Youtube playlist '${myPlaylist.title}' created !`));
+          }
+        } catch (error) {
+          dispatch(pushYoutubeErrorNotification(error));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setMyPlaylist((prev) => {
+
+        const index = prev.playlists.indexOf(myPlaylist);
+
+        return {
+          ...prev,
+          playlists: [
+            ...prev.playlists.slice(0, index),
+            {
+              ...myPlaylist,
+              spotifyPlaylist: spotifyPlaylist,
+              youtubePlaylist: youtubePlaylist
+            },
+            ...prev.playlists.slice(index + 1),
+          ]
+        }
+      });
+
+      setCreatePlaylists(undefined);
     }
   }
 
@@ -219,9 +337,18 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
                                 }
                               </Body>
                               <Right>
-                                <Button icon light onPress={() => onOpenSynchronizePlaylist(p)}>
-                                  <Icon name='arrow-forward' />
-                                </Button>
+                                {
+                                  (p.spotifyPlaylist === undefined || p.youtubePlaylist === undefined) &&
+                                  <Button icon light onPress={() => setCreatePlaylists(p)}>
+                                    <Icon name='create' type='MaterialIcons' />
+                                  </Button>
+                                }
+                                {
+                                  p.spotifyPlaylist && p.youtubePlaylist &&
+                                  <Button icon light onPress={() => onOpenSynchronizePlaylist(p)}>
+                                    <Icon name='arrow-forward' />
+                                  </Button>
+                                }
                               </Right>
                             </ListItem>
                           )

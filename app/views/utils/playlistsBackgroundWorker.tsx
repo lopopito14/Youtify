@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
-import { pushSpotifyErrorNotification, pushSpotifySuccessNotification, pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../../store/types/notifications_actions';
+import { pushSpotifyErrorNotification, pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
 import { Playlists } from '../../youtubeApi/youtube-api-playlists';
 import SpotifyApi from 'spotify-web-api-js';
 import { ISpotifyPlaylists, IYoutubePlaylists } from '../../store/state';
@@ -90,7 +90,6 @@ export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = (props
                             loaded: true
                         }
                     });
-                    dispatch(pushYoutubeSuccessNotification("My YOUTUBE playlists loaded !"));
                 }
             }
         } catch (error) {
@@ -157,7 +156,6 @@ export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = (props
                             loaded: true
                         }
                     });
-                    dispatch(pushSpotifySuccessNotification("My SPOTIFY playlists loaded !"));
                 } else {
                     setSpotifyPlaylistsOffset(response.offset + limit);
                 }

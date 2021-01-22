@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Context from '../../store/context';
-import { pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../../store/types/notifications_actions';
+import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
 import { PlaylistItem } from '../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
 import { IMyPlaylists } from '../../store/state';
@@ -119,7 +119,6 @@ export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> =
                             loaded: true
                         }
                     });
-                    dispatch(pushYoutubeSuccessNotification("Favorite items dispatched !"));
                 }
             }
         } catch (error) {

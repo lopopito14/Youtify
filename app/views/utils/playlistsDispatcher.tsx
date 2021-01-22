@@ -35,7 +35,7 @@ export const PlaylistsDispatcher: React.FunctionComponent<IProps> = (props: IPro
                 });
             }
         }
-    }, [props.myPlaylist.loaded, props.youtubePlaylists.loaded, props.spotifyPlaylists.loaded])
+    }, [props.myPlaylist.loaded, props.youtubePlaylists.loaded, props.spotifyPlaylists.loaded]);
 
     return (<></>)
 }
