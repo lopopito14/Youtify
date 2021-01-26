@@ -20,8 +20,8 @@ interface YearFilter {
 }
 
 export enum SynchronizeViewType {
-  Synchronize,
-  SynchronizePlaylist
+  SYNCHRONIZE,
+  SYNCHRONIZE_PLAYLIST
 }
 
 export const SynchronizeView: React.FunctionComponent<Props> = () => {
@@ -42,7 +42,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
     loading: false,
     playlists: []
   });
-  const [selectedView, setselectedView] = useState<SynchronizeViewType>(SynchronizeViewType.Synchronize);
+  const [selectedView, setselectedView] = useState<SynchronizeViewType>(SynchronizeViewType.SYNCHRONIZE);
   const [selectedPlaylist, setSelectedPlaylist] = useState<IYoutubeMonthPlaylist | undefined>(undefined);
   const [yearFilter, setYearFilter] = useState<YearFilter[] | undefined>(undefined);
   const [createPlaylists, setCreatePlaylists] = useState<IYoutubeMonthPlaylist | undefined>(undefined);
@@ -112,7 +112,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
   }
 
   function _headerTitle() {
-    if (_isSelectedView(SynchronizeViewType.SynchronizePlaylist)) {
+    if (_isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
       return "Synchronize Playlist";
     }
 
@@ -120,8 +120,8 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
   }
 
   function onBackButtonPressed() {
-    if (_isSelectedView(SynchronizeViewType.SynchronizePlaylist)) {
-      setselectedView(SynchronizeViewType.Synchronize);
+    if (_isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
+      setselectedView(SynchronizeViewType.SYNCHRONIZE);
     }
   }
 
@@ -232,7 +232,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 
   function onOpenSynchronizePlaylist(myPlaylist: IYoutubeMonthPlaylist) {
     setSelectedPlaylist(myPlaylist);
-    setselectedView(SynchronizeViewType.SynchronizePlaylist);
+    setselectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST);
   }
 
   function _buildAccordion() {
@@ -274,7 +274,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
       <Header noShadow style={{ backgroundColor: synchronizeTheme.primaryColor }} androidStatusBarColor={synchronizeTheme.secondaryColor}>
         <Left>
           {
-            !_isSelectedView(SynchronizeViewType.Synchronize) &&
+            !_isSelectedView(SynchronizeViewType.SYNCHRONIZE) &&
             <Button transparent onPress={onBackButtonPressed}>
               <Icon name='arrow-back' />
             </Button>
@@ -288,7 +288,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
       <PlaylistsBackgroundWorker youtubePlaylists={youtubePlaylists} setYoutubePlaylists={setYoutubePlaylists} spotifyPlaylists={spotifyPlaylists} setSpotifyPlaylists={setSpotifyPlaylists} />
       <PlaylistsDispatcher myPlaylist={myPlaylist} setMyPlaylist={setMyPlaylist} youtubePlaylists={youtubePlaylists} spotifyPlaylists={spotifyPlaylists} />
       {
-        selectedView === SynchronizeViewType.Synchronize &&
+        selectedView === SynchronizeViewType.SYNCHRONIZE &&
         <>
           {
             myPlaylist.loaded && yearFilter &&
@@ -367,7 +367,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
         </>
       }
       {
-        selectedView === SynchronizeViewType.SynchronizePlaylist && selectedPlaylist &&
+        selectedView === SynchronizeViewType.SYNCHRONIZE_PLAYLIST && selectedPlaylist &&
         <SynchronizePlaylistView selectedView={selectedView} setselectedView={setselectedView} myPlaylist={selectedPlaylist} />
       }
     </>

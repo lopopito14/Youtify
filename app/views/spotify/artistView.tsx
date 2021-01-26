@@ -28,7 +28,7 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
     }, [props.artistId]);
 
     useEffect(() => {
-        if (props.selectedView !== SpotifyViewType.Artist) {
+        if (props.selectedView !== SpotifyViewType.ARTIST) {
             if (sound) {
                 sound.pause();
                 sound.release();
@@ -188,7 +188,7 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
     return (
         <>
             {
-                props.selectedView === SpotifyViewType.Artist &&
+                props.selectedView === SpotifyViewType.ARTIST &&
                 <Content style={{ backgroundColor: spotifyTheme.secondaryColor }}>
                     {
                         loaded && artist && artistTopTracks && relatedArtists && relatedArtistsFollowingStatus &&

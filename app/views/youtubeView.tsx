@@ -6,27 +6,27 @@ import { YoutubeMenuView } from "./youtube/youtubeMenuView";
 interface Props { }
 
 export enum YoutubeViewType {
-    Menu,
-    Playlists,
-    Playlist,
-    Subscriptions
+    MENU,
+    PLAYLISTS,
+    PLAYLIST,
+    SUBSCRIPTIONS
 }
 
 export const YoutubeView: React.FunctionComponent<Props> = () => {
-    const [selectedView, setselectedView] = useState<YoutubeViewType>(YoutubeViewType.Menu)
+    const [selectedView, setselectedView] = useState<YoutubeViewType>(YoutubeViewType.MENU)
 
     function _isSelectedView(view: YoutubeViewType) {
         return selectedView === view;
     }
 
     function _headerTitle() {
-        if (_isSelectedView(YoutubeViewType.Subscriptions)) {
+        if (_isSelectedView(YoutubeViewType.SUBSCRIPTIONS)) {
             return "Subscriptions";
         }
-        if (_isSelectedView(YoutubeViewType.Playlists)) {
+        if (_isSelectedView(YoutubeViewType.PLAYLISTS)) {
             return "Playlists";
         }
-        if (_isSelectedView(YoutubeViewType.Playlist)) {
+        if (_isSelectedView(YoutubeViewType.PLAYLIST)) {
             return "Playlist";
         }
 
@@ -34,11 +34,11 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
     }
 
     function onBackButtonPressed() {
-        if (selectedView === YoutubeViewType.Playlist) {
-            setselectedView(YoutubeViewType.Playlists);
+        if (selectedView === YoutubeViewType.PLAYLIST) {
+            setselectedView(YoutubeViewType.PLAYLISTS);
         }
         else {
-            setselectedView(YoutubeViewType.Menu);
+            setselectedView(YoutubeViewType.MENU);
         }
     }
 
@@ -47,7 +47,7 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
             <Header style={{ backgroundColor: youtubeTheme.primaryColor }} androidStatusBarColor={youtubeTheme.secondaryColor}>
                 <Left>
                     {
-                        !_isSelectedView(YoutubeViewType.Menu) &&
+                        !_isSelectedView(YoutubeViewType.MENU) &&
                         <Button transparent onPress={onBackButtonPressed}>
                             <Icon name='arrow-back' />
                         </Button>

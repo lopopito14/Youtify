@@ -14,20 +14,20 @@ export const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) 
     return (
         <>
             {
-                props.selectedView === SpotifyViewType.Menu &&
+                props.selectedView === SpotifyViewType.MENU &&
                 <Content>
                     <View style={{ marginTop: 50 }}>
-                        <Button rounded success style={{ margin: 10 }} onPress={() => props.setselectedView(SpotifyViewType.Playlists)}>
+                        <Button rounded success style={{ margin: 10 }} onPress={() => props.setselectedView(SpotifyViewType.PLAYLISTS)}>
                             <Text>Playlists</Text>
                         </Button>
-                        <Button rounded info style={{ margin: 10 }} onPress={() => props.setselectedView(SpotifyViewType.Artists)}>
+                        <Button rounded info style={{ margin: 10 }} onPress={() => props.setselectedView(SpotifyViewType.ARTISTS)}>
                             <Text>Artists</Text>
                         </Button>
                     </View>
                 </Content>
             }
             {
-                props.selectedView !== SpotifyViewType.Menu &&
+                props.selectedView !== SpotifyViewType.MENU &&
                 <>
                     <PlaylistsView selectedView={props.selectedView} setselectedView={props.setselectedView} />
                     <ArtistsView selectedView={props.selectedView} setselectedView={props.setselectedView} />

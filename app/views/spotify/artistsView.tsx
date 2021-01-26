@@ -24,7 +24,7 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     }, []);
 
     useEffect(() => {
-        if (props.selectedView === SpotifyViewType.Artists) {
+        if (props.selectedView === SpotifyViewType.ARTISTS) {
             setselectedArtistId(undefined);
         }
     }, [props.selectedView]);
@@ -81,13 +81,13 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     function onOpenArtist(id: string) {
         setselectedArtistId(id);
-        props.setselectedView(SpotifyViewType.Artist);
+        props.setselectedView(SpotifyViewType.ARTIST);
     }
 
     return (
         <>
             {
-                props.selectedView === SpotifyViewType.Artists &&
+                props.selectedView === SpotifyViewType.ARTISTS &&
                 <RefreshableList onRefresh={onRefresh} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={onLoad}>
                     {
                         followedArtists.map((p) =>
@@ -118,7 +118,7 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                props.selectedView !== SpotifyViewType.Artists && selectedArtistId &&
+                props.selectedView !== SpotifyViewType.ARTISTS && selectedArtistId &&
                 <ArtistView selectedView={props.selectedView} setselectedView={props.setselectedView} artistId={selectedArtistId} />
             }
         </>

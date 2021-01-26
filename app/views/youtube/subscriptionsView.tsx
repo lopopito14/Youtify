@@ -73,7 +73,7 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
     return (
         <>
             {
-                props.selectedView === YoutubeViewType.Subscriptions &&
+                props.selectedView === YoutubeViewType.SUBSCRIPTIONS &&
                 <RefreshableList onRefresh={onRefresh} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={onLoad}>
                     {
                         subscriptions.map((p, i) =>

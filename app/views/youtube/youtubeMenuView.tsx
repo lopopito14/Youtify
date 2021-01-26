@@ -14,13 +14,13 @@ export const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) 
     return (
         <>
             {
-                props.selectedView === YoutubeViewType.Menu &&
+                props.selectedView === YoutubeViewType.MENU &&
                 <Content>
                     <View style={{ marginTop: 50 }}>
-                        <Button rounded success style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.Playlists)}>
+                        <Button rounded success style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.PLAYLISTS)}>
                             <Text>Playlists</Text>
                         </Button>
-                        <Button rounded info style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.Subscriptions)}>
+                        <Button rounded info style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.SUBSCRIPTIONS)}>
                             <Text>Subscriptions</Text>
                         </Button>
                         <Button rounded dark style={{ margin: 10 }} onPress={() => { }}>
@@ -30,7 +30,7 @@ export const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) 
                 </Content>
             }
             {
-                props.selectedView !== YoutubeViewType.Menu &&
+                props.selectedView !== YoutubeViewType.MENU &&
                 <>
                     <PlaylistsView selectedView={props.selectedView} setselectedView={props.setselectedView} />
                     <SubscriptionsView selectedView={props.selectedView} setselectedView={props.setselectedView} />

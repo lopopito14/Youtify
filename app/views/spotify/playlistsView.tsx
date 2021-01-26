@@ -23,7 +23,7 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
     }, []);
 
     useEffect(() => {
-        if (props.selectedView === SpotifyViewType.Playlists) {
+        if (props.selectedView === SpotifyViewType.PLAYLISTS) {
             setselectedPlaylistId(undefined);
         }
     }, [props.selectedView]);
@@ -73,13 +73,13 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
 
     function onOpenPlaylist(id: string) {
         setselectedPlaylistId(id);
-        props.setselectedView(SpotifyViewType.Playlist);
+        props.setselectedView(SpotifyViewType.PLAYLIST);
     }
 
     return (
         <>
             {
-                props.selectedView === SpotifyViewType.Playlists &&
+                props.selectedView === SpotifyViewType.PLAYLISTS &&
                 <RefreshableList onRefresh={onRefresh} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={onLoad}>
                     {
                         playlists.map((p) =>
@@ -109,7 +109,7 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
                 </RefreshableList>
             }
             {
-                props.selectedView !== SpotifyViewType.Playlists && selectedPlaylistId &&
+                props.selectedView !== SpotifyViewType.PLAYLISTS && selectedPlaylistId &&
                 <PlaylistView selectedView={props.selectedView} setselectedView={props.setselectedView} playlistId={selectedPlaylistId} />
             }
         </>

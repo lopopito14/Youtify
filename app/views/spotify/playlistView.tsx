@@ -24,7 +24,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     }, [props.playlistId]);
 
     useEffect(() => {
-        if (props.selectedView !== SpotifyViewType.Playlist) {
+        if (props.selectedView !== SpotifyViewType.PLAYLIST) {
             if (sound) {
                 sound.pause();
                 sound.release();
@@ -96,7 +96,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     return (
         <>
             {
-                props.selectedView === SpotifyViewType.Playlist &&
+                props.selectedView === SpotifyViewType.PLAYLIST &&
                 <Content style={{ backgroundColor: spotifyTheme.secondaryColor }}>
                     {
                         loaded && playlist &&

@@ -26,7 +26,7 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     }, []);
 
     useEffect(() => {
-        if (props.selectedView === YoutubeViewType.Playlists) {
+        if (props.selectedView === YoutubeViewType.PLAYLISTS) {
             setselectedPlaylist(undefined);
         }
     }, [props.selectedView]);
@@ -74,13 +74,13 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     function _onOpenPlaylist(playlist: Playlist) {
         setselectedPlaylist(playlist);
-        props.setselectedView(YoutubeViewType.Playlist);
+        props.setselectedView(YoutubeViewType.PLAYLIST);
     }
 
     return (
         <>
             {
-                props.selectedView === YoutubeViewType.Playlists &&
+                props.selectedView === YoutubeViewType.PLAYLISTS &&
                 <RefreshableList onRefresh={_onRefresh} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={_onLoad}>
                     {
                         playlists.map((p, i) =>
@@ -110,7 +110,7 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                props.selectedView !== YoutubeViewType.Playlists && selectedPlaylist &&
+                props.selectedView !== YoutubeViewType.PLAYLISTS && selectedPlaylist &&
                 <PlaylistView selectedView={props.selectedView} setselectedView={props.setselectedView} playlist={selectedPlaylist} />
             }
         </>

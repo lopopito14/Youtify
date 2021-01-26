@@ -899,7 +899,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
         cancelCallback={_modalCancelCallback}
         okCallback={_modalOkCallback}
         title={_modalTitle()}
-        type={ModalType.OkCancel}
+        type={ModalType.OK_CANCEL}
         visible={_modalVisible()}
       />
       <Content style={{ backgroundColor: synchronizeTheme.secondaryColor }}>

@@ -27,7 +27,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     }, [props.playlist]);
 
     useEffect(() => {
-        if (props.selectedView !== YoutubeViewType.Playlist) {
+        if (props.selectedView !== YoutubeViewType.PLAYLIST) {
             if (sound) {
                 sound.pause();
                 sound.release();
@@ -112,7 +112,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     return (
         <>
             {
-                props.selectedView === YoutubeViewType.Playlist &&
+                props.selectedView === YoutubeViewType.PLAYLIST &&
                 <Content style={{ backgroundColor: youtubeTheme.secondaryColor }}>
                     {
                         loaded && playlistItems &&

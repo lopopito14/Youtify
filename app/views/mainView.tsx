@@ -15,25 +15,25 @@ import SynchronizeView from './synchronizeView';
 interface Props { }
 
 export enum MainViewType {
-  None = "NONE",
-  Youtube = "YOUTUBE",
-  Spotify = "SPOTIFY",
-  Synchronize = "SYNCHRONIZED"
+  NONE = "NONE",
+  YOUTUBE = "YOUTUBE",
+  SPOTIFY = "SPOTIFY",
+  SYNCHRONIZE = "SYNCHRONIZE"
 }
 
 export const MainView: React.FunctionComponent<Props> = () => {
   const [state, dispatch] = useReducer(reducer, InitialState);
-  const [selectedView, setselectedView] = useState<MainViewType>(MainViewType.None);
+  const [selectedView, setselectedView] = useState<MainViewType>(MainViewType.NONE);
 
   useEffect(() => {
     if (state.spotifyState.credential.isLogged && !state.youtubeState.credential.isLogged) {
-      setselectedView(MainViewType.Spotify);
+      setselectedView(MainViewType.SPOTIFY);
     } else if (state.youtubeState.credential.isLogged && !state.spotifyState.credential.isLogged) {
-      setselectedView(MainViewType.Youtube);
+      setselectedView(MainViewType.YOUTUBE);
     } else if (state.youtubeState.credential.isLogged && state.spotifyState.credential.isLogged) {
-      setselectedView(MainViewType.Synchronize);
+      setselectedView(MainViewType.SYNCHRONIZE);
     } else {
-      setselectedView(MainViewType.None);
+      setselectedView(MainViewType.NONE);
     }
   }, [state.spotifyState.credential.isLogged, state.youtubeState.credential.isLogged])
 
@@ -46,11 +46,11 @@ export const MainView: React.FunctionComponent<Props> = () => {
   }
 
   function _footerBackgroundColor(): string {
-    if (_isSelected(MainViewType.Youtube)) {
+    if (_isSelected(MainViewType.YOUTUBE)) {
       return youtubeTheme.primaryColor;
-    } else if (_isSelected(MainViewType.Synchronize)) {
+    } else if (_isSelected(MainViewType.SYNCHRONIZE)) {
       return synchronizeTheme.primaryColor;
-    } else if (_isSelected(MainViewType.Spotify)) {
+    } else if (_isSelected(MainViewType.SPOTIFY)) {
       return spotifyTheme.primaryColor;
     }
 
@@ -65,45 +65,45 @@ export const MainView: React.FunctionComponent<Props> = () => {
           <>
             <NotificationToast notifications={state.notifications.notifications} />
             {
-              _isSelected(MainViewType.None) && <NoneView />
+              _isSelected(MainViewType.NONE) && <NoneView />
             }
             {
-              _isSelected(MainViewType.Youtube) && <YoutubeView />
+              _isSelected(MainViewType.YOUTUBE) && <YoutubeView />
             }
             {
-              _isSelected(MainViewType.Spotify) && <SpotifyView />
+              _isSelected(MainViewType.SPOTIFY) && <SpotifyView />
             }
             {
-              _isSelected(MainViewType.Synchronize) && <SynchronizeView />
+              _isSelected(MainViewType.SYNCHRONIZE) && <SynchronizeView />
             }
             {
-              !_isSelected(MainViewType.None) &&
+              !_isSelected(MainViewType.NONE) &&
               <Footer>
                 <FooterTab style={{ backgroundColor: _footerBackgroundColor() }}>
                   {
                     state.youtubeState.credential.isLogged &&
                     <>
-                      <Button vertical={true} onPress={() => setselectedView(MainViewType.Youtube)}>
-                        <Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: "white", opacity: _footerOpacity(MainViewType.Youtube) }} fontSize={1} />
-                        <Text style={{ color: "white", opacity: _footerOpacity(MainViewType.Youtube), fontWeight: 'bold' }}>Youtube</Text>
+                      <Button vertical={true} onPress={() => setselectedView(MainViewType.YOUTUBE)}>
+                        <Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: "white", opacity: _footerOpacity(MainViewType.YOUTUBE) }} fontSize={1} />
+                        <Text style={{ color: "white", opacity: _footerOpacity(MainViewType.YOUTUBE), fontWeight: 'bold' }}>Youtube</Text>
                       </Button>
                     </>
                   }
                   {
                     state.youtubeState.credential.isLogged && state.spotifyState.credential.isLogged &&
                     <>
-                      <Button vertical={true} onPress={() => setselectedView(MainViewType.Synchronize)}>
-                        <Icon name="md-sync-circle" type='Ionicons' style={{ color: "white", opacity: _footerOpacity(MainViewType.Synchronize) }} fontSize={1} />
-                        <Text style={{ color: "white", opacity: _footerOpacity(MainViewType.Synchronize), fontWeight: 'bold' }}>Synchronize</Text>
+                      <Button vertical={true} onPress={() => setselectedView(MainViewType.SYNCHRONIZE)}>
+                        <Icon name="md-sync-circle" type='Ionicons' style={{ color: "white", opacity: _footerOpacity(MainViewType.SYNCHRONIZE) }} fontSize={1} />
+                        <Text style={{ color: "white", opacity: _footerOpacity(MainViewType.SYNCHRONIZE), fontWeight: 'bold' }}>Synchronize</Text>
                       </Button>
                     </>
                   }
                   {
                     state.spotifyState.credential.isLogged &&
                     <>
-                      <Button vertical={true} onPress={() => setselectedView(MainViewType.Spotify)}>
-                        <Icon name="spotify" fontSize={50} type='FontAwesome' style={{ color: "white", opacity: _footerOpacity(MainViewType.Spotify) }} />
-                        <Text style={{ color: "white", opacity: _footerOpacity(MainViewType.Spotify), fontWeight: 'bold' }}>Spotify</Text>
+                      <Button vertical={true} onPress={() => setselectedView(MainViewType.SPOTIFY)}>
+                        <Icon name="spotify" fontSize={50} type='FontAwesome' style={{ color: "white", opacity: _footerOpacity(MainViewType.SPOTIFY) }} />
+                        <Text style={{ color: "white", opacity: _footerOpacity(MainViewType.SPOTIFY), fontWeight: 'bold' }}>Spotify</Text>
                       </Button>
                     </>
                   }

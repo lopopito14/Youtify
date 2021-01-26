@@ -3,7 +3,7 @@ import React, { } from 'react'
 import { Modal } from 'react-native'
 
 export enum ModalType {
-    OkCancel = 'OkCancel'
+    OK_CANCEL = 'OkCancel'
 }
 
 export interface IProps {
@@ -45,7 +45,7 @@ const ModalPopup: React.FunctionComponent<IProps> = (props: IProps) => {
 
                     <View style={{ flexDirection: 'row' }}>
                         {
-                            props.type === ModalType.OkCancel &&
+                            props.type === ModalType.OK_CANCEL &&
                             <>
                                 <Button rounded success onPress={props.okCallback} style={{ marginRight: 10 }}>
                                     <Text style={{
