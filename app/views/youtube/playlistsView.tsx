@@ -1,5 +1,5 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base';
-import React, { useContext, useEffect, useState } from 'react';
+import React from 'react';
 import Context from '../../store/context';
 import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
 import { Playlist } from '../../youtubeApi/youtube-api-models';
@@ -15,17 +15,18 @@ export interface IProps {
 }
 
 const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
-    const [playlists, setplaylists] = useState<Playlist[]>([]);
-    const { state, dispatch } = useContext(Context);
-    const [loaded, setLoaded] = useState(false);
-    const [pageToken, setpageToken] = useState<string | undefined>(undefined);
-    const [selectedPlaylist, setselectedPlaylist] = useState<Playlist | undefined>(undefined);
+    const { state, dispatch } = React.useContext(Context);
 
-    useEffect(() => {
+    const [loaded, setLoaded] = React.useState(false);
+    const [playlists, setplaylists] = React.useState<Playlist[]>([]);
+    const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
+    const [selectedPlaylist, setselectedPlaylist] = React.useState<Playlist | undefined>(undefined);
+
+    React.useEffect(() => {
         _fetchPlaylists();
     }, []);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (props.selectedView === YoutubeViewType.PLAYLISTS) {
             setselectedPlaylist(undefined);
         }

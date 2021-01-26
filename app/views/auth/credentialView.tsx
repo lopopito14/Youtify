@@ -1,5 +1,5 @@
-import { Button, H2, Icon, Left, Right, Text } from "native-base";
-import React, { useEffect, useState } from "react";
+import { Button, Icon, Left, Right, Text } from "native-base";
+import React from "react";
 import { ICredential } from "../../store/state";
 
 interface Props {
@@ -9,18 +9,18 @@ interface Props {
 }
 
 export const CredentialView: React.FunctionComponent<Props> = (props: Props) => {
-  const [canLogOn, setcanLogOn] = useState(true)
-  const [remainingTime, setremainingTime] = useState('');
-  const [interval, setinterval] = useState(0)
+  const [canLogOn, setcanLogOn] = React.useState(true);
+  const [remainingTime, setremainingTime] = React.useState('');
+  const [interval, setinterval] = React.useState(0);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const counterInterval = setInterval(function () {
       setinterval((prev) => prev + 1);
     }, 500);
     return () => clearInterval(counterInterval);
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (props.credential.isLogged) {
 
       const currentDate = new Date(Date.now());
@@ -43,7 +43,7 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
     }
   }, [interval, canLogOn]);
 
-  function logOn() {
+  function _logOn() {
     if (props.credential.refreshToken === '') {
       props.authorizeDelegate();
     }
@@ -57,7 +57,7 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
       <Left>
         <Button iconLeft rounded success
           disabled={!canLogOn}
-          onPress={() => logOn()}>
+          onPress={() => _logOn()}>
           <Icon name='sync' type="FontAwesome5" />
           <Text>Log on</Text>
         </Button>

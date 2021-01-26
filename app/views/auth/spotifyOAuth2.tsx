@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import { AuthConfiguration, authorize, refresh } from "react-native-app-auth";
 import Context from "../../store/context";
 import { spotifyApiAuthorizeError, spotifyApiAuthorizeRequest, spotifyApiAuthorizeSucess, spotifyApiRefreshError, spotifyApiRefreshRequest, spotifyApiRefreshSucess } from "../../store/types/spotify_credential_actions";
@@ -16,20 +16,21 @@ interface Props {
 }
 
 export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
-  const { state, dispatch } = useContext(Context);
+  const { state, dispatch } = React.useContext(Context);
+
   const storageKey = "spotify_refresh_token";
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (state.spotifyState.credential.isLogged) {
       if (state.spotifyState.userProfile.id == '') {
-        getSpotifyUserId();
+        _getSpotifyUserId();
       }
     } else {
-      tryRefreshSpotify();
+      _tryRefreshSpotify();
     }
   }, [state.spotifyState.credential.isLogged]);
 
-  async function tryRefreshSpotify() {
+  async function _tryRefreshSpotify() {
     try {
       const value = await AsyncStorage.getItem(storageKey);
       if (value !== null) {
@@ -40,7 +41,7 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
             dispatch(spotifyApiRefreshSucess(refreshResult));
 
             if (refreshResult.refreshToken) {
-              storeRefreshToken(refreshResult.refreshToken);
+              _storeRefreshToken(refreshResult.refreshToken);
             }
           }
         } catch (error) {
@@ -52,20 +53,20 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
-  async function authorizeSpotify() {
+  async function _authorizeSpotify() {
     try {
       dispatch(spotifyApiAuthorizeRequest());
       var authorizeResult = await authorize(props.authorizeConfiguration);
       if (authorizeResult) {
         dispatch(spotifyApiAuthorizeSucess(authorizeResult));
-        storeRefreshToken(authorizeResult.refreshToken);
+        _storeRefreshToken(authorizeResult.refreshToken);
       }
     } catch (error) {
       dispatch(spotifyApiAuthorizeError(error));
     }
   }
 
-  async function refreshSpotify() {
+  async function _refreshSpotify() {
     try {
       dispatch(spotifyApiRefreshRequest());
       var refreshResult = await refresh(props.authorizeConfiguration, { refreshToken: state.spotifyState.credential.refreshToken });
@@ -73,7 +74,7 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
         dispatch(spotifyApiRefreshSucess(refreshResult));
 
         if (refreshResult.refreshToken) {
-          storeRefreshToken(refreshResult.refreshToken);
+          _storeRefreshToken(refreshResult.refreshToken);
         }
       }
     } catch (error) {
@@ -81,7 +82,7 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
-  async function getSpotifyUserId() {
+  async function _getSpotifyUserId() {
     try {
       dispatch(spotifyCurrentProfileRequest());
       var spotifyApi = new SpotifyApi();
@@ -95,7 +96,7 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
-  async function storeRefreshToken(token: string) {
+  async function _storeRefreshToken(token: string) {
     try {
       await AsyncStorage.setItem(storageKey, token);
     } catch (e) {
@@ -113,8 +114,8 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
       <CardItem>
         <CredentialView
           credential={state.spotifyState.credential}
-          authorizeDelegate={authorizeSpotify}
-          refreshDelegate={refreshSpotify} />
+          authorizeDelegate={_authorizeSpotify}
+          refreshDelegate={_refreshSpotify} />
       </CardItem >
       {
         state.spotifyState.userProfile.loading &&

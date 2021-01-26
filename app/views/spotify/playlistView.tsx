@@ -1,5 +1,5 @@
 import { Body, Button, Card, CardItem, Content, H1, H2, Icon, Left, Spinner, Text, Thumbnail } from 'native-base'
-import React, { useContext, useEffect, useState } from 'react'
+import React from 'react'
 import SpotifyApi from 'spotify-web-api-js';
 import Context from '../../store/context';
 import { spotifyTheme } from '../theme';
@@ -13,17 +13,18 @@ interface IProps {
 }
 
 const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
-    const [playlist, setPlaylist] = useState<globalThis.SpotifyApi.SinglePlaylistResponse>();
-    const { state } = useContext(Context);
-    const [loaded, setLoaded] = useState(false);
-    const [trackIdPlaying, setTrackIdPlaying] = useState<string | undefined>(undefined);
-    const [sound, setsound] = useState<Sound | undefined>(undefined);
+    const { state } = React.useContext(Context);
 
-    useEffect(() => {
-        fetchPlaylist();
+    const [loaded, setLoaded] = React.useState(false);
+    const [playlist, setPlaylist] = React.useState<globalThis.SpotifyApi.SinglePlaylistResponse>();
+    const [trackIdPlaying, setTrackIdPlaying] = React.useState<string | undefined>(undefined);
+    const [sound, setsound] = React.useState<Sound | undefined>(undefined);
+
+    React.useEffect(() => {
+        _fetchPlaylist();
     }, [props.playlistId]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (props.selectedView !== SpotifyViewType.PLAYLIST) {
             if (sound) {
                 sound.pause();
@@ -34,7 +35,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
         }
     }, [props.selectedView]);
 
-    async function fetchPlaylist() {
+    async function _fetchPlaylist() {
         try {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
@@ -121,7 +122,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                 playlist.tracks.items.map((t, i) =>
                                     (t.track.type === 'track' &&
                                         <CardItem bordered key={i} style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
-                                            <Text style={{ marginRight: 20 }}>{i}</Text>
+                                            <Text style={{ marginRight: 20 }}>{i + 1}</Text>
                                             <Body>
                                                 <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{t.track.name}</Text>
                                                 <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{t.track.artists.map((a) => a.name).join(', ')}</Text>
@@ -134,7 +135,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     ) ||
                                     (t.track.type === 'episode' &&
                                         <CardItem bordered key={i} style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
-                                            <Text style={{ marginRight: 20 }}>{i}</Text>
+                                            <Text style={{ marginRight: 20 }}>{i + 1}</Text>
                                             <Body>
                                                 <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{t.track.name}</Text>
                                             </Body>

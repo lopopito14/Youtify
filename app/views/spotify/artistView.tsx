@@ -1,5 +1,5 @@
 import { Body, Button, Card, CardItem, Content, H1, H2, Icon, Left, List, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base'
-import React, { useContext, useEffect, useState } from 'react'
+import React from 'react'
 import SpotifyApi from 'spotify-web-api-js';
 import Context from '../../store/context';
 import { spotifyTheme } from '../theme';
@@ -13,21 +13,22 @@ interface IProps {
 }
 
 const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
-    const [artist, setArtist] = useState<globalThis.SpotifyApi.SingleArtistResponse>();
-    const [relatedArtists, setRelatedArtists] = useState<globalThis.SpotifyApi.ArtistsRelatedArtistsResponse>();
-    const [relatedArtistsFollowingStatus, setrelatedArtistsFollowingStatus] = useState<boolean[] | undefined>([]);
-    const [artistTopTracks, setArtistTopTracks] = useState<globalThis.SpotifyApi.ArtistsTopTracksResponse>();
-    const { state } = useContext(Context);
-    const [loaded, setLoaded] = useState(false);
-    const [trackIdPlaying, setTrackIdPlaying] = useState<string | undefined>(undefined);
-    const [sound, setsound] = useState<Sound | undefined>(undefined);
-    const [followOrUnfollowId, setfollowOrUnfollowId] = useState<string | undefined>(undefined)
+    const { state } = React.useContext(Context);
 
-    useEffect(() => {
+    const [artist, setArtist] = React.useState<globalThis.SpotifyApi.SingleArtistResponse>();
+    const [relatedArtists, setRelatedArtists] = React.useState<globalThis.SpotifyApi.ArtistsRelatedArtistsResponse>();
+    const [relatedArtistsFollowingStatus, setrelatedArtistsFollowingStatus] = React.useState<boolean[] | undefined>([]);
+    const [artistTopTracks, setArtistTopTracks] = React.useState<globalThis.SpotifyApi.ArtistsTopTracksResponse>();
+    const [loaded, setLoaded] = React.useState(false);
+    const [trackIdPlaying, setTrackIdPlaying] = React.useState<string | undefined>(undefined);
+    const [sound, setsound] = React.useState<Sound | undefined>(undefined);
+    const [followOrUnfollowId, setfollowOrUnfollowId] = React.useState<string | undefined>(undefined)
+
+    React.useEffect(() => {
         _fetchAllArtistDatas();
     }, [props.artistId]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (props.selectedView !== SpotifyViewType.ARTIST) {
             if (sound) {
                 sound.pause();
@@ -38,7 +39,7 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
         }
     }, [props.selectedView]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (followOrUnfollowId) {
             _onFollow(followOrUnfollowId);
         }

@@ -1,5 +1,4 @@
 import { TYoutubeCredentialsActions } from "./youtube_credential_types";
-import { TMyPlaylistsActions } from "./my_playlists_types";
 import { TYoutubeCurrentProfileActions } from "./youtube_userProfile_types";
 
-export type TYoutubeActions = TYoutubeCredentialsActions | TYoutubeCurrentProfileActions | TMyPlaylistsActions;
+export type TYoutubeActions = TYoutubeCredentialsActions | TYoutubeCurrentProfileActions;

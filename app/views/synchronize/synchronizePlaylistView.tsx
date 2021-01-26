@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React from 'react';
 import Context from '../../store/context';
 import { Body, Button, Card, CardItem, Content, H1, H3, Icon, Left, List, Right, Separator, Spinner, Text, Thumbnail } from 'native-base';
 import { spotifyTheme, synchronizeTheme, youtubeTheme } from '../theme';
@@ -51,38 +51,38 @@ interface ISynchro {
 }
 
 export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
-  const { state, dispatch } = useContext(Context);
+  const { state, dispatch } = React.useContext(Context);
 
-  const [save, setsave] = useState<IMyPlaylistSave>({
+  const [save, setsave] = React.useState<IMyPlaylistSave>({
     loading: false,
     loaded: false,
     items: []
   });
 
-  const [youtubeVideos, setYoutubeVideos] = useState<IYoutubeVideos>({
+  const [youtubeVideos, setYoutubeVideos] = React.useState<IYoutubeVideos>({
     loaded: false,
     loading: false,
     videos: []
   });
-  const [playlistItemPageToken, setplaylistItemPageToken] = useState<string | undefined>(undefined);
+  const [playlistItemPageToken, setplaylistItemPageToken] = React.useState<string | undefined>(undefined);
 
-  const [spotifyTracks, setSpotifyTracks] = useState<ISpotifyTracks>({
+  const [spotifyTracks, setSpotifyTracks] = React.useState<ISpotifyTracks>({
     loaded: false,
     loading: false,
     tracks: []
   });
-  const [spotifyTracksPageOffset, setSpotifyTracksPageOffset] = useState<number | undefined>(undefined);
+  const [spotifyTracksPageOffset, setSpotifyTracksPageOffset] = React.useState<number | undefined>(undefined);
 
-  const [deleteYoutubePlaylistVideos, setdeleteYoutubePlaylistVideos] = useState<{ title: string, year: number, month: number, playlistId: string } | undefined>(undefined);
-  const [synchronizeYoutubePlaylist, setsynchronizeYoutubePlaylist] = useState<{ title: string, year: number, month: number } | undefined>(undefined);
-  const [deleteSpotifyPlaylistTracks, setdeleteSpotifyPlaylistItems] = useState<{ title: string, year: number, month: number, playlistId: string } | undefined>(undefined);
-  const [synchronizeSpotifyPlaylist, setsynchronizeSpotifyPlaylist] = useState<{ title: string, year: number, month: number } | undefined>(undefined);
+  const [deleteYoutubePlaylistVideos, setdeleteYoutubePlaylistVideos] = React.useState<{ title: string, year: number, month: number, playlistId: string } | undefined>(undefined);
+  const [synchronizeYoutubePlaylist, setsynchronizeYoutubePlaylist] = React.useState<{ title: string, year: number, month: number } | undefined>(undefined);
+  const [deleteSpotifyPlaylistTracks, setdeleteSpotifyPlaylistItems] = React.useState<{ title: string, year: number, month: number, playlistId: string } | undefined>(undefined);
+  const [synchronizeSpotifyPlaylist, setsynchronizeSpotifyPlaylist] = React.useState<{ title: string, year: number, month: number } | undefined>(undefined);
 
-  useEffect(() => {
+  React.useEffect(() => {
     _getSave();
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (props.myPlaylist.youtubePlaylist?.id) {
       _fetchYoutubeVideos();
     } else {
@@ -96,13 +96,13 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
     }
   }, [props.myPlaylist.youtubePlaylist?.id]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (playlistItemPageToken) {
       _fetchYoutubeVideos(playlistItemPageToken);
     }
   }, [playlistItemPageToken]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (props.myPlaylist.spotifyPlaylist?.id) {
       _fetchSpotifyTracks();
     } else {
@@ -116,7 +116,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
     }
   }, [props.myPlaylist.spotifyPlaylist?.id]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (spotifyTracksPageOffset) {
       _fetchSpotifyTracks(spotifyTracksPageOffset);
     }

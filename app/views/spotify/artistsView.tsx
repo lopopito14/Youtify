@@ -1,5 +1,5 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base'
-import React, { useContext, useEffect, useState } from 'react'
+import React from 'react'
 import RefreshableList from '../utils/refreshableList';
 import SpotifyApi from 'spotify-web-api-js';
 import Context from '../../store/context';
@@ -13,36 +13,37 @@ interface IProps {
 }
 
 const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
-    const { state } = useContext(Context);
-    const [followedArtists, setFollowedArtists] = useState<globalThis.SpotifyApi.ArtistObjectFull[]>([]);
-    const [loaded, setLoaded] = useState(false);
-    const [after, setafter] = useState<string | undefined>(undefined);
-    const [selectedArtistId, setselectedArtistId] = useState<string | undefined>(undefined);
+    const { state } = React.useContext(Context);
 
-    useEffect(() => {
-        fetchFollowedArtists();
+    const [followedArtists, setFollowedArtists] = React.useState<globalThis.SpotifyApi.ArtistObjectFull[]>([]);
+    const [loaded, setLoaded] = React.useState(false);
+    const [after, setafter] = React.useState<string | undefined>(undefined);
+    const [selectedArtistId, setselectedArtistId] = React.useState<string | undefined>(undefined);
+
+    React.useEffect(() => {
+        _fetchFollowedArtists();
     }, []);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (props.selectedView === SpotifyViewType.ARTISTS) {
             setselectedArtistId(undefined);
         }
     }, [props.selectedView]);
 
-    function onRefresh() {
-        fetchFollowedArtists();
+    function _onRefresh() {
+        _fetchFollowedArtists();
     }
 
-    function onLoad() {
+    function _onLoad() {
         if (!loaded) {
-            fetchFollowedArtists(after);
+            _fetchFollowedArtists(after);
         }
         else {
             console.log("all followed artists loaded");
         }
     }
 
-    async function fetchFollowedArtists(after: string | undefined = undefined) {
+    async function _fetchFollowedArtists(after: string | undefined = undefined) {
         try {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
@@ -79,7 +80,7 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
         }
     }
 
-    function onOpenArtist(id: string) {
+    function _onOpenArtist(id: string) {
         setselectedArtistId(id);
         props.setselectedView(SpotifyViewType.ARTIST);
     }
@@ -88,7 +89,7 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
         <>
             {
                 props.selectedView === SpotifyViewType.ARTISTS &&
-                <RefreshableList onRefresh={onRefresh} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={onLoad}>
+                <RefreshableList onRefresh={_onRefresh} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={_onLoad}>
                     {
                         followedArtists.map((p) =>
                             <ListItem thumbnail key={p.id}>
@@ -104,7 +105,7 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     <Text note numberOfLines={1}>followers: {p.followers.total}</Text>
                                 </Body>
                                 <Right>
-                                    <Button iconRight light onPress={() => onOpenArtist(p.id)}>
+                                    <Button iconRight light onPress={() => _onOpenArtist(p.id)}>
                                         <Text>Manage</Text>
                                         <Icon name='arrow-forward' />
                                     </Button>

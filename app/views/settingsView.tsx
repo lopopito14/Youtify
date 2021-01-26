@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { YoutubeOAuth2 } from './auth/youtubeOAuth2';
 import { SpotifyOAuth2 } from './auth/spotifyOAuth2';
 import { Body, Button, Content, Header, Left, Text, Title } from 'native-base';
@@ -10,18 +10,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface Props { }
 
 export const SettingsView: React.FunctionComponent<Props> = () => {
-
   const [purgeLocalStorage, setPurgeLocalStorage] = React.useState<boolean>(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (purgeLocalStorage) {
       _purgeLocalStorage();
     }
   }, [purgeLocalStorage]);
 
   const youtubeAuthorizeConfiguration: AuthConfiguration = {
-    clientId:
-      '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
+    clientId: '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
     redirectUrl: 'com.lopopitoconverter:/youtubeoauth2callback',
     scopes: [
       'https://www.googleapis.com/auth/youtube.readonly',

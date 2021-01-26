@@ -16,7 +16,7 @@ const reducer: Reducer<ICredential, TActions> = (state: ICredential = InitialSta
         case Types.YOUTUBE_API_AUTHORIZE_REQUEST:
             return state;
 
-        case Types.YOUTUBE_API_AUTHORIZE_SUCCEESS:
+        case Types.YOUTUBE_API_AUTHORIZE_SUCCESS:
             return {
                 ...state,
                 isLogged: true,
@@ -31,7 +31,7 @@ const reducer: Reducer<ICredential, TActions> = (state: ICredential = InitialSta
         case Types.YOUTUBE_API_REFRESH_REQUEST:
             return state;
 
-        case Types.YOUTUBE_API_REFRESH_SUCCEESS:
+        case Types.YOUTUBE_API_REFRESH_SUCCESS:
             return {
                 ...state,
                 isLogged: true,

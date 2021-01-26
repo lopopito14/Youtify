@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React from 'react'
 import Context from '../../store/context';
 import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
 import { PlaylistItem } from '../../youtubeApi/youtube-api-models';
@@ -11,12 +11,13 @@ interface IProps {
 }
 
 export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> = (props: IProps) => {
-    const { state, dispatch } = useContext(Context);
-    const [favoritepageToken, setfavoritepageToken] = useState<string | undefined>(undefined);
+    const { state, dispatch } = React.useContext(Context);
+
+    const [favoritepageToken, setfavoritepageToken] = React.useState<string | undefined>(undefined);
 
     const favoritePlaylistName = "FL65Vblm8jhqYm8-0QPi3Z6A";
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (state.youtubeState.userProfile.loaded) {
             if (!props.myPlaylist.loaded) {
                 _fetchFavoritePlaylistItems();
@@ -24,7 +25,7 @@ export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> =
         }
     }, [state.youtubeState.userProfile.loaded]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (favoritepageToken) {
             _fetchFavoritePlaylistItems(favoritepageToken);
         }

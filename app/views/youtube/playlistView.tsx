@@ -1,5 +1,5 @@
 import { Body, Button, Card, CardItem, Content, H1, H2, Icon, Left, Spinner, Text, Thumbnail } from 'native-base';
-import React, { useContext, useEffect, useState } from 'react';
+import React from 'react';
 import Context from '../../store/context';
 import { youtubeTheme } from '../theme';
 import Sound from 'react-native-sound';
@@ -15,18 +15,19 @@ interface IProps {
 }
 
 const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
-    const [playlistItems, setPlaylistItems] = useState<PlaylistItem[]>([]);
-    const { state, dispatch } = useContext(Context);
-    const [loaded, setLoaded] = useState(true);
-    const [pageToken, setpageToken] = useState<string | undefined>(undefined);
-    const [trackIdPlaying, setTrackIdPlaying] = useState<string | undefined>(undefined);
-    const [sound, setsound] = useState<Sound | undefined>(undefined);
+    const { state, dispatch } = React.useContext(Context);
 
-    useEffect(() => {
+    const [loaded, setLoaded] = React.useState(true);
+    const [playlistItems, setPlaylistItems] = React.useState<PlaylistItem[]>([]);
+    const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
+    const [trackIdPlaying, setTrackIdPlaying] = React.useState<string | undefined>(undefined);
+    const [sound, setsound] = React.useState<Sound | undefined>(undefined);
+
+    React.useEffect(() => {
         _fetchPlaylistItems();
     }, [props.playlist]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (props.selectedView !== YoutubeViewType.PLAYLIST) {
             if (sound) {
                 sound.pause();
@@ -136,7 +137,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                             {
                                 playlistItems.map((item, i) =>
                                     <CardItem bordered key={i} style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
-                                        <Text style={{ marginRight: 20 }}>{i}</Text>
+                                        <Text style={{ marginRight: 20 }}>{i + 1}</Text>
                                         <Body>
                                             <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{item.snippet?.title}</Text>
                                             <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{item.snippet?.channelTitle}</Text>

@@ -1,5 +1,5 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base'
-import React, { useContext, useEffect, useState } from 'react'
+import React from 'react'
 import Context from '../../store/context';
 import SpotifyApi from 'spotify-web-api-js';
 import RefreshableList from '../utils/refreshableList';
@@ -13,35 +13,36 @@ export interface IProps {
 }
 
 export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
-    const [playlists, setPlaylists] = useState<globalThis.SpotifyApi.PlaylistObjectSimplified[]>([]);
-    const { state } = useContext(Context);
-    const [loaded, setLoaded] = useState(false);
-    const [selectedPlaylistId, setselectedPlaylistId] = useState<string | undefined>(undefined);
+    const { state } = React.useContext(Context);
 
-    useEffect(() => {
-        fetchPlaylists();
+    const [loaded, setLoaded] = React.useState(false);
+    const [playlists, setPlaylists] = React.useState<globalThis.SpotifyApi.PlaylistObjectSimplified[]>([]);
+    const [selectedPlaylistId, setselectedPlaylistId] = React.useState<string | undefined>(undefined);
+
+    React.useEffect(() => {
+        _fetchPlaylists();
     }, []);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (props.selectedView === SpotifyViewType.PLAYLISTS) {
             setselectedPlaylistId(undefined);
         }
     }, [props.selectedView]);
 
-    function onRefresh() {
-        fetchPlaylists();
+    function _onRefresh() {
+        _fetchPlaylists();
     }
 
-    function onLoad() {
+    function _onLoad() {
         if (!loaded) {
-            fetchPlaylists(playlists.length);
+            _fetchPlaylists(playlists.length);
         }
         else {
             console.log("all playlists loaded");
         }
     }
 
-    async function fetchPlaylists(offset: number = 0) {
+    async function _fetchPlaylists(offset: number = 0) {
         try {
             var spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
@@ -71,7 +72,7 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
         }
     }
 
-    function onOpenPlaylist(id: string) {
+    function _onOpenPlaylist(id: string) {
         setselectedPlaylistId(id);
         props.setselectedView(SpotifyViewType.PLAYLIST);
     }
@@ -80,7 +81,7 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
         <>
             {
                 props.selectedView === SpotifyViewType.PLAYLISTS &&
-                <RefreshableList onRefresh={onRefresh} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={onLoad}>
+                <RefreshableList onRefresh={_onRefresh} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={_onLoad}>
                     {
                         playlists.map((p) =>
                             <ListItem thumbnail key={p.id}>
@@ -95,7 +96,7 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
                                     <Text note numberOfLines={1}>{p.tracks.total} tracks</Text>
                                 </Body>
                                 <Right>
-                                    <Button iconRight light onPress={() => onOpenPlaylist(p.id)}>
+                                    <Button iconRight light onPress={() => _onOpenPlaylist(p.id)}>
                                         <Text>Manage</Text>
                                         <Icon name='arrow-forward' />
                                     </Button>

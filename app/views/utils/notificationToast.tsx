@@ -1,5 +1,5 @@
 import { Toast } from 'native-base';
-import React, { FunctionComponent, useContext, useEffect } from 'react'
+import React from 'react'
 import Context from '../../store/context';
 import { INotification, NotificationType } from '../../store/state';
 import { popNotification } from '../../store/types/notifications_actions';
@@ -8,10 +8,10 @@ interface IProps {
     notifications: INotification[];
 }
 
-const NotificationToast: FunctionComponent<IProps> = (props: IProps) => {
-    const { dispatch } = useContext(Context);
+const NotificationToast: React.FunctionComponent<IProps> = (props: IProps) => {
+    const { dispatch } = React.useContext(Context);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (props.notifications.length > 0) {
             const notification = props.notifications[0];
 

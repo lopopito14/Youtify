@@ -16,7 +16,7 @@ const RefreshableList: React.FunctionComponent<IProps> = (props: IProps) => {
         return e.layoutMeasurement.height + e.contentOffset.y >= e.contentSize.height - 1;
     };
 
-    function onScroll(e: NativeScrollEvent) {
+    function _onScroll(e: NativeScrollEvent) {
         if (props.lazyLoading && endPageReached(e)) {
             props.onLoad();
         }
@@ -24,7 +24,7 @@ const RefreshableList: React.FunctionComponent<IProps> = (props: IProps) => {
 
     return (
         <ScrollView
-            onScroll={({ nativeEvent: e }) => onScroll(e)}
+            onScroll={({ nativeEvent: e }) => _onScroll(e)}
             contentInsetAdjustmentBehavior="automatic"
             showsVerticalScrollIndicator={false}
             style={{ backgroundColor: props.backgroundColor }}

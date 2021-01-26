@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React from 'react';
 import { YoutubeView } from './youtubeView';
 import { SpotifyView } from './spotifyView';
 import { reducer } from '../store/reducer';
@@ -22,10 +22,11 @@ export enum MainViewType {
 }
 
 export const MainView: React.FunctionComponent<Props> = () => {
-  const [state, dispatch] = useReducer(reducer, InitialState);
-  const [selectedView, setselectedView] = useState<MainViewType>(MainViewType.NONE);
+  const [state, dispatch] = React.useReducer(reducer, InitialState);
 
-  useEffect(() => {
+  const [selectedView, setselectedView] = React.useState<MainViewType>(MainViewType.NONE);
+
+  React.useEffect(() => {
     if (state.spotifyState.credential.isLogged && !state.youtubeState.credential.isLogged) {
       setselectedView(MainViewType.SPOTIFY);
     } else if (state.youtubeState.credential.isLogged && !state.spotifyState.credential.isLogged) {

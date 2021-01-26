@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React from 'react'
 import Context from '../../store/context';
 import { pushSpotifyErrorNotification, pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
 import { Playlists } from '../../youtubeApi/youtube-api-playlists';
@@ -13,11 +13,12 @@ interface IProps {
 }
 
 export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = (props: IProps) => {
-    const { state, dispatch } = useContext(Context);
-    const [youtubePlaylistsPageToken, setYoutubePlaylistsPageToken] = useState<string | undefined>(undefined);
-    const [spotifyPlaylistsOffset, setSpotifyPlaylistsOffset] = useState<number | undefined>(undefined);
+    const { state, dispatch } = React.useContext(Context);
 
-    useEffect(() => {
+    const [youtubePlaylistsPageToken, setYoutubePlaylistsPageToken] = React.useState<string | undefined>(undefined);
+    const [spotifyPlaylistsOffset, setSpotifyPlaylistsOffset] = React.useState<number | undefined>(undefined);
+
+    React.useEffect(() => {
         if (state.youtubeState.userProfile.loaded) {
             if (!props.youtubePlaylists.loaded) {
                 _fetchYoutubePlaylists();
@@ -25,13 +26,13 @@ export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = (props
         }
     }, [state.youtubeState.userProfile.loaded]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (youtubePlaylistsPageToken) {
             _fetchYoutubePlaylists(youtubePlaylistsPageToken);
         }
     }, [youtubePlaylistsPageToken]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (state.spotifyState.userProfile.loaded) {
             if (!props.spotifyPlaylists.loaded) {
                 _fetchSpotifyPlaylists();
@@ -39,7 +40,7 @@ export const PlaylistsBackgroundWorker: React.FunctionComponent<IProps> = (props
         }
     }, [state.spotifyState.userProfile.loaded]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (spotifyPlaylistsOffset) {
             _fetchSpotifyPlaylists(spotifyPlaylistsOffset);
         }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Body, Button, Header, Icon, Left, Title } from 'native-base';
 import { spotifyTheme } from './theme';
 import { SpotifyMenuView } from './spotify/spotifyMenuView';
@@ -14,7 +14,7 @@ export enum SpotifyViewType {
 }
 
 export const SpotifyView: React.FunctionComponent<Props> = () => {
-    const [selectedView, setselectedView] = useState<SpotifyViewType>(SpotifyViewType.MENU);
+    const [selectedView, setselectedView] = React.useState<SpotifyViewType>(SpotifyViewType.MENU);
 
     function _isSelectedView(view: SpotifyViewType) {
         return selectedView === view;
@@ -37,7 +37,7 @@ export const SpotifyView: React.FunctionComponent<Props> = () => {
         return 'Spotify';
     }
 
-    function onBackButtonPressed() {
+    function _onBackButtonPressed() {
         if (selectedView === SpotifyViewType.ARTIST) {
             setselectedView(SpotifyViewType.ARTISTS);
         }
@@ -55,7 +55,7 @@ export const SpotifyView: React.FunctionComponent<Props> = () => {
                 <Left>
                     {
                         !_isSelectedView(SpotifyViewType.MENU) &&
-                        <Button transparent onPress={onBackButtonPressed}>
+                        <Button transparent onPress={_onBackButtonPressed}>
                             <Icon name='arrow-back' />
                         </Button>
                     }
