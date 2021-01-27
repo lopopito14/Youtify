@@ -15,7 +15,7 @@ export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> =
 
     const [favoritepageToken, setfavoritepageToken] = React.useState<string | undefined>(undefined);
 
-    const favoritePlaylistName = "FL65Vblm8jhqYm8-0QPi3Z6A";
+    const favoritePlaylistId = "FL65Vblm8jhqYm8-0QPi3Z6A";
 
     React.useEffect(() => {
         if (state.youtubeState.userProfile.loaded) {
@@ -42,7 +42,7 @@ export const FavoritePlaylistBackgroundWorker: React.FunctionComponent<IProps> =
             });
 
             var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
-                playlistId: favoritePlaylistName,
+                playlistId: favoritePlaylistId,
                 part: ['snippet', 'contentDetails'],
                 maxResults: 50,
                 pageToken: pageToken

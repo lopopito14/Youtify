@@ -75,8 +75,6 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                     });
 
                     if (videosResponse && videosResponse.items) {
-                        console.log(videosResponse.items[0]);
-
                         const items = videosResponse.items;
                         setYoutubeVideos((prev) => {
                             return [...prev, ...items]

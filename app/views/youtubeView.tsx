@@ -10,7 +10,8 @@ export enum YoutubeViewType {
     PLAYLISTS,
     PLAYLIST,
     SUBSCRIPTIONS,
-    SUBSCRIPTION
+    SUBSCRIPTION,
+    ADJUST_FAVORITES
 }
 
 export const YoutubeView: React.FunctionComponent<Props> = () => {
@@ -32,6 +33,9 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
         }
         if (_isSelectedView(YoutubeViewType.PLAYLIST)) {
             return "Playlist";
+        }
+        if (_isSelectedView(YoutubeViewType.ADJUST_FAVORITES)) {
+            return "Adjust Favorites"
         }
 
         return 'Youtube';

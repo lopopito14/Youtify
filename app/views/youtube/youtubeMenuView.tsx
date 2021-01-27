@@ -3,6 +3,7 @@ import { Button, Content, Text, View } from 'native-base';
 import { YoutubeViewType } from '../youtubeView';
 import PlaylistsView from './playlistsView';
 import SubscriptionsView from './subscriptionsView';
+import AdjustFavoritesView from './adjustFavoritesView';
 
 interface IProps {
     selectedView: YoutubeViewType;
@@ -23,8 +24,8 @@ export const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) 
                         <Button rounded info style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.SUBSCRIPTIONS)}>
                             <Text>Subscriptions</Text>
                         </Button>
-                        <Button rounded dark style={{ margin: 10 }} onPress={() => { }}>
-                            <Text>Adjust Favorites Playlist</Text>
+                        <Button rounded dark style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.ADJUST_FAVORITES)}>
+                            <Text>Adjust Favorites</Text>
                         </Button>
                     </View>
                 </Content>
@@ -34,6 +35,7 @@ export const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) 
                 <>
                     <PlaylistsView selectedView={props.selectedView} setselectedView={props.setselectedView} />
                     <SubscriptionsView selectedView={props.selectedView} setselectedView={props.setselectedView} />
+                    <AdjustFavoritesView selectedView={props.selectedView} setselectedView={props.setselectedView} />
                 </>
             }
         </>
