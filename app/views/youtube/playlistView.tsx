@@ -1,12 +1,15 @@
-import { Body, Button, Card, CardItem, Content, H1, H2, Icon, Left, Spinner, Text, Thumbnail } from 'native-base';
+import { Body, Button, Card, CardItem, Content, H1, H2, Icon, Left, List, ListItem, Spinner, Text, Thumbnail, View } from 'native-base';
 import React from 'react';
 import Context from '../../store/context';
 import { youtubeTheme } from '../theme';
 import Sound from 'react-native-sound';
 import { YoutubeViewType } from '../youtubeView';
-import { Playlist, PlaylistItem } from '../../youtubeApi/youtube-api-models';
+import { Playlist, Video } from '../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
 import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
+import YoutubePlayer, { YoutubeIframeRef } from "react-native-youtube-iframe";
+import { Image } from 'react-native';
+import { Videos } from '../../youtubeApi/youtube-api-videos';
 
 interface IProps {
     selectedView: YoutubeViewType;
@@ -18,14 +21,22 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { state, dispatch } = React.useContext(Context);
 
     const [loaded, setLoaded] = React.useState(true);
-    const [playlistItems, setPlaylistItems] = React.useState<PlaylistItem[]>([]);
+    const [youtubeVideos, setYoutubeVideos] = React.useState<Video[]>([]);
     const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
-    const [trackIdPlaying, setTrackIdPlaying] = React.useState<string | undefined>(undefined);
+    const [videoIdPlaying, setVideoIdPlaying] = React.useState<string | undefined>(undefined);
     const [sound, setsound] = React.useState<Sound | undefined>(undefined);
 
+    const playerRef = React.useRef<YoutubeIframeRef>(null);
+
     React.useEffect(() => {
-        _fetchPlaylistItems();
+        _fetchPlaylistVideos();
     }, [props.playlist]);
+
+    React.useEffect(() => {
+        if (pageToken) {
+            _fetchPlaylistVideos(pageToken);
+        }
+    }, [pageToken]);
 
     React.useEffect(() => {
         if (props.selectedView !== YoutubeViewType.PLAYLIST) {
@@ -33,29 +44,48 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                 sound.pause();
                 sound.release();
                 setsound(undefined);
-                setTrackIdPlaying(undefined);
+                setVideoIdPlaying(undefined);
             }
         }
     }, [props.selectedView]);
 
-    async function _fetchPlaylistItems() {
+    async function _fetchPlaylistVideos(pageToken: string | undefined = undefined) {
         try {
-            var response = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
+            var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
                 playlistId: props.playlist.id ? props.playlist.id : '',
-                part: ['snippet', 'contentDetails'],
+                part: ['contentDetails'],
                 maxResults: 50,
                 pageToken: pageToken
             });
-            if (response && response.items) {
-                if (pageToken) {
-                    setPlaylistItems([...playlistItems, ...response.items]);
-                }
-                else {
-                    setPlaylistItems(response.items);
+            if (playlistItemsResponse) {
+
+                if (playlistItemsResponse.items) {
+                    let videosIds: string[] = [];
+
+                    playlistItemsResponse.items.forEach(i => {
+                        if (i.contentDetails?.videoId) {
+                            videosIds.push(i.contentDetails?.videoId);
+                        }
+                    });
+
+                    var videosResponse = await new Videos(state.youtubeState.credential.accessToken).list({
+                        id: videosIds,
+                        part: ['snippet', 'contentDetails', 'statistics'],
+                        maxResults: 50,
+                    });
+
+                    if (videosResponse && videosResponse.items) {
+                        console.log(videosResponse.items[0]);
+
+                        const items = videosResponse.items;
+                        setYoutubeVideos((prev) => {
+                            return [...prev, ...items]
+                        });
+                    }
                 }
 
-                if (response.nextPageToken) {
-                    setpageToken(response.nextPageToken);
+                if (playlistItemsResponse.nextPageToken) {
+                    setpageToken(playlistItemsResponse.nextPageToken);
                 } else {
                     setLoaded(true);
                     setpageToken(undefined);
@@ -66,49 +96,44 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
         }
     }
 
-    // function _msToTime(milliseconds: number) {
-    //     var seconds = Math.floor((milliseconds / 1000) % 60);
-    //     var minutes = Math.floor((milliseconds / (1000 * 60)) % 60);
+    const _onStateChange = React.useCallback((state: String) => {
+        if (state === "ended") {
+            setVideoIdPlaying(undefined);
+        }
+    }, []);
 
-    //     const minutesString = (minutes < 10) ? "0" + minutes : minutes;
-    //     const secondsString = (seconds < 10) ? "0" + seconds : seconds;
+    const _onError = React.useCallback((error: String) => {
+        console.log(error);
+    }, []);
 
-    //     return minutesString + ":" + secondsString;
-    // }
+    const _playBackward = React.useCallback(
+        () => {
+            playerRef.current?.getCurrentTime().then(currentTime =>
+                playerRef.current?.seekTo(currentTime - 30, false)
+            );
+        },
+        [],
+    );
 
-    // function _onPlayPreview(trackId: string, url: string) {
-    //     if (sound) {
-    //         sound.pause();
-    //         sound.release();
-    //         setsound(undefined);
-    //         if (trackId === trackIdPlaying) {
-    //             setTrackIdPlaying(undefined);
-    //             return;
-    //         }
-    //     }
+    const _togglePlaying = React.useCallback((videoId: string) => {
+        setVideoIdPlaying((prev) => {
+            const sameVideo = videoId === prev;
+            if (sameVideo) {
+                return undefined;
+            } else {
+                return videoId;
+            }
+        });
+    }, []);
 
-    //     setTrackIdPlaying(trackId);
-    //     const track = new Sound(url, Sound.MAIN_BUNDLE, (e) => {
-    //         if (e) {
-    //             console.log('failed to load the sound', e);
-    //             return;
-    //         }
-    //         // loaded successfully
-    //         console.log('duration in seconds: ' + track.getDuration() + 'number of channels: ' + track.getNumberOfChannels());
-
-    //         // Play the sound with an onEnd callback
-    //         track.play((success) => {
-    //             if (success) {
-    //                 console.log('successfully finished playing');
-    //             } else {
-    //                 console.log('playback failed due to audio decoding errors');
-    //             }
-    //             setTrackIdPlaying(undefined);
-    //         });
-    //     });
-
-    //     setsound(track);
-    // }
+    const _playForward = React.useCallback(
+        () => {
+            playerRef.current?.getCurrentTime().then(currentTime =>
+                playerRef.current?.seekTo(currentTime + 30, true)
+            );
+        },
+        [],
+    );
 
     return (
         <>
@@ -116,40 +141,75 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                 props.selectedView === YoutubeViewType.PLAYLIST &&
                 <Content style={{ backgroundColor: youtubeTheme.secondaryColor }}>
                     {
-                        loaded && playlistItems &&
-                        (<Card style={{ margin: 5 }}>
-                            <CardItem header style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
-                                <Body>
-                                    <H1>{props.playlist.snippet?.title}</H1>
-                                </Body>
-                            </CardItem>
-                            <CardItem style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
-                                {
-                                    props.playlist.snippet?.thumbnails?.medium?.url &&
-                                    <Thumbnail source={{ uri: props.playlist.snippet?.thumbnails.medium?.url }} style={{ height: 180, flex: 1 }} />
-                                }
-                            </CardItem>
-                            <CardItem style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
-                                <Left>
-                                    <H2>Videos:</H2>
-                                </Left>
-                            </CardItem>
+                        loaded && youtubeVideos &&
+                        <>
                             {
-                                playlistItems.map((item, i) =>
-                                    <CardItem bordered key={i} style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
-                                        <Text style={{ marginRight: 20 }}>{i + 1}</Text>
-                                        <Body>
-                                            <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{item.snippet?.title}</Text>
-                                            <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{item.snippet?.channelTitle}</Text>
-                                        </Body>
-                                        <Button style={{ marginLeft: 20, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} light color={youtubeTheme.secondaryColor} rounded icon>
-                                            <Icon android={item.id === trackIdPlaying ? "md-pause" : "md-play"} ios={item.id === trackIdPlaying ? "md-pause" : "md-play"} />
-                                        </Button>
-                                    </CardItem>
-
-                                )
+                                videoIdPlaying &&
+                                <YoutubePlayer
+                                    ref={playerRef}
+                                    height={0}
+                                    play={videoIdPlaying !== undefined}
+                                    videoId={videoIdPlaying}
+                                    onChangeState={_onStateChange}
+                                    onError={_onError}
+                                    initialPlayerParams={{ controls: false, preventFullScreen: true, start: 30 }}
+                                />
                             }
-                        </Card>)
+                            <Card style={{ margin: 5 }}>
+                                <CardItem header style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
+                                    <Body>
+                                        <H1>{props.playlist.snippet?.title}</H1>
+                                    </Body>
+                                </CardItem>
+                                <CardItem cardBody style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
+                                    {
+                                        props.playlist.snippet?.thumbnails?.medium?.url &&
+                                        <Thumbnail square source={{ uri: props.playlist.snippet?.thumbnails.medium?.url }} style={{ height: 180, flex: 1 }} />
+                                    }
+                                </CardItem>
+                                <CardItem style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
+                                    <Left>
+                                        <H2>Videos:</H2>
+                                    </Left>
+                                </CardItem>
+                                <List>
+                                    {
+                                        youtubeVideos.map((video, i) =>
+                                            <ListItem key={i}>
+                                                <Text style={{ marginRight: 10 }}>{i + 1}</Text>
+                                                <Body>
+                                                    <Text style={{ textAlignVertical: 'center' }} numberOfLines={3}>{video.snippet?.title}</Text>
+                                                    <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{video.snippet?.channelTitle}</Text>
+                                                    <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{video.statistics?.viewCount} views</Text>
+                                                </Body>
+                                                {
+                                                    video.id && video.snippet?.thumbnails?.medium?.url &&
+                                                    <View style={{ height: 90, width: 160, backgroundColor: "red" }}>
+                                                        <Image source={{ uri: video.snippet?.thumbnails?.medium?.url }} style={{ height: 90, width: 160 }} />
+                                                        {
+                                                            video.id === videoIdPlaying &&
+                                                            <Button light onPress={_playBackward} style={{ position: 'absolute', bottom: 0, left: 10, right: 100, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
+                                                                <Icon name='step-backward' type='FontAwesome' />
+                                                            </Button>
+                                                        }
+                                                        <Button light onPress={() => _togglePlaying(video.id ? video.id : '')} style={{ position: 'absolute', top: video.id === videoIdPlaying ? 0 : 25, left: 50, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
+                                                            <Icon android={video.id === videoIdPlaying ? "md-pause" : "md-play"} ios={video.id === videoIdPlaying ? "md-pause" : "md-play"} />
+                                                        </Button>
+                                                        {
+                                                            video.id === videoIdPlaying &&
+                                                            <Button light onPress={_playForward} style={{ position: 'absolute', bottom: 0, left: 100, right: 10, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
+                                                                <Icon name='step-forward' type='FontAwesome' />
+                                                            </Button>
+                                                        }
+                                                    </View>
+                                                }
+                                            </ListItem>
+
+                                        )
+                                    }
+                                </List>
+                            </Card>
+                        </>
                     }
                     {
                         !loaded && <Spinner color={youtubeTheme.primaryColor} />
