@@ -6,6 +6,7 @@ interface Props {
   credential: ICredential
   authorizeDelegate(): any;
   refreshDelegate(): any;
+  revokeDelegate(): any;
 }
 
 export const CredentialView: React.FunctionComponent<Props> = (props: Props) => {
@@ -57,7 +58,7 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
       <Left>
         <Button iconLeft rounded success
           disabled={!canLogOn}
-          onPress={() => _logOn()}>
+          onPress={_logOn}>
           <Icon name='sync' type="FontAwesome5" />
           <Text>Log on</Text>
         </Button>

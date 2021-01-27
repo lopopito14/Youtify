@@ -2,9 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Body, Card, CardItem, Spinner } from "native-base";
 import React from "react";
 import { Image } from "react-native";
-import { AuthConfiguration, authorize, AuthorizeResult, refresh, RefreshResult } from "react-native-app-auth";
+import { AuthConfiguration, authorize, AuthorizeResult, refresh, RefreshResult, revoke } from "react-native-app-auth";
 import Context from "../../store/context";
-import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSucess, youtubeApiRefreshError, youtubeApiRefreshRequest, youtubeApiRefreshSucess } from "../../store/types/youtube_credential_actions";
+import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSuccess as youtubeApiAuthorizeSuccess, youtubeApiRefreshError, youtubeApiRefreshRequest, youtubeApiRefreshSucess as youtubeApiRefreshSuccess, youtubeApiRevokeError, youtubeApiRevokeRequest, youtubeApiRevokeSuccess } from "../../store/types/youtube_credential_actions";
 import { youtubeCurrentProfileError, youtubeCurrentProfileRequest, youtubeCurrentProfileSucess } from "../../store/types/youtube_userProfile_actions";
 import { Channels } from "../../youtubeApi/youtube-api-channels";
 import { settingsTheme } from "../theme";
@@ -38,10 +38,10 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
           dispatch(youtubeApiRefreshRequest());
           var refreshResult: RefreshResult = await refresh(props.authorizeConfiguration, { refreshToken: value });
           if (refreshResult) {
-            dispatch(youtubeApiRefreshSucess(refreshResult));
+            dispatch(youtubeApiRefreshSuccess(refreshResult));
 
             if (refreshResult.refreshToken) {
-              _storeRefreshToken(refreshResult.refreshToken);
+              await _storeRefreshToken(refreshResult.refreshToken);
             }
           }
         } catch (error) {
@@ -58,8 +58,8 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
       dispatch(youtubeApiAuthorizeRequest());
       var authorizeResult: AuthorizeResult = await authorize(props.authorizeConfiguration);
       if (authorizeResult) {
-        dispatch(youtubeApiAuthorizeSucess(authorizeResult));
-        _storeRefreshToken(authorizeResult.refreshToken);
+        dispatch(youtubeApiAuthorizeSuccess(authorizeResult));
+        await _storeRefreshToken(authorizeResult.refreshToken);
       }
     } catch (error) {
       dispatch(youtubeApiAuthorizeError(error));
@@ -68,17 +68,29 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
 
   async function _refreshYoutube() {
     try {
-      dispatch(youtubeApiAuthorizeRequest());
+      dispatch(youtubeApiRefreshRequest());
       var refreshResult: RefreshResult = await refresh(props.authorizeConfiguration, { refreshToken: state.youtubeState.credential.refreshToken });
       if (refreshResult) {
-        dispatch(youtubeApiRefreshSucess(refreshResult));
+        dispatch(youtubeApiRefreshSuccess(refreshResult));
 
         if (refreshResult.refreshToken) {
-          _storeRefreshToken(refreshResult.refreshToken);
+          await _storeRefreshToken(refreshResult.refreshToken);
         }
       }
     } catch (error) {
       dispatch(youtubeApiRefreshError(error));
+    }
+  }
+
+  async function _revokeYoutube() {
+    try {
+      dispatch(youtubeApiRevokeRequest());
+      await revoke(props.authorizeConfiguration, { tokenToRevoke: state.youtubeState.credential.refreshToken });
+
+      dispatch(youtubeApiRevokeSuccess());
+      await _storeRefreshToken('');
+    } catch (error) {
+      dispatch(youtubeApiRevokeError(error));
     }
   }
 
@@ -118,7 +130,8 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
         <CredentialView
           credential={state.youtubeState.credential}
           authorizeDelegate={_authorizeYoutube}
-          refreshDelegate={_refreshYoutube} />
+          refreshDelegate={_refreshYoutube}
+          revokeDelegate={_revokeYoutube} />
       </CardItem>
       {
         state.youtubeState.userProfile.loading &&

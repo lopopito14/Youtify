@@ -26,7 +26,13 @@ const reducer: Reducer<ICredential, TActions> = (state: ICredential = InitialSta
             };
 
         case Types.YOUTUBE_API_AUTHORIZE_ERROR:
-            return state;
+            return {
+                ...state,
+                isLogged: false,
+                accessToken: '',
+                accessTokenExpirationDate: '',
+                refreshToken: ''
+            };
 
         case Types.YOUTUBE_API_REFRESH_REQUEST:
             return state;
@@ -41,7 +47,34 @@ const reducer: Reducer<ICredential, TActions> = (state: ICredential = InitialSta
             };
 
         case Types.YOUTUBE_API_REFRESH_ERROR:
+            return {
+                ...state,
+                isLogged: false,
+                accessToken: '',
+                accessTokenExpirationDate: '',
+                refreshToken: ''
+            };
+
+            case Types.YOUTUBE_API_REVOKE_REQUEST:
             return state;
+
+        case Types.YOUTUBE_API_REVOKE_SUCCESS:
+            return {
+                ...state,
+                isLogged: true,
+                accessToken: '',
+                accessTokenExpirationDate: '',
+                refreshToken: ''
+            };
+
+        case Types.YOUTUBE_API_REVOKE_ERROR:
+            return {
+                ...state,
+                isLogged: false,
+                accessToken: '',
+                accessTokenExpirationDate: '',
+                refreshToken: ''
+            };
     
         default:
             return state;

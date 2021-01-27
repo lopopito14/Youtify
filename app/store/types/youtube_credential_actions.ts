@@ -1,5 +1,5 @@
 import { AuthorizeResult, RefreshResult } from 'react-native-app-auth';
-import { IYoutubeApiAuthorizeError, IYoutubeApiAuthorizeRequest, IYoutubeApiAuthorizeSuccess, IYoutubeApiRefreshError, IYoutubeApiRefreshRequest, IYoutubeApiRefreshSuccess, Types } from './youtube_credential_types';
+import { IYoutubeApiAuthorizeError, IYoutubeApiAuthorizeRequest, IYoutubeApiAuthorizeSuccess, IYoutubeApiRefreshError, IYoutubeApiRefreshRequest, IYoutubeApiRefreshSuccess, IYoutubeApiRevokeError, IYoutubeApiRevokeRequest, IYoutubeApiRevokeSuccess, Types } from './youtube_credential_types';
 
 export function youtubeApiAuthorizeRequest(): IYoutubeApiAuthorizeRequest {
     return {
@@ -7,7 +7,7 @@ export function youtubeApiAuthorizeRequest(): IYoutubeApiAuthorizeRequest {
     }
 }
 
-export function youtubeApiAuthorizeSucess(result: AuthorizeResult): IYoutubeApiAuthorizeSuccess {
+export function youtubeApiAuthorizeSuccess(result: AuthorizeResult): IYoutubeApiAuthorizeSuccess {
     return {
         type: Types.YOUTUBE_API_AUTHORIZE_SUCCESS,
         payload: result
@@ -37,6 +37,25 @@ export function youtubeApiRefreshSucess(result: RefreshResult): IYoutubeApiRefre
 export function youtubeApiRefreshError(result: any): IYoutubeApiRefreshError {
     return {
         type: Types.YOUTUBE_API_REFRESH_ERROR,
+        payload: result
+    }
+}
+
+export function youtubeApiRevokeRequest(): IYoutubeApiRevokeRequest {
+    return {
+        type: Types.YOUTUBE_API_REVOKE_REQUEST
+    }
+}
+
+export function youtubeApiRevokeSuccess(): IYoutubeApiRevokeSuccess {
+    return {
+        type: Types.YOUTUBE_API_REVOKE_SUCCESS,
+    }
+}
+
+export function youtubeApiRevokeError(result: any): IYoutubeApiRevokeError {
+    return {
+        type: Types.YOUTUBE_API_REVOKE_ERROR,
         payload: result
     }
 }
