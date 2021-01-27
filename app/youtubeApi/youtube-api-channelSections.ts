@@ -12,7 +12,7 @@ export interface IChannelSections {
 
 export class ChannelSections extends Base implements IChannelSections {
   constructor(token: string) {
-    super(token, 'channels');
+    super(token, 'channelSections');
   }
 
   async list(

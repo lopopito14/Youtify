@@ -9,7 +9,8 @@ export enum YoutubeViewType {
     MENU,
     PLAYLISTS,
     PLAYLIST,
-    SUBSCRIPTIONS
+    SUBSCRIPTIONS,
+    SUBSCRIPTION
 }
 
 export const YoutubeView: React.FunctionComponent<Props> = () => {
@@ -22,6 +23,9 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
     function _headerTitle() {
         if (_isSelectedView(YoutubeViewType.SUBSCRIPTIONS)) {
             return "Subscriptions";
+        }
+        if (_isSelectedView(YoutubeViewType.SUBSCRIPTION)) {
+            return "Subscription";
         }
         if (_isSelectedView(YoutubeViewType.PLAYLISTS)) {
             return "Playlists";
@@ -36,8 +40,9 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
     function _onBackButtonPressed() {
         if (selectedView === YoutubeViewType.PLAYLIST) {
             setselectedView(YoutubeViewType.PLAYLISTS);
-        }
-        else {
+        } else if (selectedView === YoutubeViewType.SUBSCRIPTION) {
+            setselectedView(YoutubeViewType.SUBSCRIPTIONS);
+        } else {
             setselectedView(YoutubeViewType.MENU);
         }
     }
