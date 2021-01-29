@@ -1,9 +1,10 @@
 import { Button, H1, Text, View } from 'native-base'
 import React, { } from 'react'
-import { Modal } from 'react-native'
+import { Modal, ScrollView } from 'react-native'
 
 export enum ModalType {
-    OK_CANCEL = 'OkCancel'
+    OK_CANCEL = 'OkCancel',
+    CANCEL = 'Cancel'
 }
 
 export interface IProps {
@@ -13,6 +14,7 @@ export interface IProps {
     backgroundColor: string;
     okCallback(): any;
     cancelCallback(): any;
+    children?: React.ReactNode
 }
 
 const ModalPopup: React.FunctionComponent<IProps> = (props: IProps) => {
@@ -31,19 +33,29 @@ const ModalPopup: React.FunctionComponent<IProps> = (props: IProps) => {
                     margin: 20,
                     backgroundColor: "white",
                     borderRadius: 20,
-                    padding: 35,
+                    paddingVertical: 15,
+                    paddingHorizontal: 5,
                     alignItems: "center",
                     shadowColor: "#000",
                     shadowOpacity: 0.9,
                     shadowRadius: 3.84,
-                    elevation: 50
+                    elevation: 50,
+                    maxWidth: 400
                 }}>
                     <H1 style={{
-                        marginBottom: 20,
+                        marginBottom: 10,
                         textAlign: "center"
                     }}>{props.title}</H1>
+                    {
+                        props.children &&
 
-                    <View style={{ flexDirection: 'row' }}>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            {
+                                props.children
+                            }
+                        </ScrollView>
+                    }
+                    <View style={{ marginTop: 10, flexDirection: 'row' }}>
                         {
                             props.type === ModalType.OK_CANCEL &&
                             <>
@@ -53,6 +65,16 @@ const ModalPopup: React.FunctionComponent<IProps> = (props: IProps) => {
                                     }}>     Ok     </Text>
                                 </Button>
                                 <Button rounded danger onPress={props.cancelCallback} style={{ marginLeft: 10 }}>
+                                    <Text style={{
+                                        textAlign: "center"
+                                    }}>Cancel</Text>
+                                </Button>
+                            </>
+                        }
+                        {
+                            props.type === ModalType.CANCEL &&
+                            <>
+                                <Button rounded danger onPress={props.cancelCallback}>
                                     <Text style={{
                                         textAlign: "center"
                                     }}>Cancel</Text>
