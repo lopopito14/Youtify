@@ -1,119 +1,40 @@
 import { Body, Button, Card, CardItem, Content, H1, H2, Icon, Left, List, ListItem, Spinner, Text, Thumbnail, View } from 'native-base';
 import React from 'react';
-import Context from '../../store/context';
-import { youtubeTheme } from '../theme';
-import Sound from 'react-native-sound';
-import { YoutubeViewType } from '../youtubeView';
-import { Playlist, Video } from '../../youtubeApi/youtube-api-models';
-import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
-import { pushYoutubeErrorNotification } from '../../store/types/notifications_actions';
+import { youtubeTheme } from '../../theme';
+import { IYoutubeNavigationProps, YoutubeViewType } from '../../youtubeView';
+import { Playlist } from '../../../youtubeApi/youtube-api-models';
 import YoutubePlayer, { YoutubeIframeRef } from "react-native-youtube-iframe";
 import { Image } from 'react-native';
-import { Videos } from '../../youtubeApi/youtube-api-videos';
+import useFetchPlaylist from './useFetchPlaylist';
 
-interface IProps {
-    selectedView: YoutubeViewType;
-    setselectedView(view: YoutubeViewType): any;
+interface IProps extends IYoutubeNavigationProps {
     playlist: Playlist;
 }
 
 const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
-    const { state, dispatch } = React.useContext(Context);
 
-    const [loaded, setLoaded] = React.useState(true);
-    const [youtubeVideos, setYoutubeVideos] = React.useState<Video[]>([]);
-    const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
+    const { youtubeVideos, loaded } = useFetchPlaylist(props.playlist);
     const [videoIdPlaying, setVideoIdPlaying] = React.useState<string | undefined>(undefined);
-    const [sound, setsound] = React.useState<Sound | undefined>(undefined);
 
     const playerRef = React.useRef<YoutubeIframeRef>(null);
 
-    React.useEffect(() => {
-        _fetchPlaylistVideos();
-    }, [props.playlist]);
-
-    React.useEffect(() => {
-        if (pageToken) {
-            _fetchPlaylistVideos(pageToken);
-        }
-    }, [pageToken]);
-
-    React.useEffect(() => {
-        if (props.selectedView !== YoutubeViewType.PLAYLIST) {
-            if (sound) {
-                sound.pause();
-                sound.release();
-                setsound(undefined);
-                setVideoIdPlaying(undefined);
-            }
-        }
-    }, [props.selectedView]);
-
-    async function _fetchPlaylistVideos(pageToken: string | undefined = undefined) {
-        try {
-            var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
-                playlistId: props.playlist.id ? props.playlist.id : '',
-                part: ['contentDetails'],
-                maxResults: 50,
-                pageToken: pageToken
-            });
-            if (playlistItemsResponse) {
-
-                if (playlistItemsResponse.items) {
-                    let videosIds: string[] = [];
-
-                    playlistItemsResponse.items.forEach(i => {
-                        if (i.contentDetails?.videoId) {
-                            videosIds.push(i.contentDetails?.videoId);
-                        }
-                    });
-
-                    var videosResponse = await new Videos(state.youtubeState.credential.accessToken).list({
-                        id: videosIds,
-                        part: ['snippet', 'contentDetails', 'statistics'],
-                        maxResults: 50,
-                    });
-
-                    if (videosResponse && videosResponse.items) {
-                        const items = videosResponse.items;
-                        setYoutubeVideos((prev) => {
-                            return [...prev, ...items]
-                        });
-                    }
-                }
-
-                if (playlistItemsResponse.nextPageToken) {
-                    setpageToken(playlistItemsResponse.nextPageToken);
-                } else {
-                    setLoaded(true);
-                    setpageToken(undefined);
-                }
-            }
-        } catch (error) {
-            dispatch(pushYoutubeErrorNotification(error));
-        }
-    }
-
-    const _onStateChange = React.useCallback((state: String) => {
+    const _onStateChange = (state: String) => {
         if (state === "ended") {
             setVideoIdPlaying(undefined);
         }
-    }, []);
+    }
 
-    const _onError = React.useCallback((error: String) => {
+    const _onError = (error: String) => {
         console.log(error);
-    }, []);
+    }
 
-    const _playBackward = React.useCallback(
-        () => {
-            playerRef.current?.getCurrentTime().then(currentTime =>
-                playerRef.current?.seekTo(currentTime - 30, false)
-            );
-        },
-        [],
-    );
+    const _playBackward = () => {
+        playerRef.current?.getCurrentTime().then(currentTime =>
+            playerRef.current?.seekTo(currentTime - 30, false)
+        );
+    }
 
-    const _togglePlaying = React.useCallback((videoId: string) => {
+    const _togglePlaying = (videoId: string) => {
         setVideoIdPlaying((prev) => {
             const sameVideo = videoId === prev;
             if (sameVideo) {
@@ -122,16 +43,13 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                 return videoId;
             }
         });
-    }, []);
+    }
 
-    const _playForward = React.useCallback(
-        () => {
-            playerRef.current?.getCurrentTime().then(currentTime =>
-                playerRef.current?.seekTo(currentTime + 30, true)
-            );
-        },
-        [],
-    );
+    const _playForward = () => {
+        playerRef.current?.getCurrentTime().then(currentTime =>
+            playerRef.current?.seekTo(currentTime + 30, true)
+        );
+    }
 
     return (
         <>
@@ -139,7 +57,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                 props.selectedView === YoutubeViewType.PLAYLIST &&
                 <Content style={{ backgroundColor: youtubeTheme.secondaryColor }}>
                     {
-                        loaded && youtubeVideos &&
+                        loaded &&
                         <>
                             {
                                 videoIdPlaying &&

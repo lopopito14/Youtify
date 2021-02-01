@@ -1,14 +1,11 @@
 import React from 'react';
 import { Button, Content, Text, View } from 'native-base';
-import { YoutubeViewType } from '../youtubeView';
-import PlaylistsView from './playlistsView';
-import SubscriptionsView from './subscriptionsView';
-import AdjustFavoritesView from './adjustFavoritesView';
+import { IYoutubeNavigationProps, YoutubeViewType } from '../youtubeView';
+import PlaylistsView from './playlists/playlistsView';
+import SubscriptionsView from './subscriptions/subscriptionsView';
+import AdjustFavoritesView from './adjustFavorites/adjustFavoritesView';
 
-interface IProps {
-    selectedView: YoutubeViewType;
-    setselectedView(view: YoutubeViewType): any;
-}
+interface IProps extends IYoutubeNavigationProps { }
 
 export const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
 

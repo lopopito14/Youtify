@@ -14,6 +14,11 @@ export enum YoutubeViewType {
     ADJUST_FAVORITES
 }
 
+export interface IYoutubeNavigationProps {
+    selectedView: YoutubeViewType;
+    setselectedView(view: YoutubeViewType): any;
+}
+
 export const YoutubeView: React.FunctionComponent<Props> = () => {
     const [selectedView, setselectedView] = React.useState<YoutubeViewType>(YoutubeViewType.MENU)
 
