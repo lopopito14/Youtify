@@ -1,13 +1,10 @@
 import React from 'react';
 import { Button, Content, Text, View } from 'native-base';
-import { SpotifyViewType } from '../spotifyView';
-import PlaylistsView from './playlistsView';
-import ArtistsView from './artistsView';
+import { ISpotifyNavigationProps, SpotifyViewType } from '../spotifyView';
+import PlaylistsView from './playlists/playlistsView';
+import ArtistsView from './artists/artistsView';
 
-interface IProps {
-    selectedView: SpotifyViewType;
-    setselectedView(view: SpotifyViewType): any;
-}
+interface IProps extends ISpotifyNavigationProps { }
 
 export const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
 

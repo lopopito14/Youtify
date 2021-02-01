@@ -3,7 +3,7 @@ import { Body, Button, Header, Icon, Left, Title } from 'native-base';
 import { spotifyTheme } from './theme';
 import { SpotifyMenuView } from './spotify/spotifyMenuView';
 
-interface Props { }
+interface IProps { }
 
 export enum SpotifyViewType {
     MENU,
@@ -13,7 +13,12 @@ export enum SpotifyViewType {
     ARTIST
 }
 
-export const SpotifyView: React.FunctionComponent<Props> = () => {
+export interface ISpotifyNavigationProps {
+    selectedView: SpotifyViewType;
+    setselectedView(view: SpotifyViewType): any;
+}
+
+export const SpotifyView: React.FunctionComponent<IProps> = () => {
     const [selectedView, setselectedView] = React.useState<SpotifyViewType>(SpotifyViewType.MENU);
 
     function _isSelectedView(view: SpotifyViewType) {

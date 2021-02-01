@@ -1,0 +1,38 @@
+import React from 'react';
+import Context from '../../../store/context';
+import SpotifyApi from 'spotify-web-api-js';
+import { pushSpotifyErrorNotification } from '../../../store/types/notifications_actions';
+
+interface IProps {
+    playlistId: string;
+}
+
+const useFetchPlaylist = (props: IProps) => {
+    const { state, dispatch } = React.useContext(Context);
+
+    const [playlist, setPlaylist] = React.useState<globalThis.SpotifyApi.SinglePlaylistResponse>();
+    const [loaded, setLoaded] = React.useState(false);
+
+    React.useEffect(() => {
+        _fetchPlaylist();
+    }, []);
+
+    async function _fetchPlaylist() {
+        try {
+            const spotifyApi = new SpotifyApi();
+            spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
+
+            var response = await spotifyApi.getPlaylist(props.playlistId);
+            if (response) {
+                setPlaylist(response);
+                setLoaded(true);
+            }
+        } catch (error) {
+            dispatch(pushSpotifyErrorNotification(error));
+        }
+    }
+
+    return { playlist, loaded };
+}
+
+export default useFetchPlaylist
