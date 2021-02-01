@@ -1,5 +1,3 @@
-import {Playlist, PlaylistItem, Video} from '../youtubeApi/youtube-api-models';
-
 export type TState = {
   spotifyState: IProfile<ISpotifyProfile>;
   youtubeState: IProfile<IYoutubeProfile>;
@@ -70,35 +68,6 @@ export interface ISpotifyProfile extends ILoad {
 export interface IYoutubeProfile extends ILoad {
   title: string;
   channelId: string;
-}
-
-export interface IMyPlaylists extends ILoad {
-  playlists: IYoutubeMonthPlaylist[];
-}
-
-export interface IYoutubePlaylists extends ILoad {
-  playlists: Playlist[];
-}
-
-export interface ISpotifyPlaylists extends ILoad {
-  playlists: SpotifyApi.PlaylistObjectSimplified[];
-}
-
-export interface IYoutubeVideos extends ILoad {
-  videos: Video[];
-}
-
-export interface ISpotifyTracks extends ILoad {
-  tracks: SpotifyApi.TrackObjectFull[];
-}
-
-export interface IYoutubeMonthPlaylist {
-  year: number,
-  month: number;
-  title: string;
-  favoriteitems: PlaylistItem[];
-  youtubePlaylist?: Playlist;
-  spotifyPlaylist?: SpotifyApi.PlaylistObjectSimplified;
 }
 
 export interface ILoad {

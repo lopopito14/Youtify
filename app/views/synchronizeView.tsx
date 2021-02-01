@@ -1,23 +1,13 @@
 import React from 'react';
 import { Accordion, Body, Button, Content, H1, Header, Icon, Left, List, ListItem, Right, Spinner, Switch, Text, Title, View } from 'native-base';
 import { spotifyTheme, synchronizeTheme, youtubeTheme } from './theme';
-import { IMyPlaylists, ISpotifyPlaylists, IYoutubeMonthPlaylist, IYoutubePlaylists } from '../store/state';
+import { ILoad } from '../store/state';
 import SynchronizePlaylistView from './synchronize/synchronizePlaylistView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import FavoritePlaylistBackgroundWorker from './utils/favoritePlaylistBackgroundWorker';
-import PlaylistsBackgroundWorker from './utils/playlistsBackgroundWorker';
-import PlaylistsDispatcher from './utils/playlistsDispatcher';
-import { Playlists } from '../youtubeApi/youtube-api-playlists';
-import Context from '../store/context';
-import { pushSpotifyErrorNotification, pushSpotifySuccessNotification, pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../store/types/notifications_actions';
-import SpotifyApi from 'spotify-web-api-js';
+import usePlaylistsSynchronizer from './usePlaylistsSynchronizer';
+import { Playlist, PlaylistItem } from '../youtubeApi/youtube-api-models';
 
 interface Props { }
-
-interface YearFilter {
-  year: number;
-  active: boolean;
-}
 
 export enum SynchronizeViewType {
   SYNCHRONIZE,
@@ -29,28 +19,29 @@ export interface ISynchronizeNavigationProps {
   setselectedView(view: SynchronizeViewType): any;
 }
 
-export const SynchronizeView: React.FunctionComponent<Props> = () => {
-  const { state, dispatch } = React.useContext(Context);
+interface YearFilter {
+  year: number;
+  active: boolean;
+}
 
-  const [myPlaylist, setMyPlaylist] = React.useState<IMyPlaylists>({
-    loaded: false,
-    loading: false,
-    playlists: []
-  })
-  const [youtubePlaylists, setYoutubePlaylists] = React.useState<IYoutubePlaylists>({
-    loaded: false,
-    loading: false,
-    playlists: []
-  });
-  const [spotifyPlaylists, setSpotifyPlaylists] = React.useState<ISpotifyPlaylists>({
-    loaded: false,
-    loading: false,
-    playlists: []
-  });
+export interface IMyPlaylists extends ILoad {
+  playlists: IYoutubeMonthPlaylist[];
+}
+export interface IYoutubeMonthPlaylist {
+  year: number,
+  month: number;
+  title: string;
+  favoriteitems: PlaylistItem[];
+  youtubePlaylist?: Playlist;
+  spotifyPlaylist?: globalThis.SpotifyApi.PlaylistObjectSimplified;
+}
+
+export const SynchronizeView: React.FunctionComponent<Props> = () => {
+
+  const { myPlaylist, createPlaylists } = usePlaylistsSynchronizer();
   const [selectedView, setselectedView] = React.useState<SynchronizeViewType>(SynchronizeViewType.SYNCHRONIZE);
   const [selectedPlaylist, setSelectedPlaylist] = React.useState<IYoutubeMonthPlaylist | undefined>(undefined);
   const [yearFilter, setYearFilter] = React.useState<YearFilter[] | undefined>(undefined);
-  const [createPlaylists, setCreatePlaylists] = React.useState<IYoutubeMonthPlaylist | undefined>(undefined);
 
   const yearFilterKey = "synchronize-year-filter";
 
@@ -65,12 +56,6 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
       _saveYearsFilter();
     }
   }, [yearFilter]);
-
-  React.useEffect(() => {
-    if (createPlaylists) {
-      _createPlaylist(createPlaylists);
-    }
-  }, [createPlaylists]);
 
   async function _buildYearsFilter() {
 
@@ -130,109 +115,8 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
     }
   }
 
-  async function _createPlaylist(myPlaylist: IYoutubeMonthPlaylist) {
-
-    let youtubePlaylist = myPlaylist.youtubePlaylist;
-    let spotifyPlaylist = myPlaylist.spotifyPlaylist;
-
-    try {
-      if (myPlaylist.spotifyPlaylist === undefined) {
-        try {
-          const spotifyApi = new SpotifyApi();
-          spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
-
-          const options = {
-            "name": myPlaylist.title,
-            "description": "",
-            "public": true,
-          };
-
-          var createSpotifyPlaylistResponse = await spotifyApi.createPlaylist(state.spotifyState.userProfile.id, options);
-          if (createSpotifyPlaylistResponse) {
-
-            setSpotifyPlaylists((prev) => {
-              return {
-                ...prev,
-                playlists: [
-                  ...prev.playlists,
-                  {
-                    ...createSpotifyPlaylistResponse,
-                    tracks: {
-                      href: '',
-                      total: 0
-                    }
-                  }
-                ]
-              }
-            });
-
-            spotifyPlaylist = {
-              ...createSpotifyPlaylistResponse,
-              tracks: {
-                href: '',
-                total: 0
-              }
-            };
-
-            dispatch(pushSpotifySuccessNotification(`Spotify playlist '${myPlaylist.title}' created !`));
-          }
-        } catch (error) {
-          dispatch(pushSpotifyErrorNotification(error));
-        }
-      }
-      if (myPlaylist.youtubePlaylist === undefined) {
-        try {
-          var createYoutubePlaylistResponse = await new Playlists(state.youtubeState.credential.accessToken).insert({
-            part: ['snippet', 'contentDetails'],
-            requestBody: {
-              snippet: {
-                title: myPlaylist.title
-              }
-            }
-          });
-          if (createYoutubePlaylistResponse && createYoutubePlaylistResponse.snippet) {
-
-            setYoutubePlaylists((prev) => {
-              return {
-                ...prev,
-                playlists: [
-                  ...prev.playlists,
-                  createYoutubePlaylistResponse
-                ]
-              }
-            });
-
-            youtubePlaylist = createYoutubePlaylistResponse;
-
-            dispatch(pushYoutubeSuccessNotification(`Youtube playlist '${myPlaylist.title}' created !`));
-          }
-        } catch (error) {
-          dispatch(pushYoutubeErrorNotification(error));
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setMyPlaylist((prev) => {
-
-        const index = prev.playlists.indexOf(myPlaylist);
-
-        return {
-          ...prev,
-          playlists: [
-            ...prev.playlists.slice(0, index),
-            {
-              ...myPlaylist,
-              spotifyPlaylist: spotifyPlaylist,
-              youtubePlaylist: youtubePlaylist
-            },
-            ...prev.playlists.slice(index + 1),
-          ]
-        }
-      });
-
-      setCreatePlaylists(undefined);
-    }
+  const _createPlaylist = (myPlaylist: IYoutubeMonthPlaylist) => {
+    createPlaylists(myPlaylist);
   }
 
   function _onOpenSynchronizePlaylist(myPlaylist: IYoutubeMonthPlaylist) {
@@ -289,9 +173,6 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
           <Title>{_headerTitle()}</Title>
         </Body>
       </Header>
-      <FavoritePlaylistBackgroundWorker myPlaylist={myPlaylist} setMyPlaylist={setMyPlaylist} />
-      <PlaylistsBackgroundWorker youtubePlaylists={youtubePlaylists} setYoutubePlaylists={setYoutubePlaylists} spotifyPlaylists={spotifyPlaylists} setSpotifyPlaylists={setSpotifyPlaylists} />
-      <PlaylistsDispatcher myPlaylist={myPlaylist} setMyPlaylist={setMyPlaylist} youtubePlaylists={youtubePlaylists} spotifyPlaylists={spotifyPlaylists} />
       {
         selectedView === SynchronizeViewType.SYNCHRONIZE &&
         <>
@@ -344,7 +225,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
                               <Right>
                                 {
                                   (p.spotifyPlaylist === undefined || p.youtubePlaylist === undefined) &&
-                                  <Button icon light onPress={() => setCreatePlaylists(p)}>
+                                  <Button icon light onPress={() => _createPlaylist(p)}>
                                     <Icon name='create' type='MaterialIcons' />
                                   </Button>
                                 }
