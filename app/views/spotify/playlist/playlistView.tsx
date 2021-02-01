@@ -12,7 +12,7 @@ interface IProps extends ISpotifyNavigationProps {
 
 const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
 
-    const { playlist, loaded } = useFetchPlaylist({ playlistId: props.playlistId });
+    const { playlist, loaded } = useFetchPlaylist(props.playlistId);
     const { trackIdPlaying, playTrack, stopPlaying } = usePlayTrack();
 
     React.useEffect(() => {

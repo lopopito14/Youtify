@@ -3,11 +3,7 @@ import Context from '../../../store/context';
 import SpotifyApi from 'spotify-web-api-js';
 import { pushSpotifyErrorNotification } from '../../../store/types/notifications_actions';
 
-interface IProps {
-    playlistId: string;
-}
-
-const useFetchPlaylist = (props: IProps) => {
+const useFetchPlaylist = (playlistId: string) => {
     const { state, dispatch } = React.useContext(Context);
 
     const [playlist, setPlaylist] = React.useState<globalThis.SpotifyApi.SinglePlaylistResponse>();
@@ -22,7 +18,7 @@ const useFetchPlaylist = (props: IProps) => {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var response = await spotifyApi.getPlaylist(props.playlistId);
+            var response = await spotifyApi.getPlaylist(playlistId);
             if (response) {
                 setPlaylist(response);
                 setLoaded(true);

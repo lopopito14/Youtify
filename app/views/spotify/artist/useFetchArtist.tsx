@@ -3,11 +3,7 @@ import SpotifyApi from 'spotify-web-api-js';
 import Context from '../../../store/context';
 import { pushSpotifyErrorNotification } from '../../../store/types/notifications_actions';
 
-interface IProps {
-    artistId: string;
-}
-
-const useFetchArtist = (props: IProps) => {
+const useFetchArtist = (artistId: string) => {
     const { state, dispatch } = React.useContext(Context);
 
     const [artist, setArtist] = React.useState<globalThis.SpotifyApi.SingleArtistResponse>();
@@ -30,7 +26,7 @@ const useFetchArtist = (props: IProps) => {
         }
 
         _fetchAllArtistDatas();
-    }, [props.artistId]);
+    }, [artistId]);
 
     React.useEffect(() => {
         if (followOrUnfollowId) {
@@ -43,7 +39,7 @@ const useFetchArtist = (props: IProps) => {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var response = await spotifyApi.getArtist(props.artistId);
+            var response = await spotifyApi.getArtist(artistId);
             if (response) {
                 setArtist(response);
             }
@@ -57,7 +53,7 @@ const useFetchArtist = (props: IProps) => {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var response = await spotifyApi.getArtistTopTracks(props.artistId, state.spotifyState.userProfile.country);
+            var response = await spotifyApi.getArtistTopTracks(artistId, state.spotifyState.userProfile.country);
             if (response) {
                 setArtistTopTracks(response);
             }
@@ -71,7 +67,7 @@ const useFetchArtist = (props: IProps) => {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var response = await spotifyApi.getArtistRelatedArtists(props.artistId);
+            var response = await spotifyApi.getArtistRelatedArtists(artistId);
             if (response) {
                 setRelatedArtists(response);
 

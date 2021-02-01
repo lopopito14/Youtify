@@ -6,14 +6,13 @@ import ModalPopup, { ModalType } from '../utils/modalPopup';
 import { pushSpotifyErrorNotification, pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../../store/types/notifications_actions';
 import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
 import { ILoad, ISpotifyTracks, IYoutubeMonthPlaylist, IYoutubeVideos } from '../../store/state';
-import { SynchronizeViewType } from '../synchronizeView';
+import { ISynchronizeNavigationProps } from '../synchronizeView';
 import SpotifyApi from 'spotify-web-api-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Videos } from '../../youtubeApi/youtube-api-videos';
+import { defaultThumbnail } from '../utils/helpers';
 
-interface IProps {
-  selectedView: SynchronizeViewType;
-  setselectedView(view: SynchronizeViewType): any;
+interface IProps extends ISynchronizeNavigationProps {
   myPlaylist: IYoutubeMonthPlaylist;
 }
 
@@ -796,8 +795,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
       }
     }
 
-    return "https://2.bp.blogspot.com/-muVbmju-gkA/Vir94NirTeI/AAAAAAAAT9c/VoHzHZzQmR4/s1600/placeholder-image.jpg";
-    //return "https://i.ytimg.com/img/no_thumbnail.jpg";
+    return defaultThumbnail();
   }
 
   function _getYoutubeChannel(saveYoutube: ISaveYoutube): string {
@@ -857,8 +855,7 @@ export const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: 
       }
     }
 
-    return "https://2.bp.blogspot.com/-muVbmju-gkA/Vir94NirTeI/AAAAAAAAT9c/VoHzHZzQmR4/s1600/placeholder-image.jpg";
-    // return 'https://i.ytimg.com/img/no_thumbnail.jpg';
+    return defaultThumbnail();
   }
 
   function _getSpotifyArtist(saveSpotify: ISaveSpotify) {

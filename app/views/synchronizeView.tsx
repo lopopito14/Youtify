@@ -24,6 +24,11 @@ export enum SynchronizeViewType {
   SYNCHRONIZE_PLAYLIST
 }
 
+export interface ISynchronizeNavigationProps {
+  selectedView: SynchronizeViewType;
+  setselectedView(view: SynchronizeViewType): any;
+}
+
 export const SynchronizeView: React.FunctionComponent<Props> = () => {
   const { state, dispatch } = React.useContext(Context);
 
