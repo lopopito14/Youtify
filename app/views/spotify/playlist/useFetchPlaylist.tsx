@@ -10,10 +10,10 @@ const useFetchPlaylist = (playlistId: string) => {
     const [loaded, setLoaded] = React.useState(false);
 
     React.useEffect(() => {
-        _fetchPlaylist();
+        fetchPlaylist();
     }, []);
 
-    async function _fetchPlaylist() {
+    const fetchPlaylist = async () => {
         try {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);

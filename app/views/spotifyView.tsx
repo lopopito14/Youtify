@@ -21,28 +21,28 @@ export interface ISpotifyNavigationProps {
 export const SpotifyView: React.FunctionComponent<IProps> = () => {
     const [selectedView, setselectedView] = React.useState<SpotifyViewType>(SpotifyViewType.MENU);
 
-    function _isSelectedView(view: SpotifyViewType) {
+    const isSelectedView = (view: SpotifyViewType) => {
         return selectedView === view;
     }
 
-    function _headerTitle() {
-        if (_isSelectedView(SpotifyViewType.ARTISTS)) {
+    const headerTitle = () => {
+        if (isSelectedView(SpotifyViewType.ARTISTS)) {
             return "Artists";
         }
-        if (_isSelectedView(SpotifyViewType.ARTIST)) {
+        if (isSelectedView(SpotifyViewType.ARTIST)) {
             return "Artist";
         }
-        if (_isSelectedView(SpotifyViewType.PLAYLISTS)) {
+        if (isSelectedView(SpotifyViewType.PLAYLISTS)) {
             return "Playlists";
         }
-        if (_isSelectedView(SpotifyViewType.PLAYLIST)) {
+        if (isSelectedView(SpotifyViewType.PLAYLIST)) {
             return "Playlist";
         }
 
         return 'Spotify';
     }
 
-    function _onBackButtonPressed() {
+    const onBackButtonPressed = React.useCallback(() => {
         if (selectedView === SpotifyViewType.ARTIST) {
             setselectedView(SpotifyViewType.ARTISTS);
         }
@@ -52,21 +52,21 @@ export const SpotifyView: React.FunctionComponent<IProps> = () => {
         else {
             setselectedView(SpotifyViewType.MENU);
         }
-    }
+    }, []);
 
     return (
         <>
             <Header noShadow style={{ backgroundColor: spotifyTheme.primaryColor }} androidStatusBarColor={spotifyTheme.secondaryColor}>
                 <Left>
                     {
-                        !_isSelectedView(SpotifyViewType.MENU) &&
-                        <Button transparent onPress={_onBackButtonPressed}>
+                        !isSelectedView(SpotifyViewType.MENU) &&
+                        <Button transparent onPress={onBackButtonPressed}>
                             <Icon name='arrow-back' />
                         </Button>
                     }
                 </Left>
                 <Body>
-                    <Title>{_headerTitle()}</Title>
+                    <Title>{headerTitle()}</Title>
                 </Body>
             </Header>
 

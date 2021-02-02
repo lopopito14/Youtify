@@ -47,48 +47,49 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 
   React.useEffect(() => {
     if (myPlaylist.loaded) {
-      _buildYearsFilter();
+
+      const buildYearsFilter = async () => {
+
+        let yearsFilter: YearFilter[] = [];
+
+        const years = [...new Set(myPlaylist.playlists.map(p => p.year))];
+
+        years.forEach(y => {
+          yearsFilter.push({ year: y, active: true });
+        });
+
+        try {
+          const value = await AsyncStorage.getItem(yearFilterKey);
+          if (value) {
+            const parsedYearsFilter = JSON.parse(value) as YearFilter[];
+            if (parsedYearsFilter) {
+              parsedYearsFilter.filter(y => !y.active).forEach(p => {
+                let existingItem = yearsFilter.find(y => y.year === p.year);
+                if (existingItem) {
+                  const index = yearsFilter.indexOf(existingItem);
+                  yearsFilter[index].active = false;
+                }
+              });
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+
+        setYearFilter(yearsFilter);
+      }
+
+      buildYearsFilter();
     }
   }, [myPlaylist.loaded]);
 
   React.useEffect(() => {
     if (yearFilter) {
-      _saveYearsFilter();
+      saveYearsFilter();
     }
   }, [yearFilter]);
 
-  async function _buildYearsFilter() {
-
-    let yearsFilter: YearFilter[] = [];
-
-    const years = [...new Set(myPlaylist.playlists.map(p => p.year))];
-
-    years.forEach(y => {
-      yearsFilter.push({ year: y, active: true });
-    });
-
-    try {
-      const value = await AsyncStorage.getItem(yearFilterKey);
-      if (value) {
-        const parsedYearsFilter = JSON.parse(value) as YearFilter[];
-        if (parsedYearsFilter) {
-          parsedYearsFilter.filter(y => !y.active).forEach(p => {
-            let existingItem = yearsFilter.find(y => y.year === p.year);
-            if (existingItem) {
-              const index = yearsFilter.indexOf(existingItem);
-              yearsFilter[index].active = false;
-            }
-          });
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    setYearFilter(yearsFilter);
-  }
-
-  async function _saveYearsFilter() {
+  const saveYearsFilter = async () => {
     try {
       const jsonValue = JSON.stringify(yearFilter);
       await AsyncStorage.setItem(yearFilterKey, jsonValue);
@@ -97,34 +98,30 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
     }
   }
 
-  function _isSelectedView(view: SynchronizeViewType) {
+  const isSelectedView = (view: SynchronizeViewType) => {
     return selectedView === view;
   }
 
-  function _headerTitle() {
-    if (_isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
+  const headerTitle = () => {
+    if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
       return "Synchronize Playlist";
     }
 
     return 'Synchronize';
   }
 
-  function _onBackButtonPressed() {
-    if (_isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
+  const onBackButtonPressed = React.useCallback(() => {
+    if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
       setselectedView(SynchronizeViewType.SYNCHRONIZE);
     }
-  }
+  }, []);
 
-  const _createPlaylist = (myPlaylist: IYoutubeMonthPlaylist) => {
-    createPlaylists(myPlaylist);
-  }
-
-  function _onOpenSynchronizePlaylist(myPlaylist: IYoutubeMonthPlaylist) {
+  const onOpenSynchronizePlaylist = React.useCallback((myPlaylist: IYoutubeMonthPlaylist) => {
     setSelectedPlaylist(myPlaylist);
     setselectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST);
-  }
+  }, []);
 
-  function _buildAccordion() {
+  const buildAccordion = () => {
     var array: { title: JSX.Element, content: JSX.Element }[] = [];
 
     const title = <H1>Filtre</H1>;
@@ -163,14 +160,14 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
       <Header noShadow style={{ backgroundColor: synchronizeTheme.primaryColor }} androidStatusBarColor={synchronizeTheme.secondaryColor}>
         <Left>
           {
-            !_isSelectedView(SynchronizeViewType.SYNCHRONIZE) &&
-            <Button transparent onPress={_onBackButtonPressed}>
+            !isSelectedView(SynchronizeViewType.SYNCHRONIZE) &&
+            <Button transparent onPress={onBackButtonPressed}>
               <Icon name='arrow-back' />
             </Button>
           }
         </Left>
         <Body>
-          <Title>{_headerTitle()}</Title>
+          <Title>{headerTitle()}</Title>
         </Body>
       </Header>
       {
@@ -179,7 +176,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
           {
             myPlaylist.loaded && yearFilter &&
             <View style={{ backgroundColor: "black" }}>
-              <Accordion style={{ backgroundColor: synchronizeTheme.secondaryBackgroundColor }} dataArray={_buildAccordion()} expanded={-1} renderContent={(item) => <>{item.content}</>} />
+              <Accordion style={{ backgroundColor: synchronizeTheme.secondaryBackgroundColor }} dataArray={buildAccordion()} expanded={-1} renderContent={(item) => <>{item.content}</>} />
             </View>
           }
           <Content style={{ backgroundColor: "black" }}>
@@ -225,13 +222,13 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
                               <Right>
                                 {
                                   (p.spotifyPlaylist === undefined || p.youtubePlaylist === undefined) &&
-                                  <Button icon light onPress={() => _createPlaylist(p)}>
+                                  <Button icon light onPress={() => createPlaylists(p)}>
                                     <Icon name='create' type='MaterialIcons' />
                                   </Button>
                                 }
                                 {
                                   p.spotifyPlaylist && p.youtubePlaylist &&
-                                  <Button icon light onPress={() => _onOpenSynchronizePlaylist(p)}>
+                                  <Button icon light onPress={() => onOpenSynchronizePlaylist(p)}>
                                     <Icon name='arrow-forward' />
                                   </Button>
                                 }

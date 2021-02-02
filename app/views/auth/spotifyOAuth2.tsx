@@ -23,14 +23,14 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
   React.useEffect(() => {
     if (state.spotifyState.credential.isLogged) {
       if (state.spotifyState.userProfile.id == '') {
-        _getSpotifyUserId();
+        getSpotifyUserId();
       }
     } else {
-      _tryRefreshSpotify();
+      tryRefreshSpotify();
     }
   }, [state.spotifyState.credential.isLogged]);
 
-  async function _tryRefreshSpotify() {
+  const tryRefreshSpotify = async () => {
     try {
       const value = await AsyncStorage.getItem(storageKey);
       if (value !== null) {
@@ -41,7 +41,7 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
             dispatch(spotifyApiRefreshSuccess(refreshResult));
 
             if (refreshResult.refreshToken) {
-              await _storeRefreshToken(refreshResult.refreshToken);
+              await storeRefreshToken(refreshResult.refreshToken);
             }
           }
         } catch (error) {
@@ -53,20 +53,20 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
-  async function _authorizeSpotify() {
+  const authorizeSpotify = async () => {
     try {
       dispatch(spotifyApiAuthorizeRequest());
       var authorizeResult = await authorize(props.authorizeConfiguration);
       if (authorizeResult) {
         dispatch(spotifyApiAuthorizeSuccess(authorizeResult));
-        await _storeRefreshToken(authorizeResult.refreshToken);
+        await storeRefreshToken(authorizeResult.refreshToken);
       }
     } catch (error) {
       dispatch(spotifyApiAuthorizeError(error));
     }
   }
 
-  async function _refreshSpotify() {
+  const refreshSpotify = async () => {
     try {
       dispatch(spotifyApiRefreshRequest());
       var refreshResult = await refresh(props.authorizeConfiguration, { refreshToken: state.spotifyState.credential.refreshToken });
@@ -74,7 +74,7 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
         dispatch(spotifyApiRefreshSuccess(refreshResult));
 
         if (refreshResult.refreshToken) {
-          await _storeRefreshToken(refreshResult.refreshToken);
+          await storeRefreshToken(refreshResult.refreshToken);
         }
       }
     } catch (error) {
@@ -82,19 +82,19 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
-  async function _revokeSpotify() {
+  const revokeSpotify = async () => {
     try {
       dispatch(spotifyApiRevokeRequest());
       await revoke(props.authorizeConfiguration, { tokenToRevoke: state.youtubeState.credential.refreshToken });
 
       dispatch(spotifyApiRevokeSuccess());
-      await _storeRefreshToken('');
+      await storeRefreshToken('');
     } catch (error) {
       dispatch(spotifyApiRevokeError(error));
     }
   }
 
-  async function _getSpotifyUserId() {
+  const getSpotifyUserId = async () => {
     try {
       dispatch(spotifyCurrentProfileRequest());
       var spotifyApi = new SpotifyApi();
@@ -108,7 +108,7 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
-  async function _storeRefreshToken(token: string) {
+  const storeRefreshToken = async (token: string) => {
     try {
       await AsyncStorage.setItem(storageKey, token);
     } catch (e) {
@@ -126,9 +126,9 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
       <CardItem>
         <CredentialView
           credential={state.spotifyState.credential}
-          authorizeDelegate={_authorizeSpotify}
-          refreshDelegate={_refreshSpotify}
-          revokeDelegate={_revokeSpotify} />
+          authorizeDelegate={authorizeSpotify}
+          refreshDelegate={refreshSpotify}
+          revokeDelegate={revokeSpotify} />
       </CardItem >
       {
         state.spotifyState.userProfile.loading &&

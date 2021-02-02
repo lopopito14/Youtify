@@ -3,7 +3,7 @@ import { Body, Button, Card, CardItem, Content, H1, H3, Icon, Left, List, Right,
 import { spotifyTheme, synchronizeTheme, youtubeTheme } from '../theme';
 import ModalPopup, { ModalType } from '../utils/modalPopup';
 import { ISynchronizeNavigationProps, IYoutubeMonthPlaylist } from '../synchronizeView';
-import { defaultThumbnail } from '../utils/helpers';
+import { defaultThumbnail, getYoutubeVideoDuration, msToTime } from '../utils/helpers';
 import useSynchronizePlaylists, { IMySpotify, IMyYoutube } from './useSynchronizePlaylists';
 
 interface IProps extends ISynchronizeNavigationProps {
@@ -72,8 +72,11 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
         break;
     }
 
-
   }, [mode]);
+
+  const modalCancelCallback = React.useCallback(async () => {
+    setMode(ActionMode.None);
+  }, []);
 
   const getYoutubeThumbnail = (saveYoutube: IMyYoutube | undefined) => {
 
@@ -84,7 +87,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
       }
     }
 
-    return defaultThumbnail();
+    return defaultThumbnail;
   }
 
   const getYoutubeChannel = (saveYoutube: IMyYoutube) => {
@@ -111,25 +114,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 
     const item = youtubeVideos.videos.find(i => i.id === saveYoutube.videoId);
     if (item && item.contentDetails?.duration) {
-
-      var regexPtms = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/;
-      var hours = 0, minutes = 0, seconds = 0, totalMilliSeconds;
-
-      if (regexPtms.test(item.contentDetails.duration)) {
-        var matches = regexPtms.exec(item.contentDetails.duration);
-        if (matches) {
-          if (matches[1]) hours = Number(matches[1]);
-          if (matches[2]) minutes = Number(matches[2]);
-          if (matches[3]) seconds = Number(matches[3]);
-          totalMilliSeconds = (hours * 3600 + minutes * 60 + seconds) * 1000;
-
-          const durationDate = new Date(totalMilliSeconds);
-          return `${durationDate.getMinutes()}:${durationDate.getSeconds()}`;
-        }
-
-      }
-
-      return item.contentDetails.duration;
+      return msToTime(getYoutubeVideoDuration(item.contentDetails?.duration));
     }
 
     return '';
@@ -144,7 +129,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
       }
     }
 
-    return defaultThumbnail();
+    return defaultThumbnail;
   }
 
   const getSpotifyArtist = (saveSpotify: IMySpotify) => {
@@ -161,8 +146,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 
     const item = spotifyTracks.tracks.find(i => i.id === saveSpotify.id);
     if (item) {
-      const durationDate = new Date(item.duration_ms);
-      return `${durationDate.getMinutes()}:${durationDate.getSeconds()}`;
+      return msToTime(item.duration_ms);
     }
 
     return '';
@@ -182,7 +166,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
     <>
       <ModalPopup
         backgroundColor={synchronizeTheme.primaryBackgroundColor}
-        cancelCallback={() => setMode(ActionMode.None)}
+        cancelCallback={modalCancelCallback}
         okCallback={modalOkCallback}
         title={title}
         type={ModalType.OK_CANCEL}
@@ -195,7 +179,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
               <H1 style={{ color: "white" }}>{props.myPlaylist.title}</H1>
             </Left>
             <Right>
-              <Button light rounded icon onPress={() => saveLocal()} style={{ borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }}>
+              <Button light rounded icon onPress={saveLocal} style={{ borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }}>
                 <Icon name="save" type="FontAwesome" />
               </Button>
             </Right>

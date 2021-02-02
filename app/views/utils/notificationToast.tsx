@@ -1,25 +1,23 @@
 import { Toast } from 'native-base';
 import React from 'react'
 import Context from '../../store/context';
-import { INotification, NotificationType } from '../../store/state';
+import { NotificationType } from '../../store/state';
 import { popNotification } from '../../store/types/notifications_actions';
 
-interface IProps {
-    notifications: INotification[];
-}
+interface IProps { }
 
-const NotificationToast: React.FunctionComponent<IProps> = (props: IProps) => {
-    const { dispatch } = React.useContext(Context);
+const NotificationToast: React.FunctionComponent<IProps> = () => {
+    const { state, dispatch } = React.useContext(Context);
 
     React.useEffect(() => {
-        if (props.notifications.length > 0) {
-            const notification = props.notifications[0];
+        if (state.notifications.notifications.length > 0) {
+            const notification = state.notifications.notifications[0];
 
             switch (notification.type) {
                 case NotificationType.SUCCESS:
                     Toast.show({
                         text: notification.message,
-                        duration: 1000,
+                        duration: 2000,
                         type: "success",
                         onClose: () => {
                             dispatch(popNotification());
@@ -30,7 +28,7 @@ const NotificationToast: React.FunctionComponent<IProps> = (props: IProps) => {
                 case NotificationType.WARNING:
                     Toast.show({
                         text: notification.message,
-                        duration: 1000,
+                        duration: 2000,
                         type: "warning",
                         onClose: () => {
                             dispatch(popNotification());
@@ -41,7 +39,7 @@ const NotificationToast: React.FunctionComponent<IProps> = (props: IProps) => {
                 case NotificationType.ERROR:
                     Toast.show({
                         text: notification.message,
-                        duration: 1000,
+                        duration: 2000,
                         type: "danger",
                         onClose: () => {
                             dispatch(popNotification());
@@ -50,7 +48,7 @@ const NotificationToast: React.FunctionComponent<IProps> = (props: IProps) => {
                     break;
             }
         }
-    }, [props.notifications]);
+    }, [state.notifications.notifications]);
 
     return (<></>)
 }

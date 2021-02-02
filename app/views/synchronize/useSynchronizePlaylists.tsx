@@ -227,7 +227,7 @@ export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
     }
   }
 
-  const saveLocal = async () => {
+  const saveLocal = React.useCallback(async () => {
     if (save) {
       try {
         console.log(`save ${myPlaylist.title} => `);
@@ -240,7 +240,7 @@ export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
         console.error(e);
       }
     }
-  }
+  }, [save]);
 
   const fetchYoutubeVideos = async (pageToken: string | undefined = undefined) => {
     if (myPlaylist.youtubePlaylist?.id) {

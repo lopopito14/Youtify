@@ -23,14 +23,14 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
   React.useEffect(() => {
     if (state.youtubeState.credential.isLogged) {
       if (!state.youtubeState.userProfile.loaded) {
-        _getYoutubeChannelId();
+        getYoutubeChannelId();
       }
     } else {
-      _tryRefreshYoutube();
+      tryRefreshYoutube();
     }
   }, [state.youtubeState.credential.isLogged]);
 
-  async function _tryRefreshYoutube() {
+  const tryRefreshYoutube = async () => {
     try {
       const value = await AsyncStorage.getItem(storageKey);
       if (value !== null) {
@@ -41,7 +41,7 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
             dispatch(youtubeApiRefreshSuccess(refreshResult));
 
             if (refreshResult.refreshToken) {
-              await _storeRefreshToken(refreshResult.refreshToken);
+              await storeRefreshToken(refreshResult.refreshToken);
             }
           }
         } catch (error) {
@@ -53,20 +53,20 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
     }
   }
 
-  async function _authorizeYoutube() {
+  const authorizeYoutube = async () => {
     try {
       dispatch(youtubeApiAuthorizeRequest());
       var authorizeResult: AuthorizeResult = await authorize(props.authorizeConfiguration);
       if (authorizeResult) {
         dispatch(youtubeApiAuthorizeSuccess(authorizeResult));
-        await _storeRefreshToken(authorizeResult.refreshToken);
+        await storeRefreshToken(authorizeResult.refreshToken);
       }
     } catch (error) {
       dispatch(youtubeApiAuthorizeError(error));
     }
   }
 
-  async function _refreshYoutube() {
+  const refreshYoutube = async () => {
     try {
       dispatch(youtubeApiRefreshRequest());
       var refreshResult: RefreshResult = await refresh(props.authorizeConfiguration, { refreshToken: state.youtubeState.credential.refreshToken });
@@ -74,7 +74,7 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
         dispatch(youtubeApiRefreshSuccess(refreshResult));
 
         if (refreshResult.refreshToken) {
-          await _storeRefreshToken(refreshResult.refreshToken);
+          await storeRefreshToken(refreshResult.refreshToken);
         }
       }
     } catch (error) {
@@ -82,19 +82,19 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
     }
   }
 
-  async function _revokeYoutube() {
+  const revokeYoutube = async () => {
     try {
       dispatch(youtubeApiRevokeRequest());
       await revoke(props.authorizeConfiguration, { tokenToRevoke: state.youtubeState.credential.refreshToken });
 
       dispatch(youtubeApiRevokeSuccess());
-      await _storeRefreshToken('');
+      await storeRefreshToken('');
     } catch (error) {
       dispatch(youtubeApiRevokeError(error));
     }
   }
 
-  async function _getYoutubeChannelId() {
+  const getYoutubeChannelId = async () => {
     try {
       dispatch(youtubeCurrentProfileRequest());
       var response = await new Channels(state.youtubeState.credential.accessToken).list(
@@ -111,7 +111,7 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
     }
   }
 
-  async function _storeRefreshToken(token: string) {
+  const storeRefreshToken = async (token: string) => {
     try {
       await AsyncStorage.setItem(storageKey, token);
     } catch (e) {
@@ -129,9 +129,9 @@ export const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) =>
       <CardItem>
         <CredentialView
           credential={state.youtubeState.credential}
-          authorizeDelegate={_authorizeYoutube}
-          refreshDelegate={_refreshYoutube}
-          revokeDelegate={_revokeYoutube} />
+          authorizeDelegate={authorizeYoutube}
+          refreshDelegate={refreshYoutube}
+          revokeDelegate={revokeYoutube} />
       </CardItem>
       {
         state.youtubeState.userProfile.loading &&

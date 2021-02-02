@@ -16,22 +16,30 @@ export interface IAdjustableVideo {
 
 const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { adjustableVideos, progress, loaded, replace } = useFetchAdjustFavorites();
-    const { searchResults, setSearchResults, openSearch } = useSearch();
+    const { searchResults, openSearch } = useSearch();
     const [adjustableVideo, setAdjustableVideo] = React.useState<IAdjustableVideo | undefined>(undefined);
 
-    function _onSearch(adjustableVideo: IAdjustableVideo) {
+    const onSearch = React.useCallback((adjustableVideo: IAdjustableVideo) => {
         if (adjustableVideo.video.snippet?.title) {
             setAdjustableVideo(adjustableVideo);
             openSearch(adjustableVideo.video.snippet?.title);
         }
-    }
+    }, []);
 
-    const _onReplace = (searchResult: SearchResult) => {
+    const onReplace = React.useCallback(async (searchResult: SearchResult) => {
         if (adjustableVideo) {
-            replace(searchResult, adjustableVideo)
-            setSearchResults(undefined);
+            await replace(searchResult, adjustableVideo)
+            await openSearch(undefined);
         }
-    }
+    }, [adjustableVideo]);
+
+    const modalOkCallback = React.useCallback(async () => {
+        // do nothing
+    }, []);
+
+    const modalCancelCallback = React.useCallback(async () => {
+        await openSearch(undefined);
+    }, []);
 
     return (
         <>
@@ -40,8 +48,8 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
                 <>
                     <ModalPopup
                         backgroundColor={youtubeTheme.primaryBackgroundColor}
-                        cancelCallback={() => setSearchResults(undefined)}
-                        okCallback={() => { }}
+                        cancelCallback={modalCancelCallback}
+                        okCallback={modalOkCallback}
                         title='Search'
                         type={ModalType.CANCEL}
                         visible={searchResults !== undefined}
@@ -68,7 +76,7 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
                                     }
                                     right={
                                         adjustableVideo &&
-                                        <Button success onPress={() => _onReplace(s)}>
+                                        <Button success onPress={() => onReplace(s)}>
                                             <Icon active name="add" />
                                         </Button>
                                     }
@@ -97,7 +105,7 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
                                                     <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{v.video.statistics?.viewCount} views</Text>
                                                 </Body>
                                                 <Right>
-                                                    <Button rounded icon light onPress={() => _onSearch(v)}>
+                                                    <Button rounded icon light onPress={() => onSearch(v)}>
                                                         <Icon name='arrow-forward' />
                                                     </Button>
                                                 </Right>

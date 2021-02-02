@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import Context from '../store/context';
 import { pushSpotifyErrorNotification, pushSpotifySuccessNotification, pushYoutubeErrorNotification, pushYoutubeSuccessNotification } from '../store/types/notifications_actions';
 import { Playlists } from '../youtubeApi/youtube-api-playlists';
@@ -43,38 +43,38 @@ const usePlaylistsSynchronizer = () => {
     React.useEffect(() => {
         if (state.youtubeState.userProfile.loaded) {
             if (!myPlaylist.loaded) {
-                _fetchFavoritePlaylistItems();
+                fetchFavoritePlaylistItems();
             }
 
             if (!youtubePlaylists.loaded) {
-                _fetchYoutubePlaylists();
+                fetchYoutubePlaylists();
             }
         }
     }, [state.youtubeState.userProfile.loaded]);
 
     React.useEffect(() => {
         if (favoritepageToken) {
-            _fetchFavoritePlaylistItems(favoritepageToken);
+            fetchFavoritePlaylistItems(favoritepageToken);
         }
     }, [favoritepageToken]);
 
     React.useEffect(() => {
         if (youtubePlaylistsPageToken) {
-            _fetchYoutubePlaylists(youtubePlaylistsPageToken);
+            fetchYoutubePlaylists(youtubePlaylistsPageToken);
         }
     }, [youtubePlaylistsPageToken]);
 
     React.useEffect(() => {
         if (state.spotifyState.userProfile.loaded) {
             if (!spotifyPlaylists.loaded) {
-                _fetchSpotifyPlaylists();
+                fetchSpotifyPlaylists();
             }
         }
     }, [state.spotifyState.userProfile.loaded]);
 
     React.useEffect(() => {
         if (spotifyPlaylistsOffset) {
-            _fetchSpotifyPlaylists(spotifyPlaylistsOffset);
+            fetchSpotifyPlaylists(spotifyPlaylistsOffset);
         }
     }, [spotifyPlaylistsOffset]);
 
@@ -105,12 +105,7 @@ const usePlaylistsSynchronizer = () => {
         }
     }, [myPlaylist.loaded, youtubePlaylists.loaded, spotifyPlaylists.loaded]);
 
-    const createPlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
-        _createPlaylist(myPlaylist);
-    }
-
-    async function _createPlaylist(myPlaylist: IYoutubeMonthPlaylist) {
-
+    const createPlaylists = React.useCallback(async (myPlaylist: IYoutubeMonthPlaylist) => {
         if (myPlaylist.spotifyPlaylist === undefined) {
             try {
                 const spotifyApi = new SpotifyApi();
@@ -124,7 +119,7 @@ const usePlaylistsSynchronizer = () => {
 
                 var createSpotifyPlaylistResponse = await spotifyApi.createPlaylist(state.spotifyState.userProfile.id, options);
                 if (createSpotifyPlaylistResponse) {
-                    _fetchSpotifyPlaylists();
+                    fetchSpotifyPlaylists();
                     dispatch(pushSpotifySuccessNotification(`Spotify playlist '${myPlaylist.title}' created !`));
                 }
             } catch (error) {
@@ -143,20 +138,20 @@ const usePlaylistsSynchronizer = () => {
                     }
                 });
                 if (createYoutubePlaylistResponse) {
-                    _fetchYoutubePlaylists();
+                    fetchYoutubePlaylists();
                     dispatch(pushYoutubeSuccessNotification(`Youtube playlist '${myPlaylist.title}' created !`));
                 }
             } catch (error) {
                 dispatch(pushYoutubeErrorNotification(error));
             }
         }
-    }
+    }, []);
 
-    const _matchPlaylistName = (name: string): boolean => {
+    const matchPlaylistName = (name: string): boolean => {
         return new RegExp("Playlist [0-9]{4} - [0-9]{2}").test(name);
     }
 
-    async function _fetchFavoritePlaylistItems(pageToken: string | undefined = undefined) {
+    const fetchFavoritePlaylistItems = async (pageToken: string | undefined = undefined) => {
         try {
             setMyPlaylist((previous) => {
                 return {
@@ -259,7 +254,7 @@ const usePlaylistsSynchronizer = () => {
         }
     }
 
-    async function _fetchYoutubePlaylists(pageToken: string | undefined = undefined) {
+    const fetchYoutubePlaylists = async (pageToken: string | undefined = undefined) => {
         try {
             if (pageToken) {
                 setYoutubePlaylists((prev) => {
@@ -287,7 +282,7 @@ const usePlaylistsSynchronizer = () => {
             });
             if (response && response.items) {
 
-                const filteredPlaylists = response.items.filter(i => i.snippet?.title && _matchPlaylistName(i.snippet?.title));
+                const filteredPlaylists = response.items.filter(i => i.snippet?.title && matchPlaylistName(i.snippet?.title));
 
                 setYoutubePlaylists((prev) => {
                     return {
@@ -324,7 +319,7 @@ const usePlaylistsSynchronizer = () => {
         }
     }
 
-    async function _fetchSpotifyPlaylists(offset: number | undefined = undefined) {
+    const fetchSpotifyPlaylists = async (offset: number | undefined = undefined) => {
         try {
             setSpotifyPlaylists((prev) => {
                 return {
@@ -355,7 +350,7 @@ const usePlaylistsSynchronizer = () => {
             );
             if (response) {
 
-                const filteredPlaylists = response.items.filter(i => _matchPlaylistName(i.name));
+                const filteredPlaylists = response.items.filter(i => matchPlaylistName(i.name));
 
                 setSpotifyPlaylists((prev) => {
                     return {

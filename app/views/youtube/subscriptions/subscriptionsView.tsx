@@ -20,16 +20,16 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
         }
     }, [props.selectedView]);
 
-    function _onOpenSubscription(subscription: Subscription) {
+    const onOpenSubscription = React.useCallback((subscription: Subscription) => {
         setselectedSubscription(subscription);
         props.setselectedView(YoutubeViewType.SUBSCRIPTION);
-    }
+    }, []);
 
     return (
         <>
             {
                 props.selectedView === YoutubeViewType.SUBSCRIPTIONS &&
-                <RefreshableList onRefresh={() => refreshSubscriptions()} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={() => loadSubscriptions()}>
+                <RefreshableList onRefresh={refreshSubscriptions} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={loadSubscriptions}>
                     {
                         subscriptions.map((s, i) =>
                             <ListItem thumbnail key={i}>
@@ -45,7 +45,7 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     <Text note numberOfLines={1}>{s.contentDetails?.totalItemCount} videos</Text>
                                 </Body>
                                 <Right>
-                                    <Button iconRight light onPress={() => _onOpenSubscription(s)}>
+                                    <Button iconRight light onPress={() => onOpenSubscription(s)}>
                                         <Text>Manage</Text>
                                         <Icon name='arrow-forward' />
                                     </Button>

@@ -6,6 +6,7 @@ import { Playlist } from '../../../youtubeApi/youtube-api-models';
 import YoutubePlayer, { YoutubeIframeRef } from "react-native-youtube-iframe";
 import { Image } from 'react-native';
 import useFetchPlaylist from './useFetchPlaylist';
+import { getYoutubeVideoDuration, msToTime } from '../../utils/helpers';
 
 interface IProps extends IYoutubeNavigationProps {
     playlist: Playlist;
@@ -18,23 +19,23 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     const playerRef = React.useRef<YoutubeIframeRef>(null);
 
-    const _onStateChange = (state: String) => {
+    const onStateChange = (state: String) => {
         if (state === "ended") {
             setVideoIdPlaying(undefined);
         }
     }
 
-    const _onError = (error: String) => {
+    const onError = (error: String) => {
         console.log(error);
     }
 
-    const _playBackward = () => {
+    const playBackward = () => {
         playerRef.current?.getCurrentTime().then(currentTime =>
             playerRef.current?.seekTo(currentTime - 30, false)
         );
     }
 
-    const _togglePlaying = (videoId: string) => {
+    const togglePlaying = (videoId: string) => {
         setVideoIdPlaying((prev) => {
             const sameVideo = videoId === prev;
             if (sameVideo) {
@@ -45,10 +46,18 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
         });
     }
 
-    const _playForward = () => {
+    const playForward = () => {
         playerRef.current?.getCurrentTime().then(currentTime =>
             playerRef.current?.seekTo(currentTime + 30, true)
         );
+    }
+
+    const getYoutubeDuration = (duration: string | undefined | null) => {
+        if (duration) {
+            return msToTime(getYoutubeVideoDuration(duration));
+        }
+
+        return '';
     }
 
     return (
@@ -66,8 +75,8 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     height={0}
                                     play={videoIdPlaying !== undefined}
                                     videoId={videoIdPlaying}
-                                    onChangeState={_onStateChange}
-                                    onError={_onError}
+                                    onChangeState={onStateChange}
+                                    onError={onError}
                                     initialPlayerParams={{ controls: false, preventFullScreen: true, start: 30 }}
                                 />
                             }
@@ -92,28 +101,29 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     {
                                         youtubeVideos.map((video, i) =>
                                             <ListItem key={i}>
-                                                <Text style={{ marginRight: 10 }}>{i + 1}</Text>
+                                                <Text style={{ marginRight: 5 }}>{i + 1}</Text>
                                                 <Body>
                                                     <Text style={{ textAlignVertical: 'center' }} numberOfLines={3}>{video.snippet?.title}</Text>
                                                     <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{video.snippet?.channelTitle}</Text>
                                                     <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{video.statistics?.viewCount} views</Text>
+                                                    <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{getYoutubeDuration(video.contentDetails?.duration)}</Text>
                                                 </Body>
                                                 {
                                                     video.id && video.snippet?.thumbnails?.medium?.url &&
-                                                    <View style={{ height: 90, width: 160, backgroundColor: "red" }}>
+                                                    <View style={{ height: 90, width: 160 }}>
                                                         <Image source={{ uri: video.snippet?.thumbnails?.medium?.url }} style={{ height: 90, width: 160 }} />
                                                         {
                                                             video.id === videoIdPlaying &&
-                                                            <Button light onPress={_playBackward} style={{ position: 'absolute', bottom: 0, left: 10, right: 100, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
+                                                            <Button light onPress={playBackward} style={{ position: 'absolute', bottom: 0, left: 10, right: 100, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
                                                                 <Icon name='step-backward' type='FontAwesome' />
                                                             </Button>
                                                         }
-                                                        <Button light onPress={() => _togglePlaying(video.id ? video.id : '')} style={{ position: 'absolute', top: video.id === videoIdPlaying ? 0 : 25, left: 50, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
+                                                        <Button light onPress={() => togglePlaying(video.id ? video.id : '')} style={{ position: 'absolute', top: video.id === videoIdPlaying ? 0 : 25, left: 50, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
                                                             <Icon android={video.id === videoIdPlaying ? "md-pause" : "md-play"} ios={video.id === videoIdPlaying ? "md-pause" : "md-play"} />
                                                         </Button>
                                                         {
                                                             video.id === videoIdPlaying &&
-                                                            <Button light onPress={_playForward} style={{ position: 'absolute', bottom: 0, left: 100, right: 10, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
+                                                            <Button light onPress={playForward} style={{ position: 'absolute', bottom: 0, left: 100, right: 10, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
                                                                 <Icon name='step-forward' type='FontAwesome' />
                                                             </Button>
                                                         }

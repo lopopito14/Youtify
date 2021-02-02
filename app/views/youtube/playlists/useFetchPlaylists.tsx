@@ -12,23 +12,24 @@ const useFetchPlaylists = () => {
     const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
-        _fetchPlaylists();
+        fetchPlaylists();
     }, []);
 
-    function refreshPlaylist() {
-        _fetchPlaylists();
-    }
+    const refreshPlaylist = React.useCallback(async () => {
+        await fetchPlaylists();
+    }, []);
 
-    function loadPlaylist() {
+    const loadPlaylist = React.useCallback(async () => {
         if (!loaded) {
-            _fetchPlaylists(pageToken);
+            await fetchPlaylists(pageToken);
         }
         else {
             console.log("all playlists loaded");
         }
-    }
+    }, [loaded, pageToken]);
 
-    async function _fetchPlaylists(pageToken: string | undefined = undefined) {
+    const fetchPlaylists = async (pageToken: string | undefined = undefined) => {
+
         try {
             var response = await new Playlists(state.youtubeState.credential.accessToken).list({
                 channelId: state.youtubeState.userProfile.channelId,

@@ -21,28 +21,28 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
         }
     }, [props.selectedView]);
 
-    function _onOpenPlaylist(playlist: Playlist) {
+    const onOpenPlaylist = React.useCallback((playlist: Playlist) => {
         setselectedPlaylist(playlist);
         props.setselectedView(YoutubeViewType.PLAYLIST);
-    }
+    }, []);
 
     return (
         <>
             {
                 props.selectedView === YoutubeViewType.PLAYLISTS &&
-                <RefreshableList onRefresh={() => refreshPlaylist()} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={() => loadPlaylist()}>
+                <RefreshableList onRefresh={refreshPlaylist} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={loadPlaylist}>
                     {
                         playlists.map((p, i) =>
                             <ListItem thumbnail key={i}>
                                 <Left>
-                                    <Thumbnail source={{ uri: p.snippet?.thumbnails?.medium?.url ? p.snippet?.thumbnails?.medium?.url : defaultThumbnail() }} />
+                                    <Thumbnail source={{ uri: p.snippet?.thumbnails?.medium?.url ? p.snippet?.thumbnails?.medium?.url : defaultThumbnail }} />
                                 </Left>
                                 <Body>
                                     <Text style={{ color: "white" }}>{p.snippet?.title}</Text>
                                     <Text note numberOfLines={1}>{p.contentDetails?.itemCount} videos.</Text>
                                 </Body>
                                 <Right>
-                                    <Button iconRight light onPress={() => _onOpenPlaylist(p)}>
+                                    <Button iconRight light onPress={() => onOpenPlaylist(p)}>
                                         <Text>Manage</Text>
                                         <Icon name='arrow-forward' />
                                     </Button>

@@ -9,11 +9,11 @@ const useSearch = () => {
 
     const [searchResults, setSearchResults] = React.useState<SearchResult[] | undefined>(undefined);
 
-    const openSearch = (query: string) => {
-        _search(query);
-    }
-
-    async function _search(query: string) {
+    const openSearch = async (query: string | undefined) => {
+        if (!query) {
+            setSearchResults(undefined);
+            return;
+        }
         try {
             let publishedBefore = undefined;
             let publishedAfter = undefined;
@@ -45,7 +45,7 @@ const useSearch = () => {
         }
     }
 
-    return { searchResults, setSearchResults, openSearch };
+    return { searchResults, openSearch };
 }
 
 export default useSearch

@@ -17,9 +17,9 @@ const useFetchSubscription = (subscription: Subscription) => {
 
     React.useEffect(() => {
 
-        async function _fetchAllChannelDatas() {
+        const fetchAllChannelDatas = async () => {
             try {
-                await Promise.all([_fetchChannelSections(), _fetchSubscriptions()]);
+                await Promise.all([fetchChannelSections(), fetchSubscriptions()]);
             } catch (error) {
                 console.log('Error => ' + error);
             } finally {
@@ -27,10 +27,10 @@ const useFetchSubscription = (subscription: Subscription) => {
             }
         }
 
-        _fetchAllChannelDatas();
+        fetchAllChannelDatas();
     }, [subscription]);
 
-    async function _fetchChannelSections() {
+    const fetchChannelSections = async () => {
         try {
             var channelSectionsResponse = await new ChannelSections(state.youtubeState.credential.accessToken).list({
                 channelId: subscription.snippet?.resourceId?.channelId ? subscription.snippet.resourceId.channelId : '',
@@ -72,7 +72,7 @@ const useFetchSubscription = (subscription: Subscription) => {
         }
     }
 
-    async function _fetchSubscriptions() {
+    const fetchSubscriptions = async () => {
         try {
             var response = await new Subscriptions(state.youtubeState.credential.accessToken).list({
                 channelId: subscription.snippet?.resourceId?.channelId ? subscription.snippet?.resourceId.channelId : '',

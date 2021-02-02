@@ -10,13 +10,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface Props { }
 
 export const SettingsView: React.FunctionComponent<Props> = () => {
-  const [purgeLocalStorage, setPurgeLocalStorage] = React.useState<boolean>(false);
-
-  React.useEffect(() => {
-    if (purgeLocalStorage) {
-      _purgeLocalStorage();
-    }
-  }, [purgeLocalStorage]);
 
   const youtubeAuthorizeConfiguration: AuthConfiguration = {
     clientId: '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
@@ -48,7 +41,7 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
     },
   }
 
-  async function _purgeLocalStorage() {
+  const purgeLocalStorage = React.useCallback(async () => {
     try {
       const keys = await AsyncStorage.getAllKeys();
 
@@ -63,10 +56,8 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
 
     } catch (e) {
       console.log(e);
-    } finally {
-      setPurgeLocalStorage(false);
     }
-  }
+  }, []);
 
   return (
     <>
@@ -83,7 +74,7 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
         <Content>
           <YoutubeOAuth2 authorizeConfiguration={youtubeAuthorizeConfiguration} />
           <SpotifyOAuth2 authorizeConfiguration={spotifyAuthorizeConfiguration} />
-          <Button onPress={() => setPurgeLocalStorage(true)}>
+          <Button onPress={purgeLocalStorage}>
             <Text>Purge local storage</Text>
           </Button>
         </Content>

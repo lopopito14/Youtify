@@ -12,7 +12,7 @@ interface IProps extends ISpotifyNavigationProps {
 
 const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
 
-    const { artist, relatedArtists, relatedArtistsFollowingStatus, artistTopTracks, loaded, setfollowOrUnfollowId } = useFetchArtist(props.artistId);
+    const { artist, relatedArtists, relatedArtistsFollowingStatus, artistTopTracks, loaded, onFollow } = useFetchArtist(props.artistId);
     const { trackIdPlaying, playTrack, stopPlaying } = usePlayTrack();
 
     React.useEffect(() => {
@@ -109,7 +109,7 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                                 <Text note numberOfLines={1}>{`${a.followers.total} followers`}</Text>
                                             </Body>
                                             <Right>
-                                                <Button color={spotifyTheme.secondaryColor} transparent rounded icon onPress={() => setfollowOrUnfollowId(a.id)}>
+                                                <Button color={spotifyTheme.secondaryColor} transparent rounded icon onPress={() => onFollow(a.id)}>
                                                     <Icon name={relatedArtistsFollowingStatus[i] ? "user-unfollow" : "user-follow"} type="SimpleLineIcons" style={{ color: relatedArtistsFollowingStatus[i] ? "red" : "green" }} />
                                                 </Button>
                                             </Right>

@@ -11,13 +11,12 @@ const useFetchArtist = (artistId: string) => {
     const [relatedArtistsFollowingStatus, setrelatedArtistsFollowingStatus] = React.useState<boolean[] | undefined>([]);
     const [artistTopTracks, setArtistTopTracks] = React.useState<globalThis.SpotifyApi.ArtistsTopTracksResponse>();
     const [loaded, setLoaded] = React.useState(false);
-    const [followOrUnfollowId, setfollowOrUnfollowId] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
 
-        async function _fetchAllArtistDatas() {
+        const fetchAllArtistDatas = async () => {
             try {
-                await Promise.all([_fetchArtist(), _fetchArtistTopTracks(), _fetchRelatedArtists()]);
+                await Promise.all([fetchArtist(), fetchArtistTopTracks(), fetchRelatedArtists()]);
             } catch (error) {
                 console.log('Error => ' + error);
             } finally {
@@ -25,16 +24,11 @@ const useFetchArtist = (artistId: string) => {
             }
         }
 
-        _fetchAllArtistDatas();
+        fetchAllArtistDatas();
     }, [artistId]);
 
-    React.useEffect(() => {
-        if (followOrUnfollowId) {
-            _onFollow(followOrUnfollowId);
-        }
-    }, [followOrUnfollowId]);
 
-    async function _fetchArtist() {
+    const fetchArtist = async () => {
         try {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
@@ -48,7 +42,7 @@ const useFetchArtist = (artistId: string) => {
         }
     }
 
-    async function _fetchArtistTopTracks() {
+    const fetchArtistTopTracks = async () => {
         try {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
@@ -62,7 +56,7 @@ const useFetchArtist = (artistId: string) => {
         }
     }
 
-    async function _fetchRelatedArtists() {
+    const fetchRelatedArtists = async () => {
         try {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
@@ -71,14 +65,14 @@ const useFetchArtist = (artistId: string) => {
             if (response) {
                 setRelatedArtists(response);
 
-                await _fetchAreArtistsFollowed(response.artists.map((a) => a.id));
+                await fetchAreArtistsFollowed(response.artists.map((a) => a.id));
             }
         } catch (error) {
             dispatch(pushSpotifyErrorNotification(error));
         }
     }
 
-    async function _fetchAreArtistsFollowed(ids: string[]) {
+    const fetchAreArtistsFollowed = async (ids: string[]) => {
         try {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
@@ -92,41 +86,41 @@ const useFetchArtist = (artistId: string) => {
         }
     }
 
-    async function _onFollow(id: string) {
+    const onFollow = React.useCallback(async (id: string) => {
         try {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var copy = relatedArtistsFollowingStatus;
             const position = relatedArtists?.artists.findIndex((a) => a.id == id);
 
-            if (position !== undefined && copy) {
+            if (position !== undefined && relatedArtistsFollowingStatus) {
 
-                const followStatus = copy[position];
+                const followStatus = relatedArtistsFollowingStatus[position];
                 if (followStatus) {
-
                     await spotifyApi.unfollowArtists([id]);
-                    if (copy) {
-                        copy[position] = false;
-                    }
                 } else {
-
                     await spotifyApi.followArtists([id]);
-                    if (copy) {
-                        copy[position] = true;
-                    }
                 }
 
-                setrelatedArtistsFollowingStatus(copy);
+                setrelatedArtistsFollowingStatus((prev) => {
+
+                    if (!prev) {
+                        return prev;
+                    }
+
+                    return [
+                        ...prev?.slice(0, position),
+                        !followStatus,
+                        ...prev.slice(position + 1)
+                    ]
+                });
             }
         } catch (error) {
             dispatch(pushSpotifyErrorNotification(error));
-        } finally {
-            setfollowOrUnfollowId(undefined);
         }
-    }
+    }, [relatedArtists, relatedArtistsFollowingStatus]);
 
-    return { artist, relatedArtists, relatedArtistsFollowingStatus, artistTopTracks, loaded, setfollowOrUnfollowId }
+    return { artist, relatedArtists, relatedArtistsFollowingStatus, artistTopTracks, loaded, onFollow }
 }
 
 export default useFetchArtist

@@ -13,16 +13,16 @@ const useFetchPlaylist = (playlist: Playlist) => {
     const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
-        _fetchPlaylistVideos();
+        fetchPlaylistVideos();
     }, [playlist]);
 
     React.useEffect(() => {
         if (pageToken) {
-            _fetchPlaylistVideos(pageToken);
+            fetchPlaylistVideos(pageToken);
         }
     }, [pageToken]);
 
-    async function _fetchPlaylistVideos(pageToken: string | undefined = undefined) {
+    const fetchPlaylistVideos = async (pageToken: string | undefined = undefined) => {
         try {
             var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
                 playlistId: playlist.id ? playlist.id : '',

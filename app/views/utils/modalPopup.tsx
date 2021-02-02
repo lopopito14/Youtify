@@ -12,8 +12,8 @@ export interface IProps {
     type: ModalType,
     visible: boolean;
     backgroundColor: string;
-    okCallback(): any;
-    cancelCallback(): any;
+    okCallback(): Promise<void>;
+    cancelCallback(): Promise<void>;
     children?: React.ReactNode
 }
 

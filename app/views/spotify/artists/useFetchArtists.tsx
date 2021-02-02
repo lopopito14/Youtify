@@ -11,23 +11,23 @@ const useFetchArtists = () => {
     const [after, setafter] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
-        _fetchFollowedArtists();
+        fetchFollowedArtists();
     }, []);
 
-    const refreshArtists = () => {
-        _fetchFollowedArtists()
-    }
+    const refreshArtists = React.useCallback(async () => {
+        await fetchFollowedArtists()
+    }, []);
 
-    const loadArtists = () => {
+    const loadArtists = React.useCallback(async () => {
         if (!loaded) {
-            _fetchFollowedArtists(after);
+            await fetchFollowedArtists(after);
         }
         else {
             console.log("all followed artists loaded");
         }
-    }
+    }, [loaded, after]);
 
-    async function _fetchFollowedArtists(after: string | undefined = undefined) {
+    const fetchFollowedArtists = async (after: string | undefined = undefined) => {
         try {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);

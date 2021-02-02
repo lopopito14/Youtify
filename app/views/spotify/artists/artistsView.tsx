@@ -19,16 +19,16 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
         }
     }, [props.selectedView]);
 
-    function _onOpenArtist(id: string) {
+    const onOpenArtist = React.useCallback((id: string) => {
         setselectedArtistId(id);
         props.setselectedView(SpotifyViewType.ARTIST);
-    }
+    }, []);
 
     return (
         <>
             {
                 props.selectedView === SpotifyViewType.ARTISTS &&
-                <RefreshableList onRefresh={() => refreshArtists()} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={() => loadArtists()}>
+                <RefreshableList onRefresh={refreshArtists} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={loadArtists}>
                     {
                         followedArtists.map((p) =>
                             <ListItem thumbnail key={p.id}>
@@ -44,7 +44,7 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     <Text note numberOfLines={1}>followers: {p.followers.total}</Text>
                                 </Body>
                                 <Right>
-                                    <Button iconRight light onPress={() => _onOpenArtist(p.id)}>
+                                    <Button iconRight light onPress={() => onOpenArtist(p.id)}>
                                         <Text>Manage</Text>
                                         <Icon name='arrow-forward' />
                                     </Button>

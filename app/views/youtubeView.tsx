@@ -22,31 +22,31 @@ export interface IYoutubeNavigationProps {
 export const YoutubeView: React.FunctionComponent<Props> = () => {
     const [selectedView, setselectedView] = React.useState<YoutubeViewType>(YoutubeViewType.MENU)
 
-    function _isSelectedView(view: YoutubeViewType) {
+    const isSelectedView = (view: YoutubeViewType) => {
         return selectedView === view;
     }
 
-    function _headerTitle() {
-        if (_isSelectedView(YoutubeViewType.SUBSCRIPTIONS)) {
+    const headerTitle = () => {
+        if (isSelectedView(YoutubeViewType.SUBSCRIPTIONS)) {
             return "Subscriptions";
         }
-        if (_isSelectedView(YoutubeViewType.SUBSCRIPTION)) {
+        if (isSelectedView(YoutubeViewType.SUBSCRIPTION)) {
             return "Subscription";
         }
-        if (_isSelectedView(YoutubeViewType.PLAYLISTS)) {
+        if (isSelectedView(YoutubeViewType.PLAYLISTS)) {
             return "Playlists";
         }
-        if (_isSelectedView(YoutubeViewType.PLAYLIST)) {
+        if (isSelectedView(YoutubeViewType.PLAYLIST)) {
             return "Playlist";
         }
-        if (_isSelectedView(YoutubeViewType.ADJUST_FAVORITES)) {
+        if (isSelectedView(YoutubeViewType.ADJUST_FAVORITES)) {
             return "Adjust Favorites"
         }
 
         return 'Youtube';
     }
 
-    function _onBackButtonPressed() {
+    const onBackButtonPressed = React.useCallback(() => {
         if (selectedView === YoutubeViewType.PLAYLIST) {
             setselectedView(YoutubeViewType.PLAYLISTS);
         } else if (selectedView === YoutubeViewType.SUBSCRIPTION) {
@@ -54,21 +54,21 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
         } else {
             setselectedView(YoutubeViewType.MENU);
         }
-    }
+    }, []);
 
     return (
         <>
             <Header style={{ backgroundColor: youtubeTheme.primaryColor }} androidStatusBarColor={youtubeTheme.secondaryColor}>
                 <Left>
                     {
-                        !_isSelectedView(YoutubeViewType.MENU) &&
-                        <Button transparent onPress={_onBackButtonPressed}>
+                        !isSelectedView(YoutubeViewType.MENU) &&
+                        <Button transparent onPress={onBackButtonPressed}>
                             <Icon name='arrow-back' />
                         </Button>
                     }
                 </Left>
                 <Body>
-                    <Title>{_headerTitle()}</Title>
+                    <Title>{headerTitle()}</Title>
                 </Body>
             </Header>
 

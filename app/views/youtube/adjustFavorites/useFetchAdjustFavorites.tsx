@@ -3,7 +3,6 @@ import Context from '../../../store/context';
 import { pushYoutubeErrorNotification } from '../../../store/types/notifications_actions';
 import { SearchResult } from '../../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../../youtubeApi/youtube-api-playlistItems';
-import { Search } from '../../../youtubeApi/youtube-api-search';
 import { Videos } from '../../../youtubeApi/youtube-api-videos';
 import { IAdjustableVideo } from './adjustFavoritesView';
 
@@ -29,17 +28,17 @@ const useFetchAdjustFavorites = () => {
 
     React.useEffect(() => {
         if (!loaded) {
-            _fetchFavoriteVideos();
+            fetchFavoriteVideos();
         }
     }, []);
 
     React.useEffect(() => {
         if (pageToken) {
-            _fetchFavoriteVideos(pageToken);
+            fetchFavoriteVideos(pageToken);
         }
     }, [pageToken]);
 
-    async function _fetchFavoriteVideos(pageToken: string | undefined = undefined) {
+    const fetchFavoriteVideos = async (pageToken: string | undefined = undefined) => {
 
         try {
             var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
@@ -112,14 +111,10 @@ const useFetchAdjustFavorites = () => {
         }
     }
 
-    const replace = (searchResult: SearchResult, adjustableVideo: IAdjustableVideo) => {
-        _replace(searchResult, adjustableVideo);
-    }
-
-    async function _replace(searchResult: SearchResult, adjustableVideo: IAdjustableVideo) {
+    const replace = async (searchResult: SearchResult, adjustableVideo: IAdjustableVideo) => {
 
         // remove the old one
-        async function _remove() {
+        const remove = async () => {
             try {
                 if (adjustableVideo.playlistItem.id) {
                     await new PlaylistItems(state.youtubeState.credential.accessToken).delete({
@@ -133,7 +128,7 @@ const useFetchAdjustFavorites = () => {
         }
 
         // insert the new one
-        async function _insert() {
+        const insert = async () => {
             try {
                 await new PlaylistItems(state.youtubeState.credential.accessToken).insert({
                     part: ['snippet'],
@@ -153,7 +148,7 @@ const useFetchAdjustFavorites = () => {
             }
         }
 
-        await Promise.all([_remove(), _insert()]);
+        await Promise.all([remove(), insert()]);
 
         setAdjustableVideos((prev) => {
             return prev.filter((i) => i.playlistItem.id !== adjustableVideo.playlistItem.id);

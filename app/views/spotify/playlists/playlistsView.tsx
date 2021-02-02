@@ -20,28 +20,28 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
         }
     }, [props.selectedView]);
 
-    function _onOpenPlaylist(id: string) {
+    const onOpenPlaylist = React.useCallback((id: string) => {
         setselectedPlaylistId(id);
         props.setselectedView(SpotifyViewType.PLAYLIST);
-    }
+    }, []);
 
     return (
         <>
             {
                 props.selectedView === SpotifyViewType.PLAYLISTS &&
-                <RefreshableList onRefresh={() => refreshPlaylists()} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={() => loadPlaylists()}>
+                <RefreshableList onRefresh={refreshPlaylists} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={loadPlaylists}>
                     {
                         playlists.map((p) =>
                             <ListItem thumbnail key={p.id}>
                                 <Left>
-                                    <Thumbnail source={{ uri: p.images && p.images.length >= 3 ? p.images[2].url : defaultThumbnail() }} />
+                                    <Thumbnail source={{ uri: p.images && p.images.length >= 3 ? p.images[2].url : defaultThumbnail }} />
                                 </Left>
                                 <Body>
                                     <Text style={{ color: "white" }}>{p.name}</Text>
                                     <Text note numberOfLines={1}>{p.tracks.total} tracks</Text>
                                 </Body>
                                 <Right>
-                                    <Button iconRight light onPress={() => _onOpenPlaylist(p.id)} disabled={p.tracks.total == 0}>
+                                    <Button iconRight light onPress={() => onOpenPlaylist(p.id)} disabled={p.tracks.total == 0}>
                                         <Text style={{ opacity: p.tracks.total == 0 ? 0.1 : 1 }}>Manage</Text>
                                         <Icon name='arrow-forward' />
                                     </Button>

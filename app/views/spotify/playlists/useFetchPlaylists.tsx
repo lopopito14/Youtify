@@ -10,23 +10,23 @@ const useFetchPlaylists = () => {
     const [loaded, setLoaded] = React.useState(false);
 
     React.useEffect(() => {
-        _fetchPlaylists();
+        fetchPlaylists();
     }, []);
 
-    const refreshPlaylists = () => {
-        _fetchPlaylists();
-    }
+    const refreshPlaylists = React.useCallback(async () => {
+        await fetchPlaylists();
+    }, []);
 
-    const loadPlaylists = () => {
+    const loadPlaylists = React.useCallback(async () => {
         if (!loaded) {
-            _fetchPlaylists(playlists.length);
+            await fetchPlaylists(playlists.length);
         }
         else {
             console.log("all playlists loaded");
         }
-    }
+    }, [loaded, playlists]);
 
-    async function _fetchPlaylists(offset: number = 0) {
+    const fetchPlaylists = async (offset: number = 0) => {
         try {
             var spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);

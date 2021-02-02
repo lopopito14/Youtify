@@ -4,9 +4,9 @@ import { ICredential } from "../../store/state";
 
 interface Props {
   credential: ICredential
-  authorizeDelegate(): any;
-  refreshDelegate(): any;
-  revokeDelegate(): any;
+  authorizeDelegate(): Promise<void>;
+  refreshDelegate(): Promise<void>;
+  revokeDelegate(): Promise<void>;
 }
 
 export const CredentialView: React.FunctionComponent<Props> = (props: Props) => {
@@ -15,7 +15,7 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
   const [interval, setinterval] = React.useState(0);
 
   React.useEffect(() => {
-    const counterInterval = setInterval(function () {
+    const counterInterval = setInterval(() => {
       setinterval((prev) => prev + 1);
     }, 500);
     return () => clearInterval(counterInterval);
@@ -44,21 +44,21 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
     }
   }, [interval, canLogOn]);
 
-  function _logOn() {
+  const logOn = React.useCallback(async () => {
     if (props.credential.refreshToken === '') {
-      props.authorizeDelegate();
+      await props.authorizeDelegate();
     }
     else {
-      props.refreshDelegate();
+      await props.refreshDelegate();
     }
-  }
+  }, []);
 
   return (
     <>
       <Left>
         <Button iconLeft rounded success
           disabled={!canLogOn}
-          onPress={_logOn}>
+          onPress={logOn}>
           <Icon name='sync' type="FontAwesome5" />
           <Text>Log on</Text>
         </Button>

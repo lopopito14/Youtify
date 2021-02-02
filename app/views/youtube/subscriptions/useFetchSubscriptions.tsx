@@ -12,23 +12,23 @@ const useFetchSubscriptions = () => {
     const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
-        _fetchSubscriptions();
+        fetchSubscriptions();
     }, []);
 
-    function refreshSubscriptions() {
-        _fetchSubscriptions();
-    }
+    const refreshSubscriptions = React.useCallback(async () => {
+        await fetchSubscriptions();
+    }, []);
 
-    function loadSubscriptions() {
+    const loadSubscriptions = React.useCallback(async () => {
         if (!loaded) {
-            _fetchSubscriptions(pageToken);
+            await fetchSubscriptions(pageToken);
         }
         else {
             console.log("all subscriptions loaded");
         }
-    }
+    }, [loaded, pageToken]);
 
-    async function _fetchSubscriptions(pageToken: string | undefined = undefined) {
+    const fetchSubscriptions = async (pageToken: string | undefined = undefined) => {
         try {
             var response = await new Subscriptions(state.youtubeState.credential.accessToken).list({
                 channelId: state.youtubeState.userProfile.channelId,

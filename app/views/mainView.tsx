@@ -14,14 +14,14 @@ import SynchronizeView from './synchronizeView';
 
 interface Props { }
 
-export enum MainViewType {
+enum MainViewType {
   NONE = "NONE",
   YOUTUBE = "YOUTUBE",
   SPOTIFY = "SPOTIFY",
   SYNCHRONIZE = "SYNCHRONIZE"
 }
 
-export const MainView: React.FunctionComponent<Props> = () => {
+const MainView: React.FunctionComponent<Props> = () => {
   const [state, dispatch] = React.useReducer(reducer, InitialState);
 
   const [selectedView, setselectedView] = React.useState<MainViewType>(MainViewType.NONE);
@@ -38,20 +38,20 @@ export const MainView: React.FunctionComponent<Props> = () => {
     }
   }, [state.spotifyState.credential.isLogged, state.youtubeState.credential.isLogged])
 
-  function _isSelected(view: MainViewType): boolean {
+  const isSelected = (view: MainViewType) => {
     return selectedView == view;
   }
 
-  function _footerOpacity(view: MainViewType): number {
-    return _isSelected(view) ? 1 : 0.5;
+  const footerOpacity = (view: MainViewType) => {
+    return isSelected(view) ? 1 : 0.5;
   }
 
-  function _footerBackgroundColor(): string {
-    if (_isSelected(MainViewType.YOUTUBE)) {
+  const footerBackgroundColor = () => {
+    if (isSelected(MainViewType.YOUTUBE)) {
       return youtubeTheme.primaryColor;
-    } else if (_isSelected(MainViewType.SYNCHRONIZE)) {
+    } else if (isSelected(MainViewType.SYNCHRONIZE)) {
       return synchronizeTheme.primaryColor;
-    } else if (_isSelected(MainViewType.SPOTIFY)) {
+    } else if (isSelected(MainViewType.SPOTIFY)) {
       return spotifyTheme.primaryColor;
     }
 
@@ -64,29 +64,29 @@ export const MainView: React.FunctionComponent<Props> = () => {
 
         <DrawerLayoutAndroid drawerWidth={350} drawerLockMode='unlocked' renderNavigationView={() => <SettingsView />}>
           <>
-            <NotificationToast notifications={state.notifications.notifications} />
+            <NotificationToast />
             {
-              _isSelected(MainViewType.NONE) && <NoneView />
+              isSelected(MainViewType.NONE) && <NoneView />
             }
             {
-              _isSelected(MainViewType.YOUTUBE) && <YoutubeView />
+              isSelected(MainViewType.YOUTUBE) && <YoutubeView />
             }
             {
-              _isSelected(MainViewType.SPOTIFY) && <SpotifyView />
+              isSelected(MainViewType.SPOTIFY) && <SpotifyView />
             }
             {
-              _isSelected(MainViewType.SYNCHRONIZE) && <SynchronizeView />
+              isSelected(MainViewType.SYNCHRONIZE) && <SynchronizeView />
             }
             {
-              !_isSelected(MainViewType.NONE) &&
+              !isSelected(MainViewType.NONE) &&
               <Footer>
-                <FooterTab style={{ backgroundColor: _footerBackgroundColor() }}>
+                <FooterTab style={{ backgroundColor: footerBackgroundColor() }}>
                   {
                     state.youtubeState.credential.isLogged &&
                     <>
                       <Button vertical={true} onPress={() => setselectedView(MainViewType.YOUTUBE)}>
-                        <Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: "white", opacity: _footerOpacity(MainViewType.YOUTUBE) }} fontSize={1} />
-                        <Text style={{ color: "white", opacity: _footerOpacity(MainViewType.YOUTUBE), fontWeight: 'bold' }}>Youtube</Text>
+                        <Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: "white", opacity: footerOpacity(MainViewType.YOUTUBE) }} fontSize={1} />
+                        <Text style={{ color: "white", opacity: footerOpacity(MainViewType.YOUTUBE), fontWeight: 'bold' }}>Youtube</Text>
                       </Button>
                     </>
                   }
@@ -94,8 +94,8 @@ export const MainView: React.FunctionComponent<Props> = () => {
                     state.youtubeState.credential.isLogged && state.spotifyState.credential.isLogged &&
                     <>
                       <Button vertical={true} onPress={() => setselectedView(MainViewType.SYNCHRONIZE)}>
-                        <Icon name="md-sync-circle" type='Ionicons' style={{ color: "white", opacity: _footerOpacity(MainViewType.SYNCHRONIZE) }} fontSize={1} />
-                        <Text style={{ color: "white", opacity: _footerOpacity(MainViewType.SYNCHRONIZE), fontWeight: 'bold' }}>Synchronize</Text>
+                        <Icon name="md-sync-circle" type='Ionicons' style={{ color: "white", opacity: footerOpacity(MainViewType.SYNCHRONIZE) }} fontSize={1} />
+                        <Text style={{ color: "white", opacity: footerOpacity(MainViewType.SYNCHRONIZE), fontWeight: 'bold' }}>Synchronize</Text>
                       </Button>
                     </>
                   }
@@ -103,8 +103,8 @@ export const MainView: React.FunctionComponent<Props> = () => {
                     state.spotifyState.credential.isLogged &&
                     <>
                       <Button vertical={true} onPress={() => setselectedView(MainViewType.SPOTIFY)}>
-                        <Icon name="spotify" fontSize={50} type='FontAwesome' style={{ color: "white", opacity: _footerOpacity(MainViewType.SPOTIFY) }} />
-                        <Text style={{ color: "white", opacity: _footerOpacity(MainViewType.SPOTIFY), fontWeight: 'bold' }}>Spotify</Text>
+                        <Icon name="spotify" fontSize={50} type='FontAwesome' style={{ color: "white", opacity: footerOpacity(MainViewType.SPOTIFY) }} />
+                        <Text style={{ color: "white", opacity: footerOpacity(MainViewType.SPOTIFY), fontWeight: 'bold' }}>Spotify</Text>
                       </Button>
                     </>
                   }
