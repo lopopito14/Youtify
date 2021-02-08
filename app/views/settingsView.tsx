@@ -42,6 +42,7 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
 	}
 
 	const purgeLocalStorage = React.useCallback(async () => {
+		return;
 		try {
 			const keys = await AsyncStorage.getAllKeys();
 

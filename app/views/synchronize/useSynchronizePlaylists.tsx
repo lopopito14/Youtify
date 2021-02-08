@@ -105,7 +105,7 @@ export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 
 						if (myPlaylist.favoriteitems) {
 
-							[...myPlaylist.favoriteitems].reverse().forEach(playlistItem => {
+							[...myPlaylist.favoriteitems].reverse().forEach((playlistItem, i) => {
 
 								let existingSaveItem = items.find(i => i.favorite?.videoId === playlistItem.contentDetails?.videoId);
 
@@ -141,6 +141,7 @@ export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 										];
 									} else {
 										items = [
+											...items.slice(0, items.length - i),
 											{
 												favorite: {
 													exists: true,
@@ -148,7 +149,7 @@ export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 													title: playlistItem.snippet?.title ? playlistItem.snippet?.title : 'Unknown'
 												}
 											},
-											...items
+											...items.slice(items.length - i)
 										];
 									}
 								}
@@ -835,43 +836,69 @@ export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 	}
 
 	const bindSpotifyTrack = async (videoId: string, track: globalThis.SpotifyApi.TrackObjectFull) => {
-		const spotifyTrack = spotifyTracks.tracks.find(t => t.id === track.id);
-		if (!spotifyTrack) {
-			if (myPlaylist.spotifyPlaylist) {
-				const spotifyApi = new SpotifyApi();
-				spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
+		try {
+			const spotifyTrack = spotifyTracks.tracks.find(t => t.id === track.id);
+			if (!spotifyTrack) {
+				if (myPlaylist.spotifyPlaylist) {
+					const spotifyApi = new SpotifyApi();
+					spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-				var addTracksResponse = await spotifyApi.addTracksToPlaylist(myPlaylist.spotifyPlaylist.id, [track.uri]);
-				if (addTracksResponse) {
-					await fetchSpotifyTracks();
+					var addTracksResponse = await spotifyApi.addTracksToPlaylist(myPlaylist.spotifyPlaylist.id, [track.uri]);
+					if (addTracksResponse) {
+						await fetchSpotifyTracks();
+					}
 				}
 			}
-		}
-
-		setLocalSave((prev) => {
-			const playlistItem = prev.items.find(i => i.favorite.videoId === videoId);
+			const playlistItem = localSave.items.find(i => i.favorite.videoId === videoId);
 			if (playlistItem) {
+				if (myPlaylist.spotifyPlaylist) {
+					if (playlistItem.spotify) {
 
-				const index = prev.items.indexOf(playlistItem);
+						const track = spotifyTracks.tracks.find(t => t.id === playlistItem.spotify?.id);
+						if (track) {
+							const spotifyApi = new SpotifyApi();
+							spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-				return {
-					...prev,
-					items: [
-						...prev.items.slice(0, index),
-						{
-							...playlistItem,
-							spotify: {
-								title: track.name,
-								id: track.id
-							}
-						},
-						...prev.items.slice(index + 1),
-					]
+							await spotifyApi.removeTracksFromPlaylist(myPlaylist.spotifyPlaylist?.id, [track.uri]);
+
+							setSpotifyTracks((prev) => {
+								return {
+									...prev,
+									tracks: prev.tracks.filter(t => t.id !== track.id)
+								}
+							});
+						}
+					}
 				}
 			}
 
-			return prev;
-		});
+			setLocalSave((prev) => {
+				const playlistItem = prev.items.find(i => i.favorite.videoId === videoId);
+				if (playlistItem) {
+
+					const index = prev.items.indexOf(playlistItem);
+
+					return {
+						...prev,
+						items: [
+							...prev.items.slice(0, index),
+							{
+								...playlistItem,
+								spotify: {
+									title: track.name,
+									id: track.id
+								}
+							},
+							...prev.items.slice(index + 1),
+						]
+					}
+				}
+
+				return prev;
+			});
+		} catch (error) {
+			dispatch(pushSpotifyErrorNotification(error));
+		}
 	}
 
 	return { localSave, saveFile, resetSave, youtubeVideos, spotifyTracks, nonAffectedVideos, nonAffectedTracks, deleteYoutubePlaylistVideos, deleteSpotifyPlaylistTracks, synchronizeYoutubePlaylist, synchronizeSpotifyPlaylist, bindYoutubeVideo, bindSpotifyTrack }

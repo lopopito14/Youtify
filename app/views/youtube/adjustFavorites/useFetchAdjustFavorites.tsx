@@ -113,46 +113,35 @@ const useFetchAdjustFavorites = () => {
 
     const replace = async (searchResult: SearchResult, adjustableVideo: IAdjustableVideo) => {
 
-        // remove the old one
-        const remove = async () => {
-            try {
+        try {
+            const insertVideoResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).insert({
+                part: ['snippet'],
+                requestBody: {
+                    snippet: {
+                        position: adjustableVideo.playlistItem.snippet?.position,
+                        playlistId: favoritePlaylistId,
+                        resourceId: searchResult.id
+                    },
+                    id: adjustableVideo.playlistItem.id
+                }
+            });
+
+            if (insertVideoResponse) {
+
                 if (adjustableVideo.playlistItem.id) {
                     await new PlaylistItems(state.youtubeState.credential.accessToken).delete({
                         id: adjustableVideo.playlistItem.id
                     });
+
+                    setAdjustableVideos((prev) => {
+                        return prev.filter((i) => i.playlistItem.id !== adjustableVideo.playlistItem.id);
+                    });
                 }
-            } catch (error) {
-                console.error(error);
-                dispatch(pushYoutubeErrorNotification(error));
             }
+        } catch (error) {
+            console.error(error);
+            dispatch(pushYoutubeErrorNotification(error));
         }
-
-        // insert the new one
-        const insert = async () => {
-            try {
-                await new PlaylistItems(state.youtubeState.credential.accessToken).insert({
-                    part: ['snippet'],
-                    requestBody: {
-                        snippet: {
-                            position: adjustableVideo.playlistItem.snippet?.position,
-                            playlistId: favoritePlaylistId,
-                            resourceId: searchResult.id
-                        },
-                        id: adjustableVideo.playlistItem.id
-                    }
-                });
-
-            } catch (error) {
-                console.error(error);
-                dispatch(pushYoutubeErrorNotification(error));
-            }
-        }
-
-        await Promise.all([remove(), insert()]);
-
-        setAdjustableVideos((prev) => {
-            return prev.filter((i) => i.playlistItem.id !== adjustableVideo.playlistItem.id);
-        });
     }
 
     return { adjustableVideos, progress, loaded, replace };

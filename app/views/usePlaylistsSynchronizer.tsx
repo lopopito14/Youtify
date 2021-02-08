@@ -190,7 +190,8 @@ const usePlaylistsSynchronizer = () => {
                             continue;
                         }
 
-                        if (year === currentYear && month === currentMonth) {
+                        if (currentYear > year || (currentYear === year && currentMonth >= month)) {
+                            // if (year == currentYear && month == currentMonth) {
                             items.push(item);
                             continue;
                         }
