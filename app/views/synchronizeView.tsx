@@ -85,18 +85,19 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 
 	React.useEffect(() => {
 		if (yearFilter) {
+
+			const saveYearsFilter = async () => {
+				try {
+					const jsonValue = JSON.stringify(yearFilter);
+					await AsyncStorage.setItem(yearFilterKey, jsonValue);
+				} catch (e) {
+					console.error(e);
+				}
+			}
+
 			saveYearsFilter();
 		}
 	}, [yearFilter]);
-
-	const saveYearsFilter = async () => {
-		try {
-			const jsonValue = JSON.stringify(yearFilter);
-			await AsyncStorage.setItem(yearFilterKey, jsonValue);
-		} catch (e) {
-			console.error(e);
-		}
-	}
 
 	const isSelectedView = (view: SynchronizeViewType) => {
 		return selectedView === view;
@@ -114,7 +115,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 		if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
 			setselectedView(SynchronizeViewType.SYNCHRONIZE);
 		}
-	}, []);
+	}, [isSelectedView]);
 
 	const onOpenSynchronizePlaylist = React.useCallback((myPlaylist: IYoutubeMonthPlaylist) => {
 		setSelectedPlaylist(myPlaylist);

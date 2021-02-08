@@ -1,10 +1,12 @@
 import React from 'react';
-import { Body, Button, Card, CardItem, Content, H1, H3, Icon, Left, List, Right, Separator, Spinner, Text, Thumbnail } from 'native-base';
+import { Body, Button, Card, CardItem, Content, H1, H3, Icon, Input, Item, Left, List, Right, Separator, Spinner, SwipeRow, Text, Thumbnail, View } from 'native-base';
 import { spotifyTheme, synchronizeTheme, youtubeTheme } from '../theme';
 import ModalPopup, { ModalType } from '../utils/modalPopup';
 import { ISynchronizeNavigationProps, IYoutubeMonthPlaylist } from '../synchronizeView';
 import { defaultThumbnail, getYoutubeVideoDuration, msToTime } from '../utils/helpers';
-import useSynchronizePlaylists, { IMySpotify, IMyYoutube } from './useSynchronizePlaylists';
+import useSynchronizePlaylists, { IMyFavorite, IMySpotify, IMyYoutube } from './useSynchronizePlaylists';
+import { Video } from '../../youtubeApi/youtube-api-models';
+import useSearch from './useSearch';
 
 interface IProps extends ISynchronizeNavigationProps {
 	myPlaylist: IYoutubeMonthPlaylist;
@@ -18,41 +20,52 @@ enum ActionMode {
 	SynchronizeSpotify,
 }
 
+enum BindingMode {
+	None,
+	BindYoutubeVideo,
+	BindSpotifyTrack,
+}
+
 const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
 
-	const { save, saveLocal, youtubeVideos, spotifyTracks, deleteYoutubePlaylistVideos, deleteSpotifyPlaylistTracks, synchronizeYoutubePlaylist, synchronizeSpotifyPlaylist } = useSynchronizePlaylists(props.myPlaylist);
-	const [mode, setMode] = React.useState<ActionMode>(ActionMode.None);
-	const [title, setTitle] = React.useState<string>('');
+	const { localSave, saveFile, resetSave, youtubeVideos, spotifyTracks, nonAffectedVideos, nonAffectedTracks, deleteYoutubePlaylistVideos, deleteSpotifyPlaylistTracks, synchronizeYoutubePlaylist, synchronizeSpotifyPlaylist, bindYoutubeVideo, bindSpotifyTrack } = useSynchronizePlaylists(props.myPlaylist);
+	const [actionMode, setActionMode] = React.useState<ActionMode>(ActionMode.None);
+	const [actionTitle, setActionTitle] = React.useState<string>('');
+	const [bindingMode, setBindingMode] = React.useState<BindingMode>(BindingMode.None);
+	const [bindingTitle, setBindingTitle] = React.useState<string>('');
+	const [selectedFavorite, setSelectedFavorite] = React.useState<IMyFavorite | undefined>(undefined);
+	const [search, setSearch] = React.useState('');
+	const { searchResults, openSearch } = useSearch();
 
 	React.useEffect(() => {
-		switch (mode) {
+		switch (actionMode) {
 			case ActionMode.DeleteYoutubeVideos:
-				setTitle(`Delete youtube playlist "${props.myPlaylist.title}" ?`);
+				setActionTitle(`Delete youtube playlist "${props.myPlaylist.title}" ?`);
 				break;
 
 			case ActionMode.SynchronizeYoutube:
-				setTitle(`Synchronize youtube playlist "${props.myPlaylist.title}" ?`);
+				setActionTitle(`Synchronize youtube playlist "${props.myPlaylist.title}" ?`);
 				break;
 
 			case ActionMode.DeleteSpotifyTracks:
-				setTitle(`Delete spotify playlist "${props.myPlaylist.title}" items ?`);
+				setActionTitle(`Delete spotify playlist "${props.myPlaylist.title}" items ?`);
 				break;
 
 			case ActionMode.SynchronizeSpotify:
-				setTitle(`Synchronize spotify playlist "${props.myPlaylist.title}" ?`);
+				setActionTitle(`Synchronize spotify playlist "${props.myPlaylist.title}" ?`);
 				break;
 
 			default:
-				setTitle('');
+				setActionTitle('');
 				break;
 		}
-	}, [mode]);
+	}, [actionMode]);
 
-	const modalOkCallback = React.useCallback(async () => {
+	const modalActionOkCallback = React.useCallback(async () => {
 
-		const selectedMode = mode;
+		const selectedMode = actionMode;
 
-		setMode(ActionMode.None);
+		setActionMode(ActionMode.None);
 
 		switch (selectedMode) {
 			case ActionMode.DeleteYoutubeVideos:
@@ -72,11 +85,75 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 				break;
 		}
 
-	}, [mode]);
+	}, [actionMode]);
 
-	const modalCancelCallback = React.useCallback(async () => {
-		setMode(ActionMode.None);
+	const modalActionCancelCallback = React.useCallback(async () => {
+		setActionMode(ActionMode.None);
 	}, []);
+
+	React.useEffect(() => {
+		switch (bindingMode) {
+			case BindingMode.BindYoutubeVideo:
+				setBindingTitle(`Bind Youtube Video`);
+				break;
+
+			case BindingMode.BindSpotifyTrack:
+				setBindingTitle(`Bind Spotify Track`);
+				break;
+
+			default:
+				setBindingTitle('');
+				break;
+		}
+	}, [bindingMode]);
+
+	const modalBindingOkCallback = React.useCallback(async () => {
+		// do nothing
+	}, []);
+
+	const modalBindingCancelCallback = React.useCallback(async () => {
+		setBindingMode(BindingMode.None);
+		setSearch('');
+		openSearch(undefined);
+	}, []);
+
+	const onBind = React.useCallback((favorite: IMyFavorite, bindingMode: BindingMode) => {
+		setSearch(favorite?.title);
+		setSelectedFavorite(favorite);
+		setBindingMode(bindingMode);
+	}, []);
+
+	const onReplaceYoutube = React.useCallback((video: Video) => {
+
+		setBindingMode(BindingMode.None);
+
+		if (selectedFavorite) {
+			bindYoutubeVideo(selectedFavorite.videoId, video);
+		}
+
+		setSearch('');
+		openSearch(undefined);
+
+	}, [bindingMode, selectedFavorite]);
+
+	const onReplaceSpotify = React.useCallback(async (track: SpotifyApi.TrackObjectFull) => {
+
+		setBindingMode(BindingMode.None);
+
+		if (selectedFavorite) {
+			await bindSpotifyTrack(selectedFavorite.videoId, track);
+		}
+
+		setSearch('');
+		openSearch(undefined);
+
+	}, [bindingMode, selectedFavorite]);
+
+	const onSearch = React.useCallback(() => {
+		console.log(search);
+
+		openSearch(search);
+	}, [search, openSearch]);
 
 	const getYoutubeThumbnail = (saveYoutube: IMyYoutube | undefined) => {
 
@@ -166,11 +243,124 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 		<>
 			<ModalPopup
 				backgroundColor={synchronizeTheme.primaryBackgroundColor}
-				cancelCallback={modalCancelCallback}
-				okCallback={modalOkCallback}
-				title={title}
+				cancelCallback={modalBindingCancelCallback}
+				okCallback={modalBindingOkCallback}
+				title={bindingTitle}
+				type={ModalType.CANCEL}
+				visible={bindingMode !== BindingMode.None}
+			>
+				<Item style={{ width: 350 }} rounded>
+					<Input multiline placeholder='Search...' value={search} onChangeText={(text) => setSearch(text)} />
+					<Button transparent onPress={onSearch}>
+						<Icon name='search' type='FontAwesome' />
+					</Button>
+				</Item>
+				{
+					bindingMode === BindingMode.BindYoutubeVideo &&
+					<>
+						<Separator style={{ height: 5 }} />
+						{
+							nonAffectedVideos.map((v, i) =>
+								<SwipeRow
+									key={i}
+									disableRightSwipe={true}
+									rightOpenValue={-75}
+									stopRightSwipe={-75}
+									body={
+										<View style={{ flexDirection: 'row' }}>
+											{
+												v.snippet?.thumbnails?.medium?.url &&
+												<Thumbnail source={{ uri: v.snippet?.thumbnails?.medium?.url }} style={{ width: 80, height: 80 }} />
+											}
+											<View style={{ marginLeft: 5, alignSelf: 'center' }}>
+												<Text numberOfLines={3} style={{ maxWidth: 250 }}>{v.snippet?.title}</Text>
+												<Text note>{v.snippet?.channelTitle}</Text>
+											</View>
+										</View>
+									}
+									right={
+										<Button success onPress={() => onReplaceYoutube(v)}>
+											<Icon active name="add" />
+										</Button>
+									}
+								/>
+							)
+						}
+					</>
+				}
+				{
+					bindingMode === BindingMode.BindSpotifyTrack &&
+					<>
+						{
+							searchResults.loaded &&
+							searchResults.searchResults.map((s, i) =>
+								<SwipeRow
+									key={i}
+									disableRightSwipe={true}
+									rightOpenValue={-75}
+									stopRightSwipe={-75}
+									body={
+										<View style={{ flexDirection: 'row' }}>
+											{
+												s.album.images.length > 0 &&
+												<Thumbnail source={{ uri: s.album.images[0].url }} style={{ width: 80, height: 80 }} />
+											}
+											<View style={{ marginLeft: 5, alignSelf: 'center' }}>
+												<Text numberOfLines={3} style={{ maxWidth: 250 }}>{s.name}</Text>
+												<Text note>{s.artists.map(a => a.name).join(', ')}</Text>
+											</View>
+										</View>
+									}
+									right={
+										<Button success onPress={() => onReplaceSpotify(s)}>
+											<Icon active name="add" />
+										</Button>
+									}
+								/>
+							)
+						}
+						{
+							searchResults.loading &&
+							<Spinner color={synchronizeTheme.primaryColor} />
+						}
+						<Separator style={{ height: 5 }} />
+						{
+							nonAffectedTracks.map((t, i) =>
+								<SwipeRow
+									key={i}
+									disableRightSwipe={true}
+									rightOpenValue={-75}
+									stopRightSwipe={-75}
+									body={
+										<View style={{ flexDirection: 'row' }}>
+											{
+												t.album.images.length > 0 &&
+												<Thumbnail source={{ uri: t.album.images[0].url }} style={{ width: 80, height: 80 }} />
+											}
+											<View style={{ marginLeft: 5, alignSelf: 'center' }}>
+												<Text numberOfLines={3} style={{ maxWidth: 250 }}>{t.name}</Text>
+												<Text note>{t.artists.map(a => a.name).join(', ')}</Text>
+											</View>
+										</View>
+									}
+									right={
+										<Button success onPress={() => onReplaceSpotify(t)}>
+											<Icon active name="add" />
+										</Button>
+									}
+								/>
+							)
+						}
+					</>
+				}
+			</ModalPopup>
+			<ModalPopup
+				backgroundColor={synchronizeTheme.primaryBackgroundColor}
+				cancelCallback={modalActionCancelCallback}
+				okCallback={modalActionOkCallback}
+				title={actionTitle}
 				type={ModalType.OK_CANCEL}
-				visible={mode !== ActionMode.None}
+				visible={actionMode !== ActionMode.None}
 			/>
 			<Content style={{ backgroundColor: synchronizeTheme.secondaryColor }}>
 				<Card noShadow transparent style={{ backgroundColor: synchronizeTheme.secondaryColor }}>
@@ -179,9 +369,14 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 							<H1 style={{ color: "white" }}>{props.myPlaylist.title}</H1>
 						</Left>
 						<Right>
-							<Button light rounded icon onPress={saveLocal} style={{ borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }}>
-								<Icon name="save" type="FontAwesome" />
-							</Button>
+							<Body style={{ display: 'flex', flexDirection: 'row' }}>
+								<Button dark rounded icon onPress={resetSave} style={{ borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }}>
+									<Icon name="cross" type="Entypo" />
+								</Button>
+								<Button dark rounded icon onPress={saveFile} style={{ borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }}>
+									<Icon name="save" type="FontAwesome" />
+								</Button>
+							</Body>
 						</Right>
 					</CardItem>
 					<CardItem cardBody style={{ backgroundColor: synchronizeTheme.secondaryColor }}>
@@ -193,14 +388,17 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 						<Left>
 							<Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: youtubeTheme.primaryColor, fontSize: 50 }} />
 						</Left>
+						<Body>
+							<Text note style={{ color: youtubeTheme.primaryColor }}>{youtubeVideos.videos.length} videos</Text>
+						</Body>
 						<Right>
 							{
 								props.myPlaylist.youtubePlaylist &&
 								<Body style={{ display: 'flex', flexDirection: 'row' }}>
-									<Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light icon rounded onPress={() => setMode(ActionMode.DeleteYoutubeVideos)} >
+									<Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light icon rounded onPress={() => setActionMode(ActionMode.DeleteYoutubeVideos)} >
 										<Icon name="cross" type="Entypo" />
 									</Button>
-									<Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light icon rounded onPress={() => setMode(ActionMode.SynchronizeYoutube)}>
+									<Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light icon rounded onPress={() => setActionMode(ActionMode.SynchronizeYoutube)}>
 										<Icon name="refresh" type="MaterialCommunityIcons" />
 									</Button>
 								</Body>
@@ -211,14 +409,17 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 						<Left>
 							<Icon name="spotify" type='FontAwesome' style={{ color: spotifyTheme.primaryColor, fontSize: 50 }} />
 						</Left>
+						<Body>
+							<Text note style={{ color: spotifyTheme.primaryColor }}>{spotifyTracks.tracks.length} tracks</Text>
+						</Body>
 						<Right>
 							{
 								props.myPlaylist.spotifyPlaylist &&
 								<Body style={{ display: 'flex', flexDirection: 'row' }}>
-									<Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light rounded icon onPress={() => setMode(ActionMode.DeleteSpotifyTracks)}>
+									<Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light rounded icon onPress={() => setActionMode(ActionMode.DeleteSpotifyTracks)}>
 										<Icon name="cross" type="Entypo" />
 									</Button>
-									<Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light rounded icon onPress={() => setMode(ActionMode.SynchronizeSpotify)}>
+									<Button style={{ marginRight: 10, borderColor: synchronizeTheme.secondaryColor, borderWidth: 1 }} light rounded icon onPress={() => setActionMode(ActionMode.SynchronizeSpotify)}>
 										<Icon name="refresh" type="MaterialCommunityIcons" />
 									</Button>
 								</Body>
@@ -229,9 +430,9 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 				<Separator style={{ height: 5, backgroundColor: synchronizeTheme.secondaryBackgroundColor }} />
 				<List style={{ backgroundColor: synchronizeTheme.secondaryColor }}>
 					{
-						save &&
-						save.items.map((saveItem, i) =>
-							<Card key={i} noShadow={true} style={{ borderColor: synchronizeTheme.primaryColor, borderBottomColor: "transparent", borderLeftWidth: 5, borderTopWidth: 5, borderRightWidth: 0, borderBottomWidth: 0, backgroundColor: synchronizeTheme.secondaryColor }}>
+						localSave &&
+						localSave.items.map((saveItem, i) =>
+							<Card key={i} noShadow={true} style={{ borderColor: "white", borderBottomColor: "transparent", borderLeftWidth: 5, borderTopWidth: 5, borderRightWidth: 0, borderBottomWidth: 0, backgroundColor: synchronizeTheme.secondaryColor }}>
 								<CardItem cardBody header style={{ backgroundColor: synchronizeTheme.secondaryColor, borderRadius: 0 }}>
 									<Left style={{ maxWidth: 50 }}>
 										<Text style={{ color: "white" }}>#{i + 1}</Text>
@@ -245,7 +446,9 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 									<>
 										<CardItem style={{ backgroundColor: synchronizeTheme.secondaryColor, borderRadius: 0 }}>
 											<Left style={{ maxWidth: 90 }}>
-												<Thumbnail source={{ uri: getYoutubeThumbnail(saveItem.youtube) }} style={{ borderRadius: 20, borderColor: youtubeTheme.primaryColor, borderWidth: 2, width: 80, height: 80 }} />
+												<Button rounded style={{ width: 80, height: 80, backgroundColor: "transparent" }} onPress={() => onBind(saveItem.favorite, BindingMode.BindYoutubeVideo)}>
+													<Thumbnail source={{ uri: getYoutubeThumbnail(saveItem.youtube) }} style={{ borderRadius: 20, borderColor: youtubeTheme.primaryColor, borderWidth: 2, width: 80, height: 80 }} />
+												</Button>
 											</Left>
 											{
 												saveItem.youtube &&
@@ -259,7 +462,9 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 										</CardItem>
 										<CardItem style={{ backgroundColor: synchronizeTheme.secondaryColor, borderRadius: 0 }}>
 											<Left style={{ maxWidth: 90 }}>
-												<Thumbnail source={{ uri: getSpotifyThumbnail(saveItem.spotify) }} style={{ borderRadius: 20, borderColor: spotifyTheme.primaryColor, borderWidth: 2, width: 80, height: 80 }} />
+												<Button rounded style={{ width: 80, height: 80, backgroundColor: "transparent" }} onPress={() => onBind(saveItem.favorite, BindingMode.BindSpotifyTrack)}>
+													<Thumbnail source={{ uri: getSpotifyThumbnail(saveItem.spotify) }} style={{ borderRadius: 20, borderColor: spotifyTheme.primaryColor, borderWidth: 2, width: 80, height: 80 }} />
+												</Button>
 											</Left>
 											{
 												saveItem.spotify &&
