@@ -54,7 +54,7 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
         } else {
             setselectedView(YoutubeViewType.MENU);
         }
-    }, []);
+    }, [selectedView, setselectedView]);
 
     return (
         <>

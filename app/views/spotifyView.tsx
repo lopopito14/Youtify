@@ -52,7 +52,7 @@ export const SpotifyView: React.FunctionComponent<IProps> = () => {
         else {
             setselectedView(SpotifyViewType.MENU);
         }
-    }, []);
+    }, [selectedView, setselectedView]);
 
     return (
         <>

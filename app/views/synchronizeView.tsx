@@ -1,5 +1,5 @@
 import React from 'react';
-import { Accordion, Body, Button, Content, H1, Header, Icon, Left, List, ListItem, Right, Spinner, Switch, Text, Title, View } from 'native-base';
+import { Accordion, Badge, Body, Button, Content, H1, Header, Icon, Left, List, ListItem, Right, Spinner, Switch, Text, Title, View } from 'native-base';
 import { spotifyTheme, synchronizeTheme, youtubeTheme } from './theme';
 import { ILoad } from '../store/state';
 import SynchronizePlaylistView from './synchronize/synchronizePlaylistView';
@@ -195,30 +195,28 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 													myPlaylist.playlists.filter(p => p.year === y.year).map((p, j) =>
 														<ListItem key={j + 1} thumbnail>
 															<Left>
-																{
-																	(p.youtubePlaylist === undefined || p.spotifyPlaylist === undefined) &&
-																	<Button warning icon transparent>
-																		<Icon name='sync' type='FontAwesome5' />
-																	</Button>
-																}
-																{
-																	p.youtubePlaylist && p.spotifyPlaylist &&
-																	<Button success icon transparent>
-																		<Icon name='check' type='FontAwesome' />
-																	</Button>
-																}
+																<Button iconRight vertical transparent>
+																	{
+																		p.youtubePlaylist &&
+																		<Badge style={{ backgroundColor: youtubeTheme.primaryColor }}>
+																			<Text>{p.youtubePlaylist.contentDetails?.itemCount}</Text>
+																		</Badge>
+																	}
+																	<Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: "white", marginTop: p.youtubePlaylist ? 0 : 28 }} />
+																</Button>
+																<Button iconRight vertical transparent>
+																	{
+																		p.spotifyPlaylist &&
+																		<Badge style={{ backgroundColor: spotifyTheme.primaryColor }}>
+																			<Text>{p.spotifyPlaylist.tracks.total}</Text>
+																		</Badge>
+																	}
+																	<Icon name="spotify" type='FontAwesome' style={{ color: "white", marginTop: p.spotifyPlaylist ? 0 : 28 }} />
+																</Button>
 															</Left>
 															<Body>
 																<Text style={{ color: "white" }}>{p.title}</Text>
 																<Text note>{p.favoriteitems.length} favorite items</Text>
-																{
-																	p.youtubePlaylist &&
-																	<Text note style={{ color: youtubeTheme.primaryColor }}>youtube contains {p.youtubePlaylist.contentDetails?.itemCount} videos</Text>
-																}
-																{
-																	p.spotifyPlaylist &&
-																	<Text note style={{ color: spotifyTheme.primaryColor }}>spotify contains {p.spotifyPlaylist.tracks.total} tracks</Text>
-																}
 															</Body>
 															<Right>
 																{

@@ -17,13 +17,13 @@ const useFetchAdjustFavorites = () => {
     const favoritePlaylistId = "FL65Vblm8jhqYm8-0QPi3Z6A";
 
     const filteredChannelIds = [
-        "UC6murUWtqOwnTL68pwjoGjQ",
-        "UCv-XlFFGN30KJkG8BhvF7nA",
-        "UCBOQta0mgFd7a9Ss3CYbXAA",
-        "UCQxonuu3uUCnt7DdV9KZljA",
-        "UCzH6Fc7Ba-S4U83P5ZR6dLA",
-        "UCuSoYG4BvzRVnNfkwXICBpg",
-        "UC67WZta3Qqm-P2Eu3fej1bw"
+        "UC6murUWtqOwnTL68pwjoGjQ", // EuphoricHardStyleZ
+        "UCv-XlFFGN30KJkG8BhvF7nA", // Hard Records
+        "UCBOQta0mgFd7a9Ss3CYbXAA", // The Legendary Uploadzz
+        "UCQxonuu3uUCnt7DdV9KZljA", // Hardstyle Zone Music
+        "UCzH6Fc7Ba-S4U83P5ZR6dLA", // Rawstyle Nation
+        "UCuSoYG4BvzRVnNfkwXICBpg", // Hard Edits
+        "UC67WZta3Qqm-P2Eu3fej1bw"  // HARDSTYLE Records
     ];
 
     React.useEffect(() => {
@@ -97,7 +97,7 @@ const useFetchAdjustFavorites = () => {
                 }
 
                 // todo => remove
-                playlistItemsResponse.nextPageToken = undefined;
+                //playlistItemsResponse.nextPageToken = undefined;
 
                 if (playlistItemsResponse.nextPageToken) {
                     setpageToken(playlistItemsResponse.nextPageToken);

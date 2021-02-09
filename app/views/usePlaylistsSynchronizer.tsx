@@ -216,19 +216,18 @@ const usePlaylistsSynchronizer = () => {
 
                 setMyPlaylist(copy);
 
-                const lastItem = playlistItemsResponse.items[playlistItemsResponse.items.length - 1];
+                // // todo => removed in production mode
+                // const lastItem = playlistItemsResponse.items[playlistItemsResponse.items.length - 1];
+                // if (lastItem.snippet?.publishedAt) {
+                //     const date = new Date(lastItem.snippet?.publishedAt);
+                //     const currentYear = date.getFullYear();
 
-                // todo => removed in production mode
-                if (lastItem.snippet?.publishedAt) {
-                    const date = new Date(lastItem.snippet?.publishedAt);
-                    const currentYear = date.getFullYear();
+                //     const limitYear = 2021;
 
-                    const limitYear = 2020;
-
-                    if (currentYear < limitYear) {
-                        playlistItemsResponse.nextPageToken = undefined;
-                    }
-                }
+                //     if (currentYear < limitYear) {
+                //         playlistItemsResponse.nextPageToken = undefined;
+                //     }
+                // }
 
                 if (playlistItemsResponse.nextPageToken) {
                     setfavoritepageToken(playlistItemsResponse.nextPageToken);
