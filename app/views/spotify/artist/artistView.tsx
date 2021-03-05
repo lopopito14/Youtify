@@ -5,6 +5,7 @@ import { ISpotifyNavigationProps, SpotifyViewType } from '../../spotifyView';
 import useFetchArtist from './useFetchArtist';
 import { msToTime } from '../../utils/helpers';
 import usePlayTrack from '../usePlayTrack';
+import { StyleSheet } from 'react-native';
 
 interface IProps extends ISpotifyNavigationProps {
     artistId: string;
@@ -25,11 +26,11 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
         <>
             {
                 props.selectedView === SpotifyViewType.ARTIST &&
-                <Content style={{ backgroundColor: spotifyTheme.secondaryColor }}>
+                <Content style={styles.contentStyle}>
                     {
                         loaded && artist && artistTopTracks && relatedArtists && relatedArtistsFollowingStatus &&
-                        <Card>
-                            <CardItem header style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
+                        <Card style={styles.cardStyle}>
+                            <CardItem header style={styles.cardItemStyle}>
                                 <Body>
                                     <H1>{artist.name}</H1>
                                 </Body>
@@ -37,7 +38,7 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
                             <CardItem cardBody>
                                 {
                                     artist.images.length >= 2 &&
-                                    <Thumbnail square source={{ uri: artist.images[1].url }} style={{ height: 320, flex: 1 }} />
+                                    <Thumbnail square source={{ uri: artist.images[1].url }} style={styles.thumbnailStyle} />
                                 }
                             </CardItem>
                             <CardItem bordered>
@@ -63,7 +64,7 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     <Text note>{artist.followers.total}</Text>
                                 </Right>
                             </CardItem>
-                            <CardItem bordered style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
+                            <CardItem bordered style={styles.cardItemStyle}>
                                 <Body>
                                     <H2>{`Artist Top Tracks (${artistTopTracks.tracks.length})`}</H2>
                                 </Body>
@@ -73,14 +74,14 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     artistTopTracks.tracks.map((t, i) =>
                                         <ListItem thumbnail key={i}>
                                             <Body>
-                                                <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{t.name}</Text>
-                                                <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{t.artists.map((a) => a.name).join(', ')}</Text>
+                                                <Text numberOfLines={1}>{t.name}</Text>
+                                                <Text note numberOfLines={1}>{t.artists.map((a) => a.name).join(', ')}</Text>
                                             </Body>
                                             <Right>
-                                                <Text style={{ marginLeft: 20 }} note>{msToTime(t.duration_ms)}</Text>
+                                                <Text style={styles.durationTextStyle} note>{msToTime(t.duration_ms)}</Text>
                                             </Right>
                                             <Right>
-                                                <Button style={{ marginLeft: 20, borderColor: spotifyTheme.secondaryColor, borderWidth: 1 }} light color={spotifyTheme.secondaryColor} rounded icon onPress={() => playTrack(t.id, t.preview_url)}>
+                                                <Button style={styles.buttonStyle} light color={spotifyTheme.secondaryColor} rounded icon onPress={() => playTrack(t.id, t.preview_url)}>
                                                     <Icon android={t.id === trackIdPlaying ? "md-pause" : "md-play"} ios={t.id === trackIdPlaying ? "md-pause" : "md-play"} />
                                                 </Button>
                                             </Right>
@@ -89,7 +90,7 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     )
                                 }
                             </List>
-                            <CardItem bordered style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
+                            <CardItem bordered style={styles.cardItemStyle}>
                                 <Body>
                                     <H2>{`Related Artists (${relatedArtists.artists.length})`}</H2>
                                 </Body>
@@ -128,4 +129,31 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
     )
 }
 
-export default ArtistView
+const styles = StyleSheet.create({
+    contentStyle: {
+        backgroundColor: spotifyTheme.secondaryColor,
+    },
+    cardStyle: {
+        margin: 5
+    },
+    cardItemStyle: {
+        backgroundColor: spotifyTheme.secondaryBackgroundColor
+    },
+    thumbnailStyle: {
+        height: 300,
+        flex: 1
+    },
+    numberingStyle: {
+        marginRight: 20
+    },
+    durationTextStyle: {
+        marginLeft: 20
+    },
+    buttonStyle: {
+        marginLeft: 20,
+        borderColor: spotifyTheme.secondaryColor,
+        borderWidth: 1
+    }
+});
+
+export default ArtistView;

@@ -1,5 +1,6 @@
 import { Body, Button, Content, H1, Icon, Left, List, ListItem, Right, Spinner, SwipeRow, Text, Thumbnail, View } from 'native-base';
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { PlaylistItem, SearchResult, Video } from '../../../youtubeApi/youtube-api-models';
 import { youtubeTheme } from '../../theme';
 import ModalPopup, { ModalType } from '../../utils/modalPopup';
@@ -7,7 +8,7 @@ import { IYoutubeNavigationProps, YoutubeViewType } from '../../youtubeView';
 import useFetchAdjustFavorites from './useFetchAdjustFavorites';
 import useSearch from './useSearch';
 
-export interface IProps extends IYoutubeNavigationProps { }
+interface IProps extends IYoutubeNavigationProps { }
 
 export interface IAdjustableVideo {
     playlistItem: PlaylistItem;
@@ -63,13 +64,13 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
                                     rightOpenValue={-75}
                                     stopRightSwipe={-75}
                                     body={
-                                        <View style={{ flexDirection: 'row' }}>
+                                        <View style={styles.modalRowViewStyle}>
                                             {
                                                 s.snippet?.thumbnails?.medium?.url &&
-                                                <Thumbnail source={{ uri: s.snippet?.thumbnails?.medium?.url }} style={{ width: 80, height: 80 }} />
+                                                <Thumbnail source={{ uri: s.snippet?.thumbnails?.medium?.url }} style={styles.modalThumbnailStyle} />
                                             }
-                                            <View style={{ marginLeft: 5, alignSelf: 'center' }}>
-                                                <Text numberOfLines={3} style={{ maxWidth: 250 }}>{s.snippet?.title}</Text>
+                                            <View style={styles.modalTextContainerStyle}>
+                                                <Text numberOfLines={3} style={styles.modalTextStyle}>{s.snippet?.title}</Text>
                                                 <Text note>{s.snippet?.channelTitle}</Text>
                                             </View>
                                         </View>
@@ -84,11 +85,11 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
                             )
                         }
                     </ModalPopup>
-                    <Content style={{ backgroundColor: youtubeTheme.secondaryColor }}>
+                    <Content style={styles.contentStyle}>
                         {
                             loaded && adjustableVideos &&
                             <>
-                                <H1 style={{ color: "white" }}>Issues {adjustableVideos.length}</H1>
+                                <H1 style={styles.textStyle}>Issues {adjustableVideos.length}</H1>
                                 <List>
                                     {
                                         adjustableVideos.map((v, i) =>
@@ -100,9 +101,9 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
                                                     }
                                                 </Left>
                                                 <Body>
-                                                    <Text style={{ color: "white" }}>{v.video.snippet?.title}</Text>
-                                                    <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{v.video.snippet?.channelTitle}</Text>
-                                                    <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{v.video.statistics?.viewCount} views</Text>
+                                                    <Text style={styles.textStyle}>{v.video.snippet?.title}</Text>
+                                                    <Text note numberOfLines={1}>{v.video.snippet?.channelTitle}</Text>
+                                                    <Text note numberOfLines={1}>{v.video.statistics?.viewCount} views</Text>
                                                 </Body>
                                                 <Right>
                                                     <Button rounded icon light onPress={() => onSearch(v)}>
@@ -119,7 +120,7 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
                             !loaded &&
                             <>
                                 <Spinner color={youtubeTheme.primaryColor} />
-                                <Text style={{ color: "white" }}>{progress}</Text>
+                                <Text style={styles.textStyle}>{progress}</Text>
                             </>
                         }
                     </Content>
@@ -129,4 +130,27 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
     )
 }
 
-export default AdjustFavoritesView
+const styles = StyleSheet.create({
+    modalRowViewStyle: {
+        flexDirection: 'row'
+    },
+    modalThumbnailStyle: {
+        width: 80,
+        height: 80
+    },
+    modalTextContainerStyle: {
+        marginLeft: 5,
+        alignSelf: 'center'
+    },
+    modalTextStyle: {
+        maxWidth: 250
+    },
+    contentStyle: {
+        backgroundColor: youtubeTheme.secondaryColor,
+    },
+    textStyle: {
+        color: "white"
+    }
+});
+
+export default AdjustFavoritesView;

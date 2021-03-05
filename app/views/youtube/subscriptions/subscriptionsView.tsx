@@ -1,5 +1,6 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base'
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { Subscription } from '../../../youtubeApi/youtube-api-models';
 import { youtubeTheme } from '../../theme';
 import RefreshableList from '../../utils/refreshableList';
@@ -12,17 +13,17 @@ interface IProps extends IYoutubeNavigationProps { }
 const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     const { subscriptions, loaded, loadSubscriptions, refreshSubscriptions } = useFetchSubscriptions();
-    const [selectedSubscription, setselectedSubscription] = React.useState<Subscription | undefined>(undefined);
+    const [selectedSubscription, setSelectedSubscription] = React.useState<Subscription | undefined>(undefined);
 
     React.useEffect(() => {
         if (props.selectedView === YoutubeViewType.SUBSCRIPTIONS) {
-            setselectedSubscription(undefined);
+            setSelectedSubscription(undefined);
         }
     }, [props.selectedView]);
 
     const onOpenSubscription = React.useCallback((subscription: Subscription) => {
-        setselectedSubscription(subscription);
-        props.setselectedView(YoutubeViewType.SUBSCRIPTION);
+        setSelectedSubscription(subscription);
+        props.setSelectedView(YoutubeViewType.SUBSCRIPTION);
     }, []);
 
     return (
@@ -40,7 +41,7 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     }
                                 </Left>
                                 <Body>
-                                    <Text style={{ color: "white" }}>{s.snippet?.title}</Text>
+                                    <Text style={styles.titleStyle}>{s.snippet?.title}</Text>
                                     <Text note numberOfLines={3}>{s.snippet?.description}</Text>
                                     <Text note numberOfLines={1}>{s.contentDetails?.totalItemCount} videos</Text>
                                 </Body>
@@ -60,10 +61,16 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
             }
             {
                 props.selectedView !== YoutubeViewType.SUBSCRIPTIONS && selectedSubscription &&
-                <SubscriptionView selectedView={props.selectedView} setselectedView={props.setselectedView} subscription={selectedSubscription} />
+                <SubscriptionView selectedView={props.selectedView} setSelectedView={props.setSelectedView} subscription={selectedSubscription} />
             }
         </>
     )
 }
 
-export default SubscriptionsView
+const styles = StyleSheet.create({
+    titleStyle: {
+        color: "white"
+    }
+});
+
+export default SubscriptionsView;

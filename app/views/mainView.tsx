@@ -1,6 +1,6 @@
 import React from 'react';
-import { YoutubeView } from './youtubeView';
-import { SpotifyView } from './spotifyView';
+import YoutubeView from './youtubeView';
+import SpotifyView from './spotifyView';
 import { reducer } from '../store/reducer';
 import { InitialState } from '../store/state';
 import Context from '../store/context';
@@ -8,8 +8,8 @@ import { Button, Footer, FooterTab, Icon, Root, Text } from 'native-base';
 import SettingsView from './settingsView';
 import { synchronizeTheme, spotifyTheme, youtubeTheme } from './theme';
 import NotificationToast from './utils/notificationToast';
-import { DrawerLayoutAndroid } from 'react-native';
-import { NoneView } from './noneView';
+import { DrawerLayoutAndroid, StyleSheet } from 'react-native';
+import NoneView from './noneView';
 import SynchronizeView from './synchronizeView';
 
 interface Props { }
@@ -24,17 +24,17 @@ enum MainViewType {
 const MainView: React.FunctionComponent<Props> = () => {
 	const [state, dispatch] = React.useReducer(reducer, InitialState);
 
-	const [selectedView, setselectedView] = React.useState<MainViewType>(MainViewType.NONE);
+	const [selectedView, setSelectedView] = React.useState<MainViewType>(MainViewType.NONE);
 
 	React.useEffect(() => {
 		if (state.spotifyState.credential.isLogged && !state.youtubeState.credential.isLogged) {
-			setselectedView(MainViewType.SPOTIFY);
+			setSelectedView(MainViewType.SPOTIFY);
 		} else if (state.youtubeState.credential.isLogged && !state.spotifyState.credential.isLogged) {
-			setselectedView(MainViewType.YOUTUBE);
+			setSelectedView(MainViewType.YOUTUBE);
 		} else if (state.youtubeState.credential.isLogged && state.spotifyState.credential.isLogged) {
-			setselectedView(MainViewType.SYNCHRONIZE);
+			setSelectedView(MainViewType.SYNCHRONIZE);
 		} else {
-			setselectedView(MainViewType.NONE);
+			setSelectedView(MainViewType.NONE);
 		}
 	}, [state.spotifyState.credential.isLogged, state.youtubeState.credential.isLogged])
 
@@ -84,27 +84,27 @@ const MainView: React.FunctionComponent<Props> = () => {
 									{
 										state.youtubeState.credential.isLogged &&
 										<>
-											<Button vertical={true} onPress={() => setselectedView(MainViewType.YOUTUBE)}>
-												<Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: "white", opacity: footerOpacity(MainViewType.YOUTUBE) }} fontSize={1} />
-												<Text style={{ color: "white", opacity: footerOpacity(MainViewType.YOUTUBE), fontWeight: 'bold' }}>Youtube</Text>
+											<Button vertical={true} onPress={() => setSelectedView(MainViewType.YOUTUBE)}>
+												<Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ ...styles.iconStyle, opacity: footerOpacity(MainViewType.YOUTUBE) }} fontSize={1} />
+												<Text style={{ ...styles.textStyle, opacity: footerOpacity(MainViewType.YOUTUBE) }}>Youtube</Text>
 											</Button>
 										</>
 									}
 									{
 										state.youtubeState.credential.isLogged && state.spotifyState.credential.isLogged &&
 										<>
-											<Button vertical={true} onPress={() => setselectedView(MainViewType.SYNCHRONIZE)}>
-												<Icon name="md-sync-circle" type='Ionicons' style={{ color: "white", opacity: footerOpacity(MainViewType.SYNCHRONIZE) }} fontSize={1} />
-												<Text style={{ color: "white", opacity: footerOpacity(MainViewType.SYNCHRONIZE), fontWeight: 'bold' }}>Synchronize</Text>
+											<Button vertical={true} onPress={() => setSelectedView(MainViewType.SYNCHRONIZE)}>
+												<Icon name="md-sync-circle" type='Ionicons' style={{ ...styles.iconStyle, opacity: footerOpacity(MainViewType.SYNCHRONIZE) }} fontSize={1} />
+												<Text style={{ ...styles.textStyle, opacity: footerOpacity(MainViewType.SYNCHRONIZE) }}>Synchronize</Text>
 											</Button>
 										</>
 									}
 									{
 										state.spotifyState.credential.isLogged &&
 										<>
-											<Button vertical={true} onPress={() => setselectedView(MainViewType.SPOTIFY)}>
-												<Icon name="spotify" fontSize={50} type='FontAwesome' style={{ color: "white", opacity: footerOpacity(MainViewType.SPOTIFY) }} />
-												<Text style={{ color: "white", opacity: footerOpacity(MainViewType.SPOTIFY), fontWeight: 'bold' }}>Spotify</Text>
+											<Button vertical={true} onPress={() => setSelectedView(MainViewType.SPOTIFY)}>
+												<Icon name="spotify" fontSize={50} type='FontAwesome' style={{ ...styles.iconStyle, opacity: footerOpacity(MainViewType.SPOTIFY) }} />
+												<Text style={{ ...styles.textStyle, opacity: footerOpacity(MainViewType.SPOTIFY) }}>Spotify</Text>
 											</Button>
 										</>
 									}
@@ -117,5 +117,15 @@ const MainView: React.FunctionComponent<Props> = () => {
 		</Context.Provider>
 	);
 };
+
+const styles = StyleSheet.create({
+	iconStyle: {
+		color: "white"
+	},
+	textStyle: {
+		color: "white",
+		fontWeight: 'bold'
+	}
+});
 
 export default MainView;

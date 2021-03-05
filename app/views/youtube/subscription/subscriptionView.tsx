@@ -4,6 +4,7 @@ import { youtubeTheme } from '../../theme';
 import { IYoutubeNavigationProps, YoutubeViewType } from '../../youtubeView';
 import { Subscription } from '../../../youtubeApi/youtube-api-models';
 import useFetchSubscription from './useFetchSubscription';
+import { StyleSheet } from 'react-native';
 
 interface IProps extends IYoutubeNavigationProps {
     subscription: Subscription;
@@ -17,11 +18,11 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
         <>
             {
                 props.selectedView === YoutubeViewType.SUBSCRIPTION &&
-                <Content style={{ backgroundColor: youtubeTheme.secondaryColor }}>
+                <Content style={styles.contentStyle}>
                     {
                         loaded && channelPlaylists &&
-                        (<Card style={{ margin: 5 }}>
-                            <CardItem header style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
+                        (<Card style={styles.cardStyle}>
+                            <CardItem header style={styles.cardItemStyle}>
                                 <Body>
                                     <H1>{props.subscription.snippet?.title}</H1>
                                 </Body>
@@ -29,13 +30,13 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
                             <CardItem cardBody>
                                 {
                                     props.subscription.snippet?.thumbnails?.high?.url &&
-                                    <Thumbnail square source={{ uri: props.subscription.snippet?.thumbnails.high?.url }} style={{ height: 320, flex: 1 }} />
+                                    <Thumbnail square source={{ uri: props.subscription.snippet?.thumbnails.high?.url }} style={styles.thumbnailStyle} />
                                 }
                             </CardItem>
                             <CardItem bordered>
                                 <Text note>{props.subscription.snippet?.description}</Text>
                             </CardItem>
-                            <CardItem style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
+                            <CardItem style={styles.cardItemStyle}>
                                 <Body>
                                     <H2>{`Playlists (${channelPlaylists.length})`}</H2>
                                 </Body>
@@ -51,19 +52,16 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
                                                 }
                                             </Left>
                                             <Body>
-                                                <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{item.snippet?.title}</Text>
-                                                <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{item.snippet?.description}</Text>
+                                                <Text numberOfLines={1}>{item.snippet?.title}</Text>
+                                                <Text note numberOfLines={1}>{item.snippet?.description}</Text>
                                             </Body>
                                             <Right>
-                                                {/* <Button style={{ marginLeft: 20, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} light color={youtubeTheme.secondaryColor} rounded icon>
-                                                    <Icon android={item.id === trackIdPlaying ? "md-pause" : "md-play"} ios={item.id === trackIdPlaying ? "md-pause" : "md-play"} />
-                                                </Button> */}
                                             </Right>
                                         </ListItem>
                                     )
                                 }
                             </List>
-                            <CardItem style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
+                            <CardItem style={styles.cardItemStyle}>
                                 <Body>
                                     <H2>{`Subscriptions (${channelSubscriptions.length})`}</H2>
                                 </Body>
@@ -79,19 +77,16 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
                                                 }
                                             </Left>
                                             <Body>
-                                                <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{s.snippet?.title}</Text>
-                                                <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{s.snippet?.description}</Text>
+                                                <Text numberOfLines={1}>{s.snippet?.title}</Text>
+                                                <Text note numberOfLines={1}>{s.snippet?.description}</Text>
                                             </Body>
                                             <Right>
-                                                {/* <Button style={{ marginLeft: 20, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} light color={youtubeTheme.secondaryColor} rounded icon>
-                                                    <Icon android={s.id === trackIdPlaying ? "md-pause" : "md-play"} ios={s.id === trackIdPlaying ? "md-pause" : "md-play"} />
-                                                </Button> */}
                                             </Right>
                                         </ListItem>
                                     )
                                 }
                             </List>
-                            <CardItem style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
+                            <CardItem style={styles.cardItemStyle}>
                                 <Body>
                                     <H2>{`Recommended (${channelChannels.length})`}</H2>
                                 </Body>
@@ -107,13 +102,10 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
                                                 }
                                             </Left>
                                             <Body>
-                                                <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{c.snippet?.title}</Text>
-                                                <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{c.snippet?.description}</Text>
+                                                <Text numberOfLines={1}>{c.snippet?.title}</Text>
+                                                <Text note numberOfLines={1}>{c.snippet?.description}</Text>
                                             </Body>
                                             <Right>
-                                                {/* <Button style={{ marginLeft: 20, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} light color={youtubeTheme.secondaryColor} rounded icon>
-                                                    <Icon android={c.id === trackIdPlaying ? "md-pause" : "md-play"} ios={c.id === trackIdPlaying ? "md-pause" : "md-play"} />
-                                                </Button> */}
                                             </Right>
                                         </ListItem>
                                     )
@@ -130,4 +122,20 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
     )
 }
 
-export default SubscriptionView
+const styles = StyleSheet.create({
+    contentStyle: {
+        backgroundColor: youtubeTheme.secondaryColor,
+    },
+    cardStyle: {
+        margin: 5
+    },
+    cardItemStyle: {
+        backgroundColor: youtubeTheme.secondaryBackgroundColor
+    },
+    thumbnailStyle: {
+        height: 320,
+        flex: 1
+    }
+});
+
+export default SubscriptionView;

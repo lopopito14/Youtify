@@ -3,10 +3,10 @@ import { AuthConfiguration, authorize, refresh, revoke } from "react-native-app-
 import Context from "../../store/context";
 import { spotifyApiAuthorizeError, spotifyApiAuthorizeRequest, spotifyApiAuthorizeSucess as spotifyApiAuthorizeSuccess, spotifyApiRefreshError, spotifyApiRefreshRequest, spotifyApiRefreshSucess as spotifyApiRefreshSuccess, spotifyApiRevokeError, spotifyApiRevokeRequest, spotifyApiRevokeSuccess } from "../../store/types/spotify_credential_actions";
 import { spotifyCurrentProfileError, spotifyCurrentProfileRequest, spotifyCurrentProfileSucess } from "../../store/types/spotify_userProfile_actions";
-import { CredentialView } from "./credentialView";
+import CredentialView from "./credentialView";
 import SpotifyApi from 'spotify-web-api-js';
 import { Body, Card, CardItem, Spinner } from "native-base";
-import { Image } from "react-native";
+import { Image, StyleSheet } from "react-native";
 import UserProfileItem from "./userProfileItem";
 import { settingsTheme } from "../theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,7 +15,7 @@ interface Props {
 	authorizeConfiguration: AuthConfiguration;
 }
 
-export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
+const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 	const { state, dispatch } = React.useContext(Context);
 
 	const storageKey = "spotify_refresh_token";
@@ -117,10 +117,10 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 	}
 
 	return (
-		<Card style={{ flex: 0 }}>
+		<Card>
 			<CardItem header bordered>
 				<Body>
-					<Image source={require(`../../images/spotify-logo.png`)} style={{ height: 65, width: 220, flex: 1, alignSelf: "center" }} />
+					<Image source={require(`../../images/spotify-logo.png`)} style={styles.imageStyle} />
 				</Body>
 			</CardItem>
 			<CardItem>
@@ -150,3 +150,14 @@ export const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 		</Card>
 	);
 };
+
+const styles = StyleSheet.create({
+	imageStyle: {
+		height: 65,
+		width: 220,
+		flex: 1,
+		alignSelf: "center"
+	}
+});
+
+export default SpotifyOAuth2;

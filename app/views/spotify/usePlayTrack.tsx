@@ -4,13 +4,13 @@ import Sound from 'react-native-sound';
 const usePlayTrack = () => {
 
     const [trackIdPlaying, setTrackIdPlaying] = React.useState<string | undefined>(undefined);
-    const [sound, setsound] = React.useState<Sound | undefined>(undefined);
+    const [sound, setSound] = React.useState<Sound | undefined>(undefined);
 
     const stopPlaying = React.useCallback(() => {
         if (sound) {
             sound.pause();
             sound.release();
-            setsound(undefined);
+            setSound(undefined);
             setTrackIdPlaying(undefined);
         }
     }, [sound]);
@@ -19,7 +19,7 @@ const usePlayTrack = () => {
         if (sound) {
             sound.pause();
             sound.release();
-            setsound(undefined);
+            setSound(undefined);
             if (trackId === trackIdPlaying) {
                 setTrackIdPlaying(undefined);
                 return;
@@ -45,11 +45,11 @@ const usePlayTrack = () => {
             });
         });
 
-        setsound(track);
+        setSound(track);
 
     }, [sound, trackIdPlaying]);
 
     return { trackIdPlaying, playTrack, stopPlaying };
 }
 
-export default usePlayTrack
+export default usePlayTrack;

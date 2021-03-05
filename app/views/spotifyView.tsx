@@ -1,7 +1,8 @@
 import React from 'react';
 import { Body, Button, Header, Icon, Left, Title } from 'native-base';
 import { spotifyTheme } from './theme';
-import { SpotifyMenuView } from './spotify/spotifyMenuView';
+import SpotifyMenuView from './spotify/spotifyMenuView';
+import { StyleSheet } from 'react-native';
 
 interface IProps { }
 
@@ -15,11 +16,11 @@ export enum SpotifyViewType {
 
 export interface ISpotifyNavigationProps {
     selectedView: SpotifyViewType;
-    setselectedView(view: SpotifyViewType): any;
+    setSelectedView(view: SpotifyViewType): any;
 }
 
-export const SpotifyView: React.FunctionComponent<IProps> = () => {
-    const [selectedView, setselectedView] = React.useState<SpotifyViewType>(SpotifyViewType.MENU);
+const SpotifyView: React.FunctionComponent<IProps> = () => {
+    const [selectedView, setSelectedView] = React.useState<SpotifyViewType>(SpotifyViewType.MENU);
 
     const isSelectedView = (view: SpotifyViewType) => {
         return selectedView === view;
@@ -44,19 +45,19 @@ export const SpotifyView: React.FunctionComponent<IProps> = () => {
 
     const onBackButtonPressed = React.useCallback(() => {
         if (selectedView === SpotifyViewType.ARTIST) {
-            setselectedView(SpotifyViewType.ARTISTS);
+            setSelectedView(SpotifyViewType.ARTISTS);
         }
         else if (selectedView === SpotifyViewType.PLAYLIST) {
-            setselectedView(SpotifyViewType.PLAYLISTS);
+            setSelectedView(SpotifyViewType.PLAYLISTS);
         }
         else {
-            setselectedView(SpotifyViewType.MENU);
+            setSelectedView(SpotifyViewType.MENU);
         }
-    }, [selectedView, setselectedView]);
+    }, [selectedView, setSelectedView]);
 
     return (
         <>
-            <Header noShadow style={{ backgroundColor: spotifyTheme.primaryColor }} androidStatusBarColor={spotifyTheme.secondaryColor}>
+            <Header noShadow style={styles.headerStyle} androidStatusBarColor={spotifyTheme.secondaryColor}>
                 <Left>
                     {
                         !isSelectedView(SpotifyViewType.MENU) &&
@@ -70,7 +71,15 @@ export const SpotifyView: React.FunctionComponent<IProps> = () => {
                 </Body>
             </Header>
 
-            <SpotifyMenuView selectedView={selectedView} setselectedView={setselectedView} />
+            <SpotifyMenuView selectedView={selectedView} setSelectedView={setSelectedView} />
         </>
     )
 }
+
+const styles = StyleSheet.create({
+    headerStyle: {
+        backgroundColor: spotifyTheme.primaryColor
+    }
+});
+
+export default SpotifyView;

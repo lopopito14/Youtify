@@ -12,9 +12,7 @@ const useFetchAdjustFavorites = () => {
     const [loaded, setLoaded] = React.useState(false);
     const [progress, setProgress] = React.useState(0);
     const [adjustableVideos, setAdjustableVideos] = React.useState<IAdjustableVideo[]>([]);
-    const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
-
-    const favoritePlaylistId = "FL65Vblm8jhqYm8-0QPi3Z6A";
+    const [pageToken, setPageToken] = React.useState<string | undefined>(undefined);
 
     const filteredChannelIds = [
         "UC6murUWtqOwnTL68pwjoGjQ", // EuphoricHardStyleZ
@@ -42,7 +40,7 @@ const useFetchAdjustFavorites = () => {
 
         try {
             var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
-                playlistId: favoritePlaylistId,
+                playlistId: state.youtubeState.userProfile.favoritePlaylistId,
                 part: ['snippet', 'contentDetails'],
                 maxResults: 50,
                 pageToken: pageToken
@@ -96,14 +94,11 @@ const useFetchAdjustFavorites = () => {
                     }
                 }
 
-                // todo => remove
-                //playlistItemsResponse.nextPageToken = undefined;
-
                 if (playlistItemsResponse.nextPageToken) {
-                    setpageToken(playlistItemsResponse.nextPageToken);
+                    setPageToken(playlistItemsResponse.nextPageToken);
                 } else {
                     setLoaded(true);
-                    setpageToken(undefined);
+                    setPageToken(undefined);
                 }
             }
         } catch (error) {
@@ -119,7 +114,7 @@ const useFetchAdjustFavorites = () => {
                 requestBody: {
                     snippet: {
                         position: adjustableVideo.playlistItem.snippet?.position,
-                        playlistId: favoritePlaylistId,
+                        playlistId: state.youtubeState.userProfile.favoritePlaylistId,
                         resourceId: searchResult.id
                     },
                     id: adjustableVideo.playlistItem.id
@@ -147,4 +142,4 @@ const useFetchAdjustFavorites = () => {
     return { adjustableVideos, progress, loaded, replace };
 }
 
-export default useFetchAdjustFavorites
+export default useFetchAdjustFavorites;

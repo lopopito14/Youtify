@@ -90,4 +90,4 @@ const useFetchSubscription = (subscription: Subscription) => {
     return { channelPlaylists, channelChannels, channelSubscriptions, loaded };
 }
 
-export default useFetchSubscription
+export default useFetchSubscription;

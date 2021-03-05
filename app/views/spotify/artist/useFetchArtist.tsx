@@ -8,7 +8,7 @@ const useFetchArtist = (artistId: string) => {
 
     const [artist, setArtist] = React.useState<globalThis.SpotifyApi.SingleArtistResponse>();
     const [relatedArtists, setRelatedArtists] = React.useState<globalThis.SpotifyApi.ArtistsRelatedArtistsResponse>();
-    const [relatedArtistsFollowingStatus, setrelatedArtistsFollowingStatus] = React.useState<boolean[] | undefined>([]);
+    const [relatedArtistsFollowingStatus, setRelatedArtistsFollowingStatus] = React.useState<boolean[] | undefined>([]);
     const [artistTopTracks, setArtistTopTracks] = React.useState<globalThis.SpotifyApi.ArtistsTopTracksResponse>();
     const [loaded, setLoaded] = React.useState(false);
 
@@ -79,7 +79,7 @@ const useFetchArtist = (artistId: string) => {
 
             var response = await spotifyApi.isFollowingArtists(ids);
             if (response) {
-                setrelatedArtistsFollowingStatus(response);
+                setRelatedArtistsFollowingStatus(response);
             }
         } catch (error) {
             dispatch(pushSpotifyErrorNotification(error));
@@ -102,7 +102,7 @@ const useFetchArtist = (artistId: string) => {
                     await spotifyApi.followArtists([id]);
                 }
 
-                setrelatedArtistsFollowingStatus((prev) => {
+                setRelatedArtistsFollowingStatus((prev) => {
 
                     if (!prev) {
                         return prev;
@@ -123,4 +123,4 @@ const useFetchArtist = (artistId: string) => {
     return { artist, relatedArtists, relatedArtistsFollowingStatus, artistTopTracks, loaded, onFollow }
 }
 
-export default useFetchArtist
+export default useFetchArtist;

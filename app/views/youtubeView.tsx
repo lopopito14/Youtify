@@ -1,7 +1,8 @@
-import { Body, Button, Header, Icon, Left, Title } from "native-base";
-import React from "react";
-import { youtubeTheme } from "./theme";
-import { YoutubeMenuView } from "./youtube/youtubeMenuView";
+import { Body, Button, Header, Icon, Left, Title } from 'native-base';
+import React from 'react';
+import { StyleSheet } from 'react-native';
+import { youtubeTheme } from './theme';
+import YoutubeMenuView from './youtube/youtubeMenuView';
 
 interface Props { }
 
@@ -16,11 +17,11 @@ export enum YoutubeViewType {
 
 export interface IYoutubeNavigationProps {
     selectedView: YoutubeViewType;
-    setselectedView(view: YoutubeViewType): any;
+    setSelectedView(view: YoutubeViewType): any;
 }
 
-export const YoutubeView: React.FunctionComponent<Props> = () => {
-    const [selectedView, setselectedView] = React.useState<YoutubeViewType>(YoutubeViewType.MENU)
+const YoutubeView: React.FunctionComponent<Props> = () => {
+    const [selectedView, setSelectedView] = React.useState<YoutubeViewType>(YoutubeViewType.MENU);
 
     const isSelectedView = (view: YoutubeViewType) => {
         return selectedView === view;
@@ -28,19 +29,19 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
 
     const headerTitle = () => {
         if (isSelectedView(YoutubeViewType.SUBSCRIPTIONS)) {
-            return "Subscriptions";
+            return 'Subscriptions';
         }
         if (isSelectedView(YoutubeViewType.SUBSCRIPTION)) {
-            return "Subscription";
+            return 'Subscription';
         }
         if (isSelectedView(YoutubeViewType.PLAYLISTS)) {
-            return "Playlists";
+            return 'Playlists';
         }
         if (isSelectedView(YoutubeViewType.PLAYLIST)) {
-            return "Playlist";
+            return 'Playlist';
         }
         if (isSelectedView(YoutubeViewType.ADJUST_FAVORITES)) {
-            return "Adjust Favorites"
+            return 'Adjust Favorites'
         }
 
         return 'Youtube';
@@ -48,17 +49,17 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
 
     const onBackButtonPressed = React.useCallback(() => {
         if (selectedView === YoutubeViewType.PLAYLIST) {
-            setselectedView(YoutubeViewType.PLAYLISTS);
+            setSelectedView(YoutubeViewType.PLAYLISTS);
         } else if (selectedView === YoutubeViewType.SUBSCRIPTION) {
-            setselectedView(YoutubeViewType.SUBSCRIPTIONS);
+            setSelectedView(YoutubeViewType.SUBSCRIPTIONS);
         } else {
-            setselectedView(YoutubeViewType.MENU);
+            setSelectedView(YoutubeViewType.MENU);
         }
-    }, [selectedView, setselectedView]);
+    }, [selectedView, setSelectedView]);
 
     return (
         <>
-            <Header style={{ backgroundColor: youtubeTheme.primaryColor }} androidStatusBarColor={youtubeTheme.secondaryColor}>
+            <Header style={styles.headerStyle} androidStatusBarColor={youtubeTheme.secondaryColor}>
                 <Left>
                     {
                         !isSelectedView(YoutubeViewType.MENU) &&
@@ -72,7 +73,15 @@ export const YoutubeView: React.FunctionComponent<Props> = () => {
                 </Body>
             </Header>
 
-            <YoutubeMenuView selectedView={selectedView} setselectedView={setselectedView} />
+            <YoutubeMenuView selectedView={selectedView} setSelectedView={setSelectedView} />
         </>
     )
 }
+
+const styles = StyleSheet.create({
+    headerStyle: {
+        backgroundColor: youtubeTheme.primaryColor
+    }
+});
+
+export default YoutubeView;

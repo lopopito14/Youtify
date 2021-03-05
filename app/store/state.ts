@@ -38,7 +38,8 @@ export const InitialState: TState = {
       loading: false,
       loaded: false,
       title: '',
-      channelId: ''
+      channelId: '',
+      favoritePlaylistId: ''
     }
   },
   notifications: {
@@ -68,6 +69,7 @@ export interface ISpotifyProfile extends ILoad {
 export interface IYoutubeProfile extends ILoad {
   title: string;
   channelId: string;
+  favoritePlaylistId: string;
 }
 
 export interface ILoad {

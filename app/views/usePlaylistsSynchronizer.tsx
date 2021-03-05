@@ -38,8 +38,6 @@ const usePlaylistsSynchronizer = () => {
     const [youtubePlaylistsPageToken, setYoutubePlaylistsPageToken] = React.useState<string | undefined>(undefined);
     const [spotifyPlaylistsOffset, setSpotifyPlaylistsOffset] = React.useState<number | undefined>(undefined);
 
-    const favoritePlaylistId = "FL65Vblm8jhqYm8-0QPi3Z6A";
-
     React.useEffect(() => {
         if (state.youtubeState.userProfile.loaded) {
             if (!myPlaylist.loaded) {
@@ -162,7 +160,7 @@ const usePlaylistsSynchronizer = () => {
             });
 
             var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
-                playlistId: favoritePlaylistId,
+                playlistId: state.youtubeState.userProfile.favoritePlaylistId,
                 part: ['snippet', 'contentDetails'],
                 maxResults: 50,
                 pageToken: pageToken
@@ -390,4 +388,4 @@ const usePlaylistsSynchronizer = () => {
     return { myPlaylist, createPlaylists };
 }
 
-export default usePlaylistsSynchronizer
+export default usePlaylistsSynchronizer;

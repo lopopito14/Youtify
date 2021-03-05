@@ -4,7 +4,7 @@ import { youtubeTheme } from '../../theme';
 import { IYoutubeNavigationProps, YoutubeViewType } from '../../youtubeView';
 import { Playlist } from '../../../youtubeApi/youtube-api-models';
 import YoutubePlayer, { YoutubeIframeRef } from "react-native-youtube-iframe";
-import { Image } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 import useFetchPlaylist from './useFetchPlaylist';
 import { getYoutubeVideoDuration, msToTime } from '../../utils/helpers';
 
@@ -64,7 +64,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
         <>
             {
                 props.selectedView === YoutubeViewType.PLAYLIST &&
-                <Content style={{ backgroundColor: youtubeTheme.secondaryColor }}>
+                <Content style={styles.contentStyle}>
                     {
                         loaded &&
                         <>
@@ -80,19 +80,19 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     initialPlayerParams={{ controls: false, preventFullScreen: true, start: 30 }}
                                 />
                             }
-                            <Card style={{ margin: 5 }}>
-                                <CardItem header style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
+                            <Card style={styles.cardStyle}>
+                                <CardItem header style={styles.cardItemStyle}>
                                     <Body>
                                         <H1>{props.playlist.snippet?.title}</H1>
                                     </Body>
                                 </CardItem>
-                                <CardItem cardBody style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
+                                <CardItem cardBody style={styles.cardItemStyle}>
                                     {
                                         props.playlist.snippet?.thumbnails?.medium?.url &&
-                                        <Thumbnail square source={{ uri: props.playlist.snippet?.thumbnails.medium?.url }} style={{ height: 180, flex: 1 }} />
+                                        <Thumbnail square source={{ uri: props.playlist.snippet?.thumbnails.medium?.url }} style={styles.thumbnailStyle} />
                                     }
                                 </CardItem>
-                                <CardItem style={{ backgroundColor: youtubeTheme.secondaryBackgroundColor }}>
+                                <CardItem style={styles.cardItemStyle}>
                                     <Left>
                                         <H2>Videos:</H2>
                                     </Left>
@@ -101,29 +101,29 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     {
                                         youtubeVideos.map((video, i) =>
                                             <ListItem key={i}>
-                                                <Text style={{ marginRight: 5 }}>{i + 1}</Text>
+                                                <Text style={styles.numberingStyle}>{i + 1}</Text>
                                                 <Body>
-                                                    <Text style={{ textAlignVertical: 'center' }} numberOfLines={3}>{video.snippet?.title}</Text>
-                                                    <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{video.snippet?.channelTitle}</Text>
-                                                    <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{video.statistics?.viewCount} views</Text>
-                                                    <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{getYoutubeDuration(video.contentDetails?.duration)}</Text>
+                                                    <Text numberOfLines={3}>{video.snippet?.title}</Text>
+                                                    <Text note numberOfLines={1}>{video.snippet?.channelTitle}</Text>
+                                                    <Text note numberOfLines={1}>{video.statistics?.viewCount} views</Text>
+                                                    <Text note numberOfLines={1}>{getYoutubeDuration(video.contentDetails?.duration)}</Text>
                                                 </Body>
                                                 {
                                                     video.id && video.snippet?.thumbnails?.medium?.url &&
-                                                    <View style={{ height: 90, width: 160 }}>
-                                                        <Image source={{ uri: video.snippet?.thumbnails?.medium?.url }} style={{ height: 90, width: 160 }} />
+                                                    <View style={styles.imageContainerStyle}>
+                                                        <Image source={{ uri: video.snippet?.thumbnails?.medium?.url }} style={styles.imageContainerStyle} />
                                                         {
                                                             video.id === videoIdPlaying &&
-                                                            <Button light onPress={playBackward} style={{ position: 'absolute', bottom: 0, left: 10, right: 100, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
+                                                            <Button light onPress={playBackward} style={{ ...styles.buttonStyle, ...styles.backwardButtonStyle }} rounded icon color={youtubeTheme.secondaryColor}>
                                                                 <Icon name='step-backward' type='FontAwesome' />
                                                             </Button>
                                                         }
-                                                        <Button light onPress={() => togglePlaying(video.id ? video.id : '')} style={{ position: 'absolute', top: video.id === videoIdPlaying ? 0 : 25, left: 50, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
+                                                        <Button light onPress={() => togglePlaying(video.id ? video.id : '')} style={{ ...styles.buttonStyle, ...styles.playButtonStyle, top: video.id === videoIdPlaying ? 0 : 25, }} rounded icon color={youtubeTheme.secondaryColor}>
                                                             <Icon android={video.id === videoIdPlaying ? "md-pause" : "md-play"} ios={video.id === videoIdPlaying ? "md-pause" : "md-play"} />
                                                         </Button>
                                                         {
                                                             video.id === videoIdPlaying &&
-                                                            <Button light onPress={playForward} style={{ position: 'absolute', bottom: 0, left: 100, right: 10, borderColor: youtubeTheme.secondaryColor, borderWidth: 1 }} rounded icon color={youtubeTheme.secondaryColor}>
+                                                            <Button light onPress={playForward} style={{ ...styles.buttonStyle, ...styles.forwardButtonStyle }} rounded icon color={youtubeTheme.secondaryColor}>
                                                                 <Icon name='step-forward' type='FontAwesome' />
                                                             </Button>
                                                         }
@@ -146,4 +146,45 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     )
 }
 
-export default PlaylistView
+const styles = StyleSheet.create({
+    contentStyle: {
+        backgroundColor: youtubeTheme.secondaryColor,
+    },
+    cardStyle: {
+        margin: 5
+    },
+    cardItemStyle: {
+        backgroundColor: youtubeTheme.secondaryBackgroundColor
+    },
+    thumbnailStyle: {
+        height: 180,
+        flex: 1
+    },
+    numberingStyle: {
+        marginRight: 5
+    },
+    imageContainerStyle: {
+        height: 90,
+        width: 160
+    },
+    buttonStyle: {
+        position: 'absolute',
+        borderColor: youtubeTheme.secondaryColor,
+        borderWidth: 1
+    },
+    backwardButtonStyle: {
+        bottom: 0,
+        left: 10,
+        right: 100,
+    },
+    playButtonStyle: {
+        left: 50,
+    },
+    forwardButtonStyle: {
+        bottom: 0,
+        left: 100,
+        right: 10,
+    }
+});
+
+export default PlaylistView;

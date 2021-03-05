@@ -9,6 +9,8 @@ interface IProps { }
 const NotificationToast: React.FunctionComponent<IProps> = () => {
     const { state, dispatch } = React.useContext(Context);
 
+    const duration = 2000;
+
     React.useEffect(() => {
         if (state.notifications.notifications.length > 0) {
             const notification = state.notifications.notifications[0];
@@ -17,7 +19,7 @@ const NotificationToast: React.FunctionComponent<IProps> = () => {
                 case NotificationType.SUCCESS:
                     Toast.show({
                         text: notification.message,
-                        duration: 2000,
+                        duration: duration,
                         type: "success",
                         onClose: () => {
                             dispatch(popNotification());
@@ -28,7 +30,7 @@ const NotificationToast: React.FunctionComponent<IProps> = () => {
                 case NotificationType.WARNING:
                     Toast.show({
                         text: notification.message,
-                        duration: 2000,
+                        duration: duration,
                         type: "warning",
                         onClose: () => {
                             dispatch(popNotification());
@@ -39,7 +41,7 @@ const NotificationToast: React.FunctionComponent<IProps> = () => {
                 case NotificationType.ERROR:
                     Toast.show({
                         text: notification.message,
-                        duration: 2000,
+                        duration: duration,
                         type: "danger",
                         onClose: () => {
                             dispatch(popNotification());

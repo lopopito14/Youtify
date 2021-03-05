@@ -10,8 +10,6 @@ const reducer: Reducer<IYoutubeProfile, TActions> = (state: IYoutubeProfile = In
         return state;
     }
 
-    console.log(youtubeAction.type);
-
     switch (youtubeAction.type) {
         case Types.YOUTUBE_CURRENT_PROFILE_REQUEST:
             return { ...state, loading: true, loaded: false };
@@ -25,6 +23,7 @@ const reducer: Reducer<IYoutubeProfile, TActions> = (state: IYoutubeProfile = In
                     loaded: true,
                     title: channel.snippet?.title ? channel.snippet?.title : 'Not Available',
                     channelId: channel.id ? channel.id : 'Not Available',
+                    favoritePlaylistId: channel.contentDetails?.relatedPlaylists?.favorites ? channel.contentDetails?.relatedPlaylists?.favorites : 'Not Available'
                 };
             }
             return state;

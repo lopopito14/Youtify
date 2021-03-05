@@ -8,8 +8,8 @@ const useFetchSubscriptions = () => {
     const { state, dispatch } = React.useContext(Context);
 
     const [loaded, setLoaded] = React.useState(false);
-    const [subscriptions, setsubscriptions] = React.useState<Subscription[]>([]);
-    const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
+    const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
+    const [pageToken, setPageToken] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
         fetchSubscriptions();
@@ -39,17 +39,17 @@ const useFetchSubscriptions = () => {
             });
             if (response && response.items) {
                 if (pageToken) {
-                    setsubscriptions([...subscriptions, ...response.items]);
+                    setSubscriptions([...subscriptions, ...response.items]);
                 }
                 else {
-                    setsubscriptions(response.items);
+                    setSubscriptions(response.items);
                 }
 
                 if (response.nextPageToken) {
-                    setpageToken(response.nextPageToken);
+                    setPageToken(response.nextPageToken);
                 } else {
                     setLoaded(true);
-                    setpageToken(undefined);
+                    setPageToken(undefined);
                 }
             }
         } catch (error) {
@@ -60,4 +60,4 @@ const useFetchSubscriptions = () => {
     return { subscriptions, loaded, loadSubscriptions, refreshSubscriptions };
 }
 
-export default useFetchSubscriptions
+export default useFetchSubscriptions;

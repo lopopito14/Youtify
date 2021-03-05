@@ -5,6 +5,7 @@ import { ISpotifyNavigationProps, SpotifyViewType } from '../../spotifyView';
 import { msToTime } from '../../utils/helpers';
 import useFetchPlaylist from './useFetchPlaylist';
 import usePlayTrack from '../usePlayTrack';
+import { StyleSheet } from 'react-native';
 
 interface IProps extends ISpotifyNavigationProps {
     playlistId: string;
@@ -25,50 +26,51 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
         <>
             {
                 props.selectedView === SpotifyViewType.PLAYLIST &&
-                <Content style={{ backgroundColor: spotifyTheme.secondaryColor }}>
+                <Content style={styles.contentStyle}>
                     {
                         loaded && playlist &&
-                        <Card style={{ margin: 5 }}>
-                            <CardItem header style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
+                        <Card style={styles.cardStyle}>
+                            <CardItem header style={styles.cardItemStyle}>
                                 <Body>
                                     <H1>{playlist.name}</H1>
                                 </Body>
                             </CardItem>
-                            <CardItem style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
+                            <CardItem style={styles.cardItemStyle}>
                                 {
                                     playlist.images.length >= 2 &&
-                                    <Thumbnail source={{ uri: playlist.images[0].url }} style={{ height: 300, flex: 1 }} />
+                                    <Thumbnail source={{ uri: playlist.images[0].url }} style={styles.thumbnailStyle} />
                                 }
                             </CardItem>
-                            <CardItem style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
+                            <CardItem style={styles.cardItemStyle}>
                                 <Left>
                                     <H2>Tracks:</H2>
                                 </Left>
                             </CardItem>
                             {
                                 playlist.tracks.items.map((t, i) =>
-                                    (t.track.type === 'track' &&
-                                        <CardItem bordered key={i} style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
-                                            <Text style={{ marginRight: 20 }}>{i + 1}</Text>
-                                            <Body>
-                                                <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{t.track.name}</Text>
-                                                <Text note style={{ textAlignVertical: 'center' }} numberOfLines={1}>{t.track.artists.map((a) => a.name).join(', ')}</Text>
-                                            </Body>
-                                            <Text style={{ marginLeft: 20 }} note>{msToTime(t.track.duration_ms)}</Text>
-                                            <Button style={{ marginLeft: 20, borderColor: spotifyTheme.secondaryColor, borderWidth: 1 }} light color={spotifyTheme.secondaryColor} rounded icon onPress={() => playTrack(t.track.id, t.track.type === 'track' ? t.track.preview_url : '')}>
-                                                <Icon android={t.track.id === trackIdPlaying ? "md-pause" : "md-play"} ios={t.track.id === trackIdPlaying ? "md-pause" : "md-play"} />
-                                            </Button>
-                                        </CardItem>
-                                    ) ||
-                                    (t.track.type === 'episode' &&
-                                        <CardItem bordered key={i} style={{ backgroundColor: spotifyTheme.secondaryBackgroundColor }}>
-                                            <Text style={{ marginRight: 20 }}>{i + 1}</Text>
-                                            <Body>
-                                                <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{t.track.name}</Text>
-                                            </Body>
-                                            <Text style={{ marginLeft: 20 }} note>{msToTime(t.track.duration_ms)}</Text>
-                                        </CardItem>
-                                    )
+                                (t.track.type === 'track' &&
+                                    <CardItem bordered key={i} style={styles.cardItemStyle}>
+                                        <Text style={styles.numberingStyle}>{i + 1}</Text>
+                                        <Body>
+                                            <Text numberOfLines={1}>{t.track.name}</Text>
+                                            <Text note numberOfLines={1}>{t.track.artists.map((a) => a.name).join(', ')}</Text>
+                                        </Body>
+                                        <Text style={styles.durationTextStyle} note>{msToTime(t.track.duration_ms)}</Text>
+                                        <Button style={styles.buttonStyle} light color={spotifyTheme.secondaryColor} rounded icon onPress={() => playTrack(t.track.id, t.track.type === 'track' ? t.track.preview_url : '')}>
+                                            <Icon android={t.track.id === trackIdPlaying ? "md-pause" : "md-play"} ios={t.track.id === trackIdPlaying ? "md-pause" : "md-play"} />
+                                        </Button>
+                                    </CardItem>
+                                )
+                                    // ||
+                                    // (t.track.type === 'episode' &&
+                                    //     <CardItem bordered key={i} style={styles.cardItemStyle}>
+                                    //         <Text style={{ marginRight: 20 }}>{i + 1}</Text>
+                                    //         <Body>
+                                    //             <Text style={{ textAlignVertical: 'center' }} numberOfLines={1}>{t.track.name}</Text>
+                                    //         </Body>
+                                    //         <Text style={{ marginLeft: 20 }} note>{msToTime(t.track.duration_ms)}</Text>
+                                    //     </CardItem>
+                                    // )
                                 )
                             }
                         </Card>
@@ -82,4 +84,31 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     )
 }
 
-export default PlaylistView
+const styles = StyleSheet.create({
+    contentStyle: {
+        backgroundColor: spotifyTheme.secondaryColor,
+    },
+    cardStyle: {
+        margin: 5
+    },
+    cardItemStyle: {
+        backgroundColor: spotifyTheme.secondaryBackgroundColor
+    },
+    thumbnailStyle: {
+        height: 300,
+        flex: 1
+    },
+    numberingStyle: {
+        marginRight: 20
+    },
+    durationTextStyle: {
+        marginLeft: 20
+    },
+    buttonStyle: {
+        marginLeft: 20,
+        borderColor: spotifyTheme.secondaryColor,
+        borderWidth: 1
+    }
+});
+
+export default PlaylistView;

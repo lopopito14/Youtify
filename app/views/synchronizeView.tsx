@@ -6,6 +6,7 @@ import SynchronizePlaylistView from './synchronize/synchronizePlaylistView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import usePlaylistsSynchronizer from './usePlaylistsSynchronizer';
 import { Playlist, PlaylistItem } from '../youtubeApi/youtube-api-models';
+import { StyleSheet } from 'react-native';
 
 interface Props { }
 
@@ -16,7 +17,7 @@ export enum SynchronizeViewType {
 
 export interface ISynchronizeNavigationProps {
 	selectedView: SynchronizeViewType;
-	setselectedView(view: SynchronizeViewType): any;
+	setSelectedView(view: SynchronizeViewType): any;
 }
 
 interface YearFilter {
@@ -36,10 +37,10 @@ export interface IYoutubeMonthPlaylist {
 	spotifyPlaylist?: globalThis.SpotifyApi.PlaylistObjectSimplified;
 }
 
-export const SynchronizeView: React.FunctionComponent<Props> = () => {
+const SynchronizeView: React.FunctionComponent<Props> = () => {
 
 	const { myPlaylist, createPlaylists } = usePlaylistsSynchronizer();
-	const [selectedView, setselectedView] = React.useState<SynchronizeViewType>(SynchronizeViewType.SYNCHRONIZE);
+	const [selectedView, setSelectedView] = React.useState<SynchronizeViewType>(SynchronizeViewType.SYNCHRONIZE);
 	const [selectedPlaylist, setSelectedPlaylist] = React.useState<IYoutubeMonthPlaylist | undefined>(undefined);
 	const [yearFilter, setYearFilter] = React.useState<YearFilter[] | undefined>(undefined);
 
@@ -113,13 +114,13 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 
 	const onBackButtonPressed = React.useCallback(() => {
 		if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
-			setselectedView(SynchronizeViewType.SYNCHRONIZE);
+			setSelectedView(SynchronizeViewType.SYNCHRONIZE);
 		}
 	}, [isSelectedView]);
 
 	const onOpenSynchronizePlaylist = React.useCallback((myPlaylist: IYoutubeMonthPlaylist) => {
 		setSelectedPlaylist(myPlaylist);
-		setselectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST);
+		setSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST);
 	}, []);
 
 	const buildAccordion = () => {
@@ -132,10 +133,10 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 					yearFilter?.map((y, i) =>
 						<ListItem key={i}>
 							<Left>
-								<Text style={{ color: "white" }}>{y.year}</Text>
+								<Text style={styles.filterTitleStyle}>{y.year}</Text>
 							</Left>
 							<Right>
-								<Switch style={{ transform: [{ scale: 1.2 }, { translateX: -40 }] }} thumbColor={"white"} trackColor={{ true: "green", false: "white" }} value={y.active} onValueChange={() =>
+								<Switch style={styles.switchStyle} thumbColor={"white"} trackColor={{ true: "green", false: "white" }} value={y.active} onValueChange={() =>
 									setYearFilter(
 										[
 											...yearFilter.slice(0, i),
@@ -158,7 +159,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 
 	return (
 		<>
-			<Header noShadow style={{ backgroundColor: synchronizeTheme.primaryColor }} androidStatusBarColor={synchronizeTheme.secondaryColor}>
+			<Header noShadow style={styles.headerStyle} androidStatusBarColor={synchronizeTheme.secondaryColor}>
 				<Left>
 					{
 						!isSelectedView(SynchronizeViewType.SYNCHRONIZE) &&
@@ -176,11 +177,11 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 				<>
 					{
 						myPlaylist.loaded && yearFilter &&
-						<View style={{ backgroundColor: "black" }}>
-							<Accordion style={{ backgroundColor: synchronizeTheme.secondaryBackgroundColor }} dataArray={buildAccordion()} expanded={-1} renderContent={(item) => <>{item.content}</>} />
+						<View style={styles.viewStyle}>
+							<Accordion style={styles.accordionStyle} dataArray={buildAccordion()} expanded={-1} renderContent={(item) => <>{item.content}</>} />
 						</View>
 					}
-					<Content style={{ backgroundColor: "black" }}>
+					<Content style={styles.viewStyle}>
 						{
 							myPlaylist.loaded && yearFilter &&
 							<>
@@ -189,7 +190,7 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 										yearFilter.filter(y => y.active).map((y, i) =>
 											<View key={i}>
 												<ListItem itemHeader key={1}>
-													<H1 style={{ color: "white" }}>{y.year}</H1>
+													<H1 style={styles.listTitleStyle}>{y.year}</H1>
 												</ListItem>
 												{
 													myPlaylist.playlists.filter(p => p.year === y.year).map((p, j) =>
@@ -198,24 +199,24 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 																<Button iconRight vertical transparent>
 																	{
 																		p.youtubePlaylist &&
-																		<Badge style={{ backgroundColor: youtubeTheme.primaryColor }}>
+																		<Badge style={styles.youtubeBadgeStyle}>
 																			<Text>{p.youtubePlaylist.contentDetails?.itemCount}</Text>
 																		</Badge>
 																	}
-																	<Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ color: "white", marginTop: p.youtubePlaylist ? 0 : 28 }} />
+																	<Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ ...styles.logoIconStyle, marginTop: p.youtubePlaylist ? 0 : 28 }} />
 																</Button>
 																<Button iconRight vertical transparent>
 																	{
 																		p.spotifyPlaylist &&
-																		<Badge style={{ backgroundColor: spotifyTheme.primaryColor }}>
+																		<Badge style={styles.spotifyBadgeStyle}>
 																			<Text>{p.spotifyPlaylist.tracks.total}</Text>
 																		</Badge>
 																	}
-																	<Icon name="spotify" type='FontAwesome' style={{ color: "white", marginTop: p.spotifyPlaylist ? 0 : 28 }} />
+																	<Icon name="spotify" type='FontAwesome' style={{ ...styles.logoIconStyle, marginTop: p.spotifyPlaylist ? 0 : 28 }} />
 																</Button>
 															</Left>
 															<Body>
-																<Text style={{ color: "white" }}>{p.title}</Text>
+																<Text style={styles.listItemTitleStyle}>{p.title}</Text>
 																<Text note>{p.favoriteitems.length} favorite items</Text>
 															</Body>
 															<Right>
@@ -250,10 +251,50 @@ export const SynchronizeView: React.FunctionComponent<Props> = () => {
 			}
 			{
 				selectedView === SynchronizeViewType.SYNCHRONIZE_PLAYLIST && selectedPlaylist &&
-				<SynchronizePlaylistView selectedView={selectedView} setselectedView={setselectedView} myPlaylist={selectedPlaylist} />
+				<SynchronizePlaylistView selectedView={selectedView} setSelectedView={setSelectedView} myPlaylist={selectedPlaylist} />
 			}
 		</>
 	)
 };
+
+const styles = StyleSheet.create({
+	viewStyle: {
+		backgroundColor: "black"
+	},
+	accordionStyle: {
+		backgroundColor: synchronizeTheme.secondaryBackgroundColor
+	},
+	headerStyle: {
+		backgroundColor: synchronizeTheme.primaryColor
+	},
+	filterTitleStyle: {
+		color: "white"
+	},
+	switchStyle: {
+		transform: [
+			{
+				scale: 1.2
+			},
+			{
+				translateX: -40
+			}
+		]
+	},
+	listTitleStyle: {
+		color: "white"
+	},
+	listItemTitleStyle: {
+		color: "white"
+	},
+	youtubeBadgeStyle: {
+		backgroundColor: youtubeTheme.primaryColor
+	},
+	spotifyBadgeStyle: {
+		backgroundColor: spotifyTheme.primaryColor
+	},
+	logoIconStyle: {
+		color: "white"
+	}
+});
 
 export default SynchronizeView;

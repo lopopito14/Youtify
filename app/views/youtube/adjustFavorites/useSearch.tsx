@@ -48,4 +48,4 @@ const useSearch = () => {
     return { searchResults, openSearch };
 }
 
-export default useSearch
+export default useSearch;

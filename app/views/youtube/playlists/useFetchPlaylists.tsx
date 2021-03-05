@@ -8,8 +8,8 @@ const useFetchPlaylists = () => {
     const { state, dispatch } = React.useContext(Context);
 
     const [loaded, setLoaded] = React.useState(false);
-    const [playlists, setplaylists] = React.useState<Playlist[]>([]);
-    const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
+    const [playlists, setPlaylists] = React.useState<Playlist[]>([]);
+    const [pageToken, setPageToken] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
         fetchPlaylists();
@@ -39,17 +39,17 @@ const useFetchPlaylists = () => {
             });
             if (response && response.items) {
                 if (pageToken) {
-                    setplaylists([...playlists, ...response.items]);
+                    setPlaylists([...playlists, ...response.items]);
                 }
                 else {
-                    setplaylists(response.items);
+                    setPlaylists(response.items);
                 }
 
                 if (response.nextPageToken) {
-                    setpageToken(response.nextPageToken);
+                    setPageToken(response.nextPageToken);
                 } else {
                     setLoaded(true);
-                    setpageToken(undefined);
+                    setPageToken(undefined);
                 }
             }
         } catch (error) {
@@ -60,4 +60,4 @@ const useFetchPlaylists = () => {
     return { playlists, loaded, loadPlaylist, refreshPlaylist };
 }
 
-export default useFetchPlaylists
+export default useFetchPlaylists;

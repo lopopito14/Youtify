@@ -6,10 +6,11 @@ import { ISpotifyNavigationProps, SpotifyViewType } from '../../spotifyView';
 import PlaylistView from '../playlist/playlistView';
 import useFetchPlaylists from './useFetchPlaylists';
 import { defaultThumbnail } from '../../utils/helpers';
+import { StyleSheet } from 'react-native';
 
 interface IProps extends ISpotifyNavigationProps { }
 
-export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
+const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     const { playlists, loaded, loadPlaylists, refreshPlaylists } = useFetchPlaylists();
     const [selectedPlaylistId, setselectedPlaylistId] = React.useState<string | undefined>(undefined);
@@ -22,7 +23,7 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
 
     const onOpenPlaylist = React.useCallback((id: string) => {
         setselectedPlaylistId(id);
-        props.setselectedView(SpotifyViewType.PLAYLIST);
+        props.setSelectedView(SpotifyViewType.PLAYLIST);
     }, []);
 
     return (
@@ -37,7 +38,7 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
                                     <Thumbnail source={{ uri: p.images && p.images.length >= 3 ? p.images[2].url : defaultThumbnail }} />
                                 </Left>
                                 <Body>
-                                    <Text style={{ color: "white" }}>{p.name}</Text>
+                                    <Text style={styles.titleStyle}>{p.name}</Text>
                                     <Text note numberOfLines={1}>{p.tracks.total} tracks</Text>
                                 </Body>
                                 <Right>
@@ -56,10 +57,16 @@ export const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) =>
             }
             {
                 props.selectedView !== SpotifyViewType.PLAYLISTS && selectedPlaylistId &&
-                <PlaylistView selectedView={props.selectedView} setselectedView={props.setselectedView} playlistId={selectedPlaylistId} />
+                <PlaylistView selectedView={props.selectedView} setSelectedView={props.setSelectedView} playlistId={selectedPlaylistId} />
             }
         </>
     )
 }
 
-export default PlaylistsView
+const styles = StyleSheet.create({
+    titleStyle: {
+        color: "white"
+    }
+});
+
+export default PlaylistsView;

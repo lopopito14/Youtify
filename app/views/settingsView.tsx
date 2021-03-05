@@ -1,15 +1,15 @@
 import React from 'react';
-import { YoutubeOAuth2 } from './auth/youtubeOAuth2';
-import { SpotifyOAuth2 } from './auth/spotifyOAuth2';
-import { Body, Button, Content, Header, Left, Text, Title } from 'native-base';
-import { ScrollView } from 'react-native';
+import YoutubeOAuth2 from './auth/youtubeOAuth2';
+import SpotifyOAuth2 from './auth/spotifyOAuth2';
+import { Body, Content, Header, Left, Title } from 'native-base';
+import { ScrollView, StyleSheet } from 'react-native';
 import { AuthConfiguration } from 'react-native-app-auth';
 import { settingsTheme } from './theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props { }
 
-export const SettingsView: React.FunctionComponent<Props> = () => {
+const SettingsView: React.FunctionComponent<Props> = () => {
 
 	const youtubeAuthorizeConfiguration: AuthConfiguration = {
 		clientId: '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
@@ -42,7 +42,6 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
 	}
 
 	const purgeLocalStorage = React.useCallback(async () => {
-		return;
 		try {
 			const keys = await AsyncStorage.getAllKeys();
 
@@ -62,7 +61,7 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
 
 	return (
 		<>
-			<Header noShadow style={{ backgroundColor: settingsTheme.primaryColor }} androidStatusBarColor={settingsTheme.secondaryColor}>
+			<Header noShadow style={styles.headerStyle} androidStatusBarColor={settingsTheme.secondaryColor}>
 				<Left />
 				<Body>
 					<Title>Settings</Title>
@@ -71,17 +70,26 @@ export const SettingsView: React.FunctionComponent<Props> = () => {
 			<ScrollView
 				contentInsetAdjustmentBehavior="automatic"
 				showsVerticalScrollIndicator={false}
-				style={{ backgroundColor: settingsTheme.secondaryColor }}>
+				style={styles.contentStyle}>
 				<Content>
 					<YoutubeOAuth2 authorizeConfiguration={youtubeAuthorizeConfiguration} />
 					<SpotifyOAuth2 authorizeConfiguration={spotifyAuthorizeConfiguration} />
-					<Button onPress={purgeLocalStorage}>
+					{/* <Button onPress={purgeLocalStorage}>
 						<Text>Purge local storage</Text>
-					</Button>
+					</Button> */}
 				</Content>
 			</ScrollView>
 		</>
 	);
 };
+
+const styles = StyleSheet.create({
+	headerStyle: {
+		backgroundColor: settingsTheme.primaryColor
+	},
+	contentStyle: {
+		backgroundColor: settingsTheme.secondaryColor
+	}
+});
 
 export default SettingsView;

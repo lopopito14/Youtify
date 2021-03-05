@@ -10,7 +10,7 @@ const useFetchPlaylist = (playlist: Playlist) => {
 
     const [loaded, setLoaded] = React.useState(false);
     const [youtubeVideos, setYoutubeVideos] = React.useState<Video[]>([]);
-    const [pageToken, setpageToken] = React.useState<string | undefined>(undefined);
+    const [pageToken, setPageToken] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
         fetchPlaylistVideos();
@@ -56,10 +56,10 @@ const useFetchPlaylist = (playlist: Playlist) => {
                 }
 
                 if (playlistItemsResponse.nextPageToken) {
-                    setpageToken(playlistItemsResponse.nextPageToken);
+                    setPageToken(playlistItemsResponse.nextPageToken);
                 } else {
                     setLoaded(true);
-                    setpageToken(undefined);
+                    setPageToken(undefined);
                 }
             }
         } catch (error) {
@@ -70,4 +70,4 @@ const useFetchPlaylist = (playlist: Playlist) => {
     return { youtubeVideos, loaded };
 }
 
-export default useFetchPlaylist
+export default useFetchPlaylist;

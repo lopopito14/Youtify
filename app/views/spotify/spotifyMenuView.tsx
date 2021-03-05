@@ -3,21 +3,22 @@ import { Button, Content, Text, View } from 'native-base';
 import { ISpotifyNavigationProps, SpotifyViewType } from '../spotifyView';
 import PlaylistsView from './playlists/playlistsView';
 import ArtistsView from './artists/artistsView';
+import { StyleSheet } from 'react-native';
 
 interface IProps extends ISpotifyNavigationProps { }
 
-export const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
+const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     return (
         <>
             {
                 props.selectedView === SpotifyViewType.MENU &&
                 <Content>
-                    <View style={{ marginTop: 50 }}>
-                        <Button rounded success style={{ margin: 10 }} onPress={() => props.setselectedView(SpotifyViewType.PLAYLISTS)}>
+                    <View style={styles.containerStyle}>
+                        <Button rounded success style={styles.buttonStyle} onPress={() => props.setSelectedView(SpotifyViewType.PLAYLISTS)}>
                             <Text>Playlists</Text>
                         </Button>
-                        <Button rounded info style={{ margin: 10 }} onPress={() => props.setselectedView(SpotifyViewType.ARTISTS)}>
+                        <Button rounded info style={styles.buttonStyle} onPress={() => props.setSelectedView(SpotifyViewType.ARTISTS)}>
                             <Text>Artists</Text>
                         </Button>
                     </View>
@@ -26,10 +27,21 @@ export const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) 
             {
                 props.selectedView !== SpotifyViewType.MENU &&
                 <>
-                    <PlaylistsView selectedView={props.selectedView} setselectedView={props.setselectedView} />
-                    <ArtistsView selectedView={props.selectedView} setselectedView={props.setselectedView} />
+                    <PlaylistsView selectedView={props.selectedView} setSelectedView={props.setSelectedView} />
+                    <ArtistsView selectedView={props.selectedView} setSelectedView={props.setSelectedView} />
                 </>
             }
         </>
     )
 }
+
+const styles = StyleSheet.create({
+    containerStyle: {
+        marginTop: 50
+    },
+    buttonStyle: {
+        margin: 10
+    }
+});
+
+export default SpotifyMenuView;

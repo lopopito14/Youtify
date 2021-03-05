@@ -5,23 +5,24 @@ import { spotifyTheme } from '../../theme';
 import { ISpotifyNavigationProps, SpotifyViewType } from '../../spotifyView';
 import ArtistView from '../artist/artistView';
 import useFetchArtists from './useFetchArtists';
+import { StyleSheet } from 'react-native';
 
 interface IProps extends ISpotifyNavigationProps { }
 
 const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     const { followedArtists, loaded, loadArtists, refreshArtists } = useFetchArtists();
-    const [selectedArtistId, setselectedArtistId] = React.useState<string | undefined>(undefined);
+    const [selectedArtistId, setSelectedArtistId] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
         if (props.selectedView === SpotifyViewType.ARTISTS) {
-            setselectedArtistId(undefined);
+            setSelectedArtistId(undefined);
         }
     }, [props.selectedView]);
 
     const onOpenArtist = React.useCallback((id: string) => {
-        setselectedArtistId(id);
-        props.setselectedView(SpotifyViewType.ARTIST);
+        setSelectedArtistId(id);
+        props.setSelectedView(SpotifyViewType.ARTIST);
     }, []);
 
     return (
@@ -39,7 +40,7 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     }
                                 </Left>
                                 <Body>
-                                    <Text style={{ color: "white" }}>{p.name}</Text>
+                                    <Text style={styles.titleStyle}>{p.name}</Text>
                                     <Text note numberOfLines={1}>popularity: {p.popularity}</Text>
                                     <Text note numberOfLines={1}>followers: {p.followers.total}</Text>
                                 </Body>
@@ -59,10 +60,16 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
             }
             {
                 props.selectedView !== SpotifyViewType.ARTISTS && selectedArtistId &&
-                <ArtistView selectedView={props.selectedView} setselectedView={props.setselectedView} artistId={selectedArtistId} />
+                <ArtistView selectedView={props.selectedView} setSelectedView={props.setSelectedView} artistId={selectedArtistId} />
             }
         </>
     )
 }
 
-export default ArtistsView
+const styles = StyleSheet.create({
+    titleStyle: {
+        color: "white"
+    }
+});
+
+export default ArtistsView;

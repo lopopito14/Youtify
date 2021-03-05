@@ -9,9 +9,9 @@ interface Props {
 	revokeDelegate(): Promise<void>;
 }
 
-export const CredentialView: React.FunctionComponent<Props> = (props: Props) => {
+const CredentialView: React.FunctionComponent<Props> = (props: Props) => {
 	const [canLogOn, setcanLogOn] = React.useState(true);
-	const [remainingTime, setremainingTime] = React.useState('');
+	const [remainingTime, setRemainingTime] = React.useState('');
 	const [interval, setinterval] = React.useState(0);
 
 	React.useEffect(() => {
@@ -31,16 +31,16 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
 			if (remainingMilliSeconds > 0) {
 				setcanLogOn(false);
 				const remainingDate = new Date(remainingMilliSeconds);
-				setremainingTime(`${remainingDate.getHours()}h ${remainingDate.getMinutes()}min ${remainingDate.getSeconds()}s`);
+				setRemainingTime(`${remainingDate.getHours()}h ${remainingDate.getMinutes()}min ${remainingDate.getSeconds()}s`);
 			}
 			else {
 				setcanLogOn(true);
-				setremainingTime('Session expired, please log on again !');
+				setRemainingTime('Session expired, please log on again !');
 			}
 		}
 		else {
 			setcanLogOn(true);
-			setremainingTime('Please log on !');
+			setRemainingTime('Please log on !');
 		}
 	}, [interval, canLogOn]);
 
@@ -69,3 +69,5 @@ export const CredentialView: React.FunctionComponent<Props> = (props: Props) => 
 		</>
 	);
 };
+
+export default CredentialView;

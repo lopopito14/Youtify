@@ -4,24 +4,25 @@ import { IYoutubeNavigationProps, YoutubeViewType } from '../youtubeView';
 import PlaylistsView from './playlists/playlistsView';
 import SubscriptionsView from './subscriptions/subscriptionsView';
 import AdjustFavoritesView from './adjustFavorites/adjustFavoritesView';
+import { StyleSheet } from 'react-native';
 
 interface IProps extends IYoutubeNavigationProps { }
 
-export const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
+const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     return (
         <>
             {
                 props.selectedView === YoutubeViewType.MENU &&
                 <Content>
-                    <View style={{ marginTop: 50 }}>
-                        <Button rounded success style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.PLAYLISTS)}>
+                    <View style={styles.containerStyle}>
+                        <Button rounded success style={styles.buttonStyle} onPress={() => props.setSelectedView(YoutubeViewType.PLAYLISTS)}>
                             <Text>Playlists</Text>
                         </Button>
-                        <Button rounded info style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.SUBSCRIPTIONS)}>
+                        <Button rounded info style={styles.buttonStyle} onPress={() => props.setSelectedView(YoutubeViewType.SUBSCRIPTIONS)}>
                             <Text>Subscriptions</Text>
                         </Button>
-                        <Button rounded dark style={{ margin: 10 }} onPress={() => props.setselectedView(YoutubeViewType.ADJUST_FAVORITES)}>
+                        <Button rounded dark style={styles.buttonStyle} onPress={() => props.setSelectedView(YoutubeViewType.ADJUST_FAVORITES)}>
                             <Text>Adjust Favorites</Text>
                         </Button>
                     </View>
@@ -30,11 +31,22 @@ export const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) 
             {
                 props.selectedView !== YoutubeViewType.MENU &&
                 <>
-                    <PlaylistsView selectedView={props.selectedView} setselectedView={props.setselectedView} />
-                    <SubscriptionsView selectedView={props.selectedView} setselectedView={props.setselectedView} />
-                    <AdjustFavoritesView selectedView={props.selectedView} setselectedView={props.setselectedView} />
+                    <PlaylistsView selectedView={props.selectedView} setSelectedView={props.setSelectedView} />
+                    <SubscriptionsView selectedView={props.selectedView} setSelectedView={props.setSelectedView} />
+                    <AdjustFavoritesView selectedView={props.selectedView} setSelectedView={props.setSelectedView} />
                 </>
             }
         </>
     )
 }
+
+const styles = StyleSheet.create({
+    containerStyle: {
+        marginTop: 50
+    },
+    buttonStyle: {
+        margin: 10
+    }
+});
+
+export default YoutubeMenuView;

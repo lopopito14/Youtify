@@ -8,7 +8,7 @@ const useFetchArtists = () => {
 
     const [followedArtists, setFollowedArtists] = React.useState<globalThis.SpotifyApi.ArtistObjectFull[]>([]);
     const [loaded, setLoaded] = React.useState(false);
-    const [after, setafter] = React.useState<string | undefined>(undefined);
+    const [after, setAfter] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
         fetchFollowedArtists();
@@ -53,9 +53,9 @@ const useFetchArtists = () => {
                 }
 
                 if (response.artists.cursors.after) {
-                    setafter(response.artists.cursors.after);
+                    setAfter(response.artists.cursors.after);
                 } else {
-                    setafter(undefined);
+                    setAfter(undefined);
                     setLoaded(true);
                 }
             }
@@ -67,4 +67,4 @@ const useFetchArtists = () => {
     return { followedArtists, loaded, loadArtists, refreshArtists };
 }
 
-export default useFetchArtists
+export default useFetchArtists;

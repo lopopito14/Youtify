@@ -52,7 +52,7 @@ interface ISynchro {
 	}
 }
 
-export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
+const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 	const { state, dispatch } = React.useContext(Context);
 
 	const [localSave, setLocalSave] = React.useState<IMyPlaylist>({
@@ -66,7 +66,7 @@ export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 		loading: false,
 		videos: []
 	});
-	const [playlistItemPageToken, setplaylistItemPageToken] = React.useState<string | undefined>(undefined);
+	const [playlistItemPageToken, setPlaylistItemPageToken] = React.useState<string | undefined>(undefined);
 
 	const [spotifyTracks, setSpotifyTracks] = React.useState<ISpotifyTracks>({
 		loaded: false,
@@ -277,7 +277,6 @@ export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 				console.log(localSave.items);
 
 				const jsonValue = JSON.stringify(localSave);
-				//await AsyncStorage.removeItem(myPlaylist.title);
 				await AsyncStorage.setItem(myPlaylist.title, jsonValue);
 			} catch (e) {
 				console.error(e);
@@ -369,7 +368,7 @@ export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 					}
 
 					if (playlistItemsResponse.nextPageToken) {
-						setplaylistItemPageToken(playlistItemsResponse.nextPageToken);
+						setPlaylistItemPageToken(playlistItemsResponse.nextPageToken);
 					} else {
 						setYoutubeVideos((prev) => {
 							return {
@@ -378,7 +377,7 @@ export const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 								loaded: true
 							}
 						});
-						setplaylistItemPageToken(undefined);
+						setPlaylistItemPageToken(undefined);
 					}
 				}
 			} catch (error) {

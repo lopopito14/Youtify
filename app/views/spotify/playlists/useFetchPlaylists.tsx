@@ -59,4 +59,4 @@ const useFetchPlaylists = () => {
     return { playlists, loaded, loadPlaylists, refreshPlaylists };
 }
 
-export default useFetchPlaylists
+export default useFetchPlaylists;

@@ -1,5 +1,6 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base';
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { Playlist } from '../../../youtubeApi/youtube-api-models';
 import { youtubeTheme } from '../../theme';
 import { defaultThumbnail } from '../../utils/helpers';
@@ -8,22 +9,22 @@ import { IYoutubeNavigationProps, YoutubeViewType } from '../../youtubeView';
 import PlaylistView from '../playlist/playlistView';
 import useFetchPlaylists from './useFetchPlaylists';
 
-export interface IProps extends IYoutubeNavigationProps { }
+interface IProps extends IYoutubeNavigationProps { }
 
 const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
 
     const { playlists, loaded, loadPlaylist, refreshPlaylist } = useFetchPlaylists();
-    const [selectedPlaylist, setselectedPlaylist] = React.useState<Playlist | undefined>(undefined);
+    const [selectedPlaylist, setSelectedPlaylist] = React.useState<Playlist | undefined>(undefined);
 
     React.useEffect(() => {
         if (props.selectedView === YoutubeViewType.PLAYLISTS) {
-            setselectedPlaylist(undefined);
+            setSelectedPlaylist(undefined);
         }
     }, [props.selectedView]);
 
     const onOpenPlaylist = React.useCallback((playlist: Playlist) => {
-        setselectedPlaylist(playlist);
-        props.setselectedView(YoutubeViewType.PLAYLIST);
+        setSelectedPlaylist(playlist);
+        props.setSelectedView(YoutubeViewType.PLAYLIST);
     }, []);
 
     return (
@@ -38,7 +39,7 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                                     <Thumbnail source={{ uri: p.snippet?.thumbnails?.medium?.url ? p.snippet?.thumbnails?.medium?.url : defaultThumbnail }} />
                                 </Left>
                                 <Body>
-                                    <Text style={{ color: "white" }}>{p.snippet?.title}</Text>
+                                    <Text style={styles.titleStyle}>{p.snippet?.title}</Text>
                                     <Text note numberOfLines={1}>{p.contentDetails?.itemCount} videos.</Text>
                                 </Body>
                                 <Right>
@@ -57,10 +58,16 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
             }
             {
                 props.selectedView !== YoutubeViewType.PLAYLISTS && selectedPlaylist &&
-                <PlaylistView selectedView={props.selectedView} setselectedView={props.setselectedView} playlist={selectedPlaylist} />
+                <PlaylistView selectedView={props.selectedView} setSelectedView={props.setSelectedView} playlist={selectedPlaylist} />
             }
         </>
     )
 }
 
-export default PlaylistsView
+const styles = StyleSheet.create({
+    titleStyle: {
+        color: "white"
+    }
+});
+
+export default PlaylistsView;
