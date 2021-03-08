@@ -4,6 +4,7 @@ import { pushYoutubeErrorNotification } from '../../../store/types/notifications
 import { Playlist } from '../../../youtubeApi/youtube-api-models';
 import { Playlists } from '../../../youtubeApi/youtube-api-playlists';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchPlaylists = () => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -24,18 +25,19 @@ const useFetchPlaylists = () => {
             await fetchPlaylists(pageToken);
         }
         else {
+            // eslint-disable-next-line no-console
             console.log("all playlists loaded");
         }
     }, [loaded, pageToken]);
 
-    const fetchPlaylists = async (pageToken: string | undefined = undefined) => {
+    const fetchPlaylists = async (pageTokenValue: string | undefined = undefined) => {
 
         try {
-            var response = await new Playlists(state.youtubeState.credential.accessToken).list({
+            const response = await new Playlists(state.youtubeState.credential.accessToken).list({
                 channelId: state.youtubeState.userProfile.channelId,
                 part: ['snippet', 'contentDetails'],
                 maxResults: 10,
-                pageToken: pageToken
+                pageToken: pageTokenValue
             });
             if (response && response.items) {
                 if (pageToken) {

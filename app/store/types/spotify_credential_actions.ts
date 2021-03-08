@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
 import { AuthorizeResult, RefreshResult } from 'react-native-app-auth';
 import { ISpotifyApiAuthorizeError, ISpotifyApiAuthorizeRequest, ISpotifyApiAuthorizeSuccess, IspotifyApiRefreshError, ISpotifyApiRefreshRequest, ISpotifyApiRefreshSuccess, ISpotifyApiRevokeError, ISpotifyApiRevokeRequest, ISpotifyApiRevokeSuccess, Types } from './spotify_credential_types';
 

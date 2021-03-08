@@ -4,9 +4,7 @@ import Context from '../../store/context';
 import { NotificationType } from '../../store/state';
 import { popNotification } from '../../store/types/notifications_actions';
 
-interface IProps { }
-
-const NotificationToast: React.FunctionComponent<IProps> = () => {
+const NotificationToast: React.VoidFunctionComponent = () => {
     const { state, dispatch } = React.useContext(Context);
 
     const duration = 2000;
@@ -19,7 +17,7 @@ const NotificationToast: React.FunctionComponent<IProps> = () => {
                 case NotificationType.SUCCESS:
                     Toast.show({
                         text: notification.message,
-                        duration: duration,
+                        duration,
                         type: "success",
                         onClose: () => {
                             dispatch(popNotification());
@@ -30,7 +28,7 @@ const NotificationToast: React.FunctionComponent<IProps> = () => {
                 case NotificationType.WARNING:
                     Toast.show({
                         text: notification.message,
-                        duration: duration,
+                        duration,
                         type: "warning",
                         onClose: () => {
                             dispatch(popNotification());
@@ -41,12 +39,15 @@ const NotificationToast: React.FunctionComponent<IProps> = () => {
                 case NotificationType.ERROR:
                     Toast.show({
                         text: notification.message,
-                        duration: duration,
+                        duration,
                         type: "danger",
                         onClose: () => {
                             dispatch(popNotification());
                         }
                     });
+                    break;
+
+                default:
                     break;
             }
         }

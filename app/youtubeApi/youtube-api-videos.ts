@@ -1,4 +1,4 @@
-import {Base} from './youtube-api-base';
+import Base from './youtube-api-base';
 import {VideoListParameter, VideoListResponse} from './youtube-api-models';
 
 export interface IVideos {
@@ -11,6 +11,6 @@ export class Videos extends Base implements IVideos {
   }
 
   async list(params: VideoListParameter): Promise<VideoListResponse> | never {
-    return await this.getWebRequest<VideoListResponse>(this.buildUri(params));
+    return this.getWebRequest<VideoListResponse>(this.buildUri(params));
   }
 }

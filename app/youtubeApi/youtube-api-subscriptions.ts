@@ -1,4 +1,5 @@
-import {Base} from './youtube-api-base';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Base from './youtube-api-base';
 import {
   SubscriptionDeleteParameter,
   SubscriptionInsertParameter,
@@ -23,19 +24,21 @@ export class Subscriptions extends Base implements ISubscriptions {
   async list(
     params: SubscriptionListParameter,
   ): Promise<SubscriptionListResponse> | never {
-    return await this.getWebRequest<SubscriptionListResponse>(
+    return this.getWebRequest<SubscriptionListResponse>(
       this.buildUri(params),
     );
   }
+
   async insert(
     params: SubscriptionInsertParameter,
   ): Promise<SubscriptionInsertResponse> | never {
-    return await this.postWebRequest<SubscriptionListResponse>(
+    return this.postWebRequest<SubscriptionListResponse>(
       this.buildUri(params),
       params.requestBody
     );
   }
+
   async delete(params: SubscriptionDeleteParameter): Promise<any> | never {
-    return await this.deleteWebRequest_(this.buildUri(params));
+    return this.deleteWebRequest(this.buildUri(params));
   }
 }

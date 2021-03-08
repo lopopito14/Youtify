@@ -3,6 +3,7 @@ import SpotifyApi from 'spotify-web-api-js';
 import Context from '../../../store/context';
 import { pushSpotifyErrorNotification } from '../../../store/types/notifications_actions';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchArtist = (artistId: string) => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -18,7 +19,8 @@ const useFetchArtist = (artistId: string) => {
             try {
                 await Promise.all([fetchArtist(), fetchArtistTopTracks(), fetchRelatedArtists()]);
             } catch (error) {
-                console.log('Error => ' + error);
+                // eslint-disable-next-line no-console
+                console.log(`Error => ${error}`);
             } finally {
                 setLoaded(true);
             }
@@ -33,7 +35,7 @@ const useFetchArtist = (artistId: string) => {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var response = await spotifyApi.getArtist(artistId);
+            const response = await spotifyApi.getArtist(artistId);
             if (response) {
                 setArtist(response);
             }
@@ -47,7 +49,7 @@ const useFetchArtist = (artistId: string) => {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var response = await spotifyApi.getArtistTopTracks(artistId, state.spotifyState.userProfile.country);
+            const response = await spotifyApi.getArtistTopTracks(artistId, state.spotifyState.userProfile.country);
             if (response) {
                 setArtistTopTracks(response);
             }
@@ -61,7 +63,7 @@ const useFetchArtist = (artistId: string) => {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var response = await spotifyApi.getArtistRelatedArtists(artistId);
+            const response = await spotifyApi.getArtistRelatedArtists(artistId);
             if (response) {
                 setRelatedArtists(response);
 
@@ -77,7 +79,7 @@ const useFetchArtist = (artistId: string) => {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var response = await spotifyApi.isFollowingArtists(ids);
+            const response = await spotifyApi.isFollowingArtists(ids);
             if (response) {
                 setRelatedArtistsFollowingStatus(response);
             }
@@ -91,7 +93,7 @@ const useFetchArtist = (artistId: string) => {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            const position = relatedArtists?.artists.findIndex((a) => a.id == id);
+            const position = relatedArtists?.artists.findIndex((a) => a.id === id);
 
             if (position !== undefined && relatedArtistsFollowingStatus) {
 

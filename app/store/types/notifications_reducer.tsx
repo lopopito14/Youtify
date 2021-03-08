@@ -6,12 +6,10 @@ import { TNotificationsActions, Types } from './notifications_types';
 
 const reducer: Reducer<INotifications, TActions> = (state: INotifications = InitialState.notifications, action: TActions) => {
 
-    var notificationAction = action as TNotificationsActions;
+    const notificationAction = action as TNotificationsActions;
     if (notificationAction === null) {
         return state;
     }
-
-    console.log(notificationAction.type);
 
     switch (notificationAction.type) {
         case Types.PUSH_SPOTIFY_SUCCESS_NOTIFICATION:
@@ -47,7 +45,7 @@ const reducer: Reducer<INotifications, TActions> = (state: INotifications = Init
                     notifications: [
                         ...state.notifications,
                         {
-                            message: notificationAction.payload.errorResponse.error.message,
+                            message: notificationAction.payload.message,
                             type: NotificationType.ERROR
                         }
                     ]

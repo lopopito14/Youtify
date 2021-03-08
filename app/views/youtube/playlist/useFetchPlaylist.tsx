@@ -5,6 +5,7 @@ import { PlaylistItems } from '../../../youtubeApi/youtube-api-playlistItems';
 import { pushYoutubeErrorNotification } from '../../../store/types/notifications_actions';
 import { Videos } from '../../../youtubeApi/youtube-api-videos';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchPlaylist = (playlist: Playlist) => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -22,18 +23,18 @@ const useFetchPlaylist = (playlist: Playlist) => {
         }
     }, [pageToken]);
 
-    const fetchPlaylistVideos = async (pageToken: string | undefined = undefined) => {
+    const fetchPlaylistVideos = async (pageTokenValue: string | undefined = undefined) => {
         try {
-            var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
+            const playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
                 playlistId: playlist.id ? playlist.id : '',
                 part: ['contentDetails'],
                 maxResults: 50,
-                pageToken: pageToken
+                pageToken: pageTokenValue
             });
             if (playlistItemsResponse) {
 
                 if (playlistItemsResponse.items) {
-                    let videosIds: string[] = [];
+                    const videosIds: string[] = [];
 
                     playlistItemsResponse.items.forEach(i => {
                         if (i.contentDetails?.videoId) {
@@ -41,17 +42,15 @@ const useFetchPlaylist = (playlist: Playlist) => {
                         }
                     });
 
-                    var videosResponse = await new Videos(state.youtubeState.credential.accessToken).list({
+                    const videosResponse = await new Videos(state.youtubeState.credential.accessToken).list({
                         id: videosIds,
                         part: ['snippet', 'contentDetails', 'statistics'],
                         maxResults: 50,
                     });
 
                     if (videosResponse && videosResponse.items) {
-                        const items = videosResponse.items;
-                        setYoutubeVideos((prev) => {
-                            return [...prev, ...items]
-                        });
+                        const { items } = videosResponse;
+                        setYoutubeVideos((prev) => [...prev, ...items]);
                     }
                 }
 

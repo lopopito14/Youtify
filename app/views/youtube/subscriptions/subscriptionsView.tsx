@@ -1,39 +1,40 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base'
 import React from 'react';
 import { StyleSheet } from 'react-native';
+import { IYoutubeNavigationProps, YoutubeViewType } from '../../../interfaces/youtubeInterfaces';
 import { Subscription } from '../../../youtubeApi/youtube-api-models';
 import { youtubeTheme } from '../../theme';
 import RefreshableList from '../../utils/refreshableList';
-import { IYoutubeNavigationProps, YoutubeViewType } from '../../youtubeView';
 import SubscriptionView from '../subscription/subscriptionView';
 import useFetchSubscriptions from './useFetchSubscriptions';
 
-interface IProps extends IYoutubeNavigationProps { }
+type IProps = IYoutubeNavigationProps
 
 const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
+    const { selectedView, setSelectedView } = props;
 
     const { subscriptions, loaded, loadSubscriptions, refreshSubscriptions } = useFetchSubscriptions();
     const [selectedSubscription, setSelectedSubscription] = React.useState<Subscription | undefined>(undefined);
 
     React.useEffect(() => {
-        if (props.selectedView === YoutubeViewType.SUBSCRIPTIONS) {
+        if (selectedView === YoutubeViewType.SUBSCRIPTIONS) {
             setSelectedSubscription(undefined);
         }
-    }, [props.selectedView]);
+    }, [selectedView]);
 
     const onOpenSubscription = React.useCallback((subscription: Subscription) => {
         setSelectedSubscription(subscription);
-        props.setSelectedView(YoutubeViewType.SUBSCRIPTION);
+        setSelectedView(YoutubeViewType.SUBSCRIPTION);
     }, []);
 
     return (
         <>
             {
-                props.selectedView === YoutubeViewType.SUBSCRIPTIONS &&
-                <RefreshableList onRefresh={refreshSubscriptions} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={loadSubscriptions}>
+                selectedView === YoutubeViewType.SUBSCRIPTIONS &&
+                <RefreshableList onRefresh={refreshSubscriptions} backgroundColor={youtubeTheme.secondaryColor} lazyLoading onLoad={loadSubscriptions}>
                     {
-                        subscriptions.map((s, i) =>
-                            <ListItem thumbnail key={i}>
+                        subscriptions.map((s) =>
+                            <ListItem thumbnail key={s.id}>
                                 <Left>
                                     {
                                         s.snippet?.thumbnails?.default?.url &&
@@ -60,8 +61,8 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                props.selectedView !== YoutubeViewType.SUBSCRIPTIONS && selectedSubscription &&
-                <SubscriptionView selectedView={props.selectedView} setSelectedView={props.setSelectedView} subscription={selectedSubscription} />
+                selectedView !== YoutubeViewType.SUBSCRIPTIONS && selectedSubscription &&
+                <SubscriptionView selectedView={selectedView} setSelectedView={setSelectedView} subscription={selectedSubscription} />
             }
         </>
     )

@@ -1,43 +1,19 @@
+/* eslint-disable no-console */
 import React from 'react';
 import { Accordion, Badge, Body, Button, Content, H1, Header, Icon, Left, List, ListItem, Right, Spinner, Switch, Text, Title, View } from 'native-base';
-import { spotifyTheme, synchronizeTheme, youtubeTheme } from './theme';
-import { ILoad } from '../store/state';
-import SynchronizePlaylistView from './synchronize/synchronizePlaylistView';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import usePlaylistsSynchronizer from './usePlaylistsSynchronizer';
-import { Playlist, PlaylistItem } from '../youtubeApi/youtube-api-models';
 import { StyleSheet } from 'react-native';
-
-interface Props { }
-
-export enum SynchronizeViewType {
-	SYNCHRONIZE,
-	SYNCHRONIZE_PLAYLIST
-}
-
-export interface ISynchronizeNavigationProps {
-	selectedView: SynchronizeViewType;
-	setSelectedView(view: SynchronizeViewType): any;
-}
+import { spotifyTheme, synchronizeTheme, youtubeTheme } from './theme';
+import { SynchronizeViewType, IYoutubeMonthPlaylist } from '../interfaces/synchronizeInterfaces';
+import usePlaylistsSynchronizer from './usePlaylistsSynchronizer';
+import SynchronizePlaylistView from './synchronize/synchronizePlaylistView';
 
 interface YearFilter {
 	year: number;
 	active: boolean;
 }
 
-export interface IMyPlaylists extends ILoad {
-	playlists: IYoutubeMonthPlaylist[];
-}
-export interface IYoutubeMonthPlaylist {
-	year: number,
-	month: number;
-	title: string;
-	favoriteitems: PlaylistItem[];
-	youtubePlaylist?: Playlist;
-	spotifyPlaylist?: globalThis.SpotifyApi.PlaylistObjectSimplified;
-}
-
-const SynchronizeView: React.FunctionComponent<Props> = () => {
+const SynchronizeView: React.VoidFunctionComponent = () => {
 
 	const { myPlaylist, createPlaylists } = usePlaylistsSynchronizer();
 	const [selectedView, setSelectedView] = React.useState<SynchronizeViewType>(SynchronizeViewType.SYNCHRONIZE);
@@ -51,7 +27,7 @@ const SynchronizeView: React.FunctionComponent<Props> = () => {
 
 			const buildYearsFilter = async () => {
 
-				let yearsFilter: YearFilter[] = [];
+				const yearsFilter: YearFilter[] = [];
 
 				const years = [...new Set(myPlaylist.playlists.map(p => p.year))];
 
@@ -65,7 +41,7 @@ const SynchronizeView: React.FunctionComponent<Props> = () => {
 						const parsedYearsFilter = JSON.parse(value) as YearFilter[];
 						if (parsedYearsFilter) {
 							parsedYearsFilter.filter(y => !y.active).forEach(p => {
-								let existingItem = yearsFilter.find(y => y.year === p.year);
+								const existingItem = yearsFilter.find(y => y.year === p.year);
 								if (existingItem) {
 									const index = yearsFilter.indexOf(existingItem);
 									yearsFilter[index].active = false;
@@ -100,9 +76,7 @@ const SynchronizeView: React.FunctionComponent<Props> = () => {
 		}
 	}, [yearFilter]);
 
-	const isSelectedView = (view: SynchronizeViewType) => {
-		return selectedView === view;
-	}
+	const isSelectedView = (view: SynchronizeViewType) => selectedView === view
 
 	const headerTitle = () => {
 		if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
@@ -118,25 +92,25 @@ const SynchronizeView: React.FunctionComponent<Props> = () => {
 		}
 	}, [isSelectedView]);
 
-	const onOpenSynchronizePlaylist = React.useCallback((myPlaylist: IYoutubeMonthPlaylist) => {
-		setSelectedPlaylist(myPlaylist);
+	const onOpenSynchronizePlaylist = React.useCallback((monthPlaylist: IYoutubeMonthPlaylist) => {
+		setSelectedPlaylist(monthPlaylist);
 		setSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST);
 	}, []);
 
 	const buildAccordion = () => {
-		var array: { title: JSX.Element, content: JSX.Element }[] = [];
+		const array: { title: JSX.Element, content: JSX.Element }[] = [];
 
 		const title = <H1>Filtre</H1>;
 		const content =
 			<List>
 				{
 					yearFilter?.map((y, i) =>
-						<ListItem key={i}>
+						<ListItem key={y.year}>
 							<Left>
 								<Text style={styles.filterTitleStyle}>{y.year}</Text>
 							</Left>
 							<Right>
-								<Switch style={styles.switchStyle} thumbColor={"white"} trackColor={{ true: "green", false: "white" }} value={y.active} onValueChange={() =>
+								<Switch style={styles.switchStyle} thumbColor="white" trackColor={{ true: "green", false: "white" }} value={y.active} onValueChange={() =>
 									setYearFilter(
 										[
 											...yearFilter.slice(0, i),
@@ -152,7 +126,7 @@ const SynchronizeView: React.FunctionComponent<Props> = () => {
 					)
 				}
 			</List>;
-		array.push({ title: title, content: content });
+		array.push({ title, content });
 
 		return array;
 	}
@@ -187,48 +161,48 @@ const SynchronizeView: React.FunctionComponent<Props> = () => {
 							<>
 								<List>
 									{
-										yearFilter.filter(y => y.active).map((y, i) =>
-											<View key={i}>
+										yearFilter.filter(y => y.active).map((y) =>
+											<View key={y.year}>
 												<ListItem itemHeader key={1}>
 													<H1 style={styles.listTitleStyle}>{y.year}</H1>
 												</ListItem>
 												{
-													myPlaylist.playlists.filter(p => p.year === y.year).map((p, j) =>
-														<ListItem key={j + 1} thumbnail>
+													myPlaylist.playlists.filter(p => p.year === y.year).map((playlist) =>
+														<ListItem key={playlist.month} thumbnail>
 															<Left>
 																<Button iconRight vertical transparent>
 																	{
-																		p.youtubePlaylist &&
+																		playlist.youtubePlaylist &&
 																		<Badge style={styles.youtubeBadgeStyle}>
-																			<Text>{p.youtubePlaylist.contentDetails?.itemCount}</Text>
+																			<Text>{playlist.youtubePlaylist.contentDetails?.itemCount}</Text>
 																		</Badge>
 																	}
-																	<Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ ...styles.logoIconStyle, marginTop: p.youtubePlaylist ? 0 : 28 }} />
+																	<Icon android="md-logo-youtube" ios="ios-logo-youtube" style={{ ...styles.logoIconStyle, marginTop: playlist.youtubePlaylist ? 0 : 28 }} />
 																</Button>
 																<Button iconRight vertical transparent>
 																	{
-																		p.spotifyPlaylist &&
+																		playlist.spotifyPlaylist &&
 																		<Badge style={styles.spotifyBadgeStyle}>
-																			<Text>{p.spotifyPlaylist.tracks.total}</Text>
+																			<Text>{playlist.spotifyPlaylist.tracks.total}</Text>
 																		</Badge>
 																	}
-																	<Icon name="spotify" type='FontAwesome' style={{ ...styles.logoIconStyle, marginTop: p.spotifyPlaylist ? 0 : 28 }} />
+																	<Icon name="spotify" type='FontAwesome' style={{ ...styles.logoIconStyle, marginTop: playlist.spotifyPlaylist ? 0 : 28 }} />
 																</Button>
 															</Left>
 															<Body>
-																<Text style={styles.listItemTitleStyle}>{p.title}</Text>
-																<Text note>{p.favoriteitems.length} favorite items</Text>
+																<Text style={styles.listItemTitleStyle}>{playlist.title}</Text>
+																<Text note>{playlist.favoriteitems.length} favorite items</Text>
 															</Body>
 															<Right>
 																{
-																	(p.spotifyPlaylist === undefined || p.youtubePlaylist === undefined) &&
-																	<Button icon light onPress={() => createPlaylists(p)}>
+																	(playlist.spotifyPlaylist === undefined || playlist.youtubePlaylist === undefined) &&
+																	<Button icon light onPress={() => createPlaylists(playlist)}>
 																		<Icon name='create' type='MaterialIcons' />
 																	</Button>
 																}
 																{
-																	p.spotifyPlaylist && p.youtubePlaylist &&
-																	<Button icon light onPress={() => onOpenSynchronizePlaylist(p)}>
+																	playlist.spotifyPlaylist && playlist.youtubePlaylist &&
+																	<Button icon light onPress={() => onOpenSynchronizePlaylist(playlist)}>
 																		<Icon name='arrow-forward' />
 																	</Button>
 																}

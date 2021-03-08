@@ -1,31 +1,34 @@
 import { Body, Button, Card, CardItem, Content, H1, H2, Icon, Left, List, ListItem, Spinner, Text, Thumbnail, View } from 'native-base';
 import React from 'react';
-import { youtubeTheme } from '../../theme';
-import { IYoutubeNavigationProps, YoutubeViewType } from '../../youtubeView';
-import { Playlist } from '../../../youtubeApi/youtube-api-models';
 import YoutubePlayer, { YoutubeIframeRef } from "react-native-youtube-iframe";
 import { Image, StyleSheet } from 'react-native';
+import { youtubeTheme } from '../../theme';
+import { Playlist } from '../../../youtubeApi/youtube-api-models';
 import useFetchPlaylist from './useFetchPlaylist';
 import { getYoutubeVideoDuration, msToTime } from '../../utils/helpers';
+import { IYoutubeNavigationProps, YoutubeViewType } from '../../../interfaces/youtubeInterfaces';
 
 interface IProps extends IYoutubeNavigationProps {
     playlist: Playlist;
 }
 
 const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
+    const { playlist, selectedView } = props;
 
-    const { youtubeVideos, loaded } = useFetchPlaylist(props.playlist);
+    const { youtubeVideos, loaded } = useFetchPlaylist(playlist);
     const [videoIdPlaying, setVideoIdPlaying] = React.useState<string | undefined>(undefined);
 
     const playerRef = React.useRef<YoutubeIframeRef>(null);
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     const onStateChange = (state: String) => {
         if (state === "ended") {
             setVideoIdPlaying(undefined);
         }
     }
 
-    const onError = (error: String) => {
+    const onError = (error: string) => {
+        // eslint-disable-next-line no-console
         console.log(error);
     }
 
@@ -40,9 +43,9 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
             const sameVideo = videoId === prev;
             if (sameVideo) {
                 return undefined;
-            } else {
-                return videoId;
             }
+            return videoId;
+
         });
     }
 
@@ -63,7 +66,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     return (
         <>
             {
-                props.selectedView === YoutubeViewType.PLAYLIST &&
+                selectedView === YoutubeViewType.PLAYLIST &&
                 <Content style={styles.contentStyle}>
                     {
                         loaded &&
@@ -83,13 +86,13 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                             <Card style={styles.cardStyle}>
                                 <CardItem header style={styles.cardItemStyle}>
                                     <Body>
-                                        <H1>{props.playlist.snippet?.title}</H1>
+                                        <H1>{playlist.snippet?.title}</H1>
                                     </Body>
                                 </CardItem>
                                 <CardItem cardBody style={styles.cardItemStyle}>
                                     {
-                                        props.playlist.snippet?.thumbnails?.medium?.url &&
-                                        <Thumbnail square source={{ uri: props.playlist.snippet?.thumbnails.medium?.url }} style={styles.thumbnailStyle} />
+                                        playlist.snippet?.thumbnails?.medium?.url &&
+                                        <Thumbnail square source={{ uri: playlist.snippet?.thumbnails.medium?.url }} style={styles.thumbnailStyle} />
                                     }
                                 </CardItem>
                                 <CardItem style={styles.cardItemStyle}>
@@ -100,7 +103,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                 <List>
                                     {
                                         youtubeVideos.map((video, i) =>
-                                            <ListItem key={i}>
+                                            <ListItem key={video.id}>
                                                 <Text style={styles.numberingStyle}>{i + 1}</Text>
                                                 <Body>
                                                     <Text numberOfLines={3}>{video.snippet?.title}</Text>

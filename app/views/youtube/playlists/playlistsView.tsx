@@ -1,40 +1,41 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base';
 import React from 'react';
 import { StyleSheet } from 'react-native';
+import { IYoutubeNavigationProps, YoutubeViewType } from '../../../interfaces/youtubeInterfaces';
 import { Playlist } from '../../../youtubeApi/youtube-api-models';
 import { youtubeTheme } from '../../theme';
 import { defaultThumbnail } from '../../utils/helpers';
 import RefreshableList from '../../utils/refreshableList';
-import { IYoutubeNavigationProps, YoutubeViewType } from '../../youtubeView';
 import PlaylistView from '../playlist/playlistView';
 import useFetchPlaylists from './useFetchPlaylists';
 
-interface IProps extends IYoutubeNavigationProps { }
+type IProps = IYoutubeNavigationProps
 
 const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
+    const { selectedView, setSelectedView } = props;
 
     const { playlists, loaded, loadPlaylist, refreshPlaylist } = useFetchPlaylists();
     const [selectedPlaylist, setSelectedPlaylist] = React.useState<Playlist | undefined>(undefined);
 
     React.useEffect(() => {
-        if (props.selectedView === YoutubeViewType.PLAYLISTS) {
+        if (selectedView === YoutubeViewType.PLAYLISTS) {
             setSelectedPlaylist(undefined);
         }
-    }, [props.selectedView]);
+    }, [selectedView]);
 
     const onOpenPlaylist = React.useCallback((playlist: Playlist) => {
         setSelectedPlaylist(playlist);
-        props.setSelectedView(YoutubeViewType.PLAYLIST);
+        setSelectedView(YoutubeViewType.PLAYLIST);
     }, []);
 
     return (
         <>
             {
-                props.selectedView === YoutubeViewType.PLAYLISTS &&
-                <RefreshableList onRefresh={refreshPlaylist} backgroundColor={youtubeTheme.secondaryColor} lazyLoading={true} onLoad={loadPlaylist}>
+                selectedView === YoutubeViewType.PLAYLISTS &&
+                <RefreshableList onRefresh={refreshPlaylist} backgroundColor={youtubeTheme.secondaryColor} lazyLoading onLoad={loadPlaylist}>
                     {
-                        playlists.map((p, i) =>
-                            <ListItem thumbnail key={i}>
+                        playlists.map((p) =>
+                            <ListItem thumbnail key={p.id}>
                                 <Left>
                                     <Thumbnail source={{ uri: p.snippet?.thumbnails?.medium?.url ? p.snippet?.thumbnails?.medium?.url : defaultThumbnail }} />
                                 </Left>
@@ -57,8 +58,8 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                props.selectedView !== YoutubeViewType.PLAYLISTS && selectedPlaylist &&
-                <PlaylistView selectedView={props.selectedView} setSelectedView={props.setSelectedView} playlist={selectedPlaylist} />
+                selectedView !== YoutubeViewType.PLAYLISTS && selectedPlaylist &&
+                <PlaylistView selectedView={selectedView} setSelectedView={setSelectedView} playlist={selectedPlaylist} />
             }
         </>
     )

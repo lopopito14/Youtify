@@ -1,40 +1,41 @@
 import { Body, Card, CardItem, Content, H1, H2, Left, List, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base';
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { youtubeTheme } from '../../theme';
-import { IYoutubeNavigationProps, YoutubeViewType } from '../../youtubeView';
 import { Subscription } from '../../../youtubeApi/youtube-api-models';
 import useFetchSubscription from './useFetchSubscription';
-import { StyleSheet } from 'react-native';
+import { IYoutubeNavigationProps, YoutubeViewType } from '../../../interfaces/youtubeInterfaces';
 
 interface IProps extends IYoutubeNavigationProps {
     subscription: Subscription;
 }
 
 const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
+    const { subscription, selectedView } = props;
 
-    const { channelPlaylists, channelChannels, channelSubscriptions, loaded } = useFetchSubscription(props.subscription);
+    const { channelPlaylists, channelChannels, channelSubscriptions, loaded } = useFetchSubscription(subscription);
 
     return (
         <>
             {
-                props.selectedView === YoutubeViewType.SUBSCRIPTION &&
+                selectedView === YoutubeViewType.SUBSCRIPTION &&
                 <Content style={styles.contentStyle}>
                     {
                         loaded && channelPlaylists &&
                         (<Card style={styles.cardStyle}>
                             <CardItem header style={styles.cardItemStyle}>
                                 <Body>
-                                    <H1>{props.subscription.snippet?.title}</H1>
+                                    <H1>{subscription.snippet?.title}</H1>
                                 </Body>
                             </CardItem>
                             <CardItem cardBody>
                                 {
-                                    props.subscription.snippet?.thumbnails?.high?.url &&
-                                    <Thumbnail square source={{ uri: props.subscription.snippet?.thumbnails.high?.url }} style={styles.thumbnailStyle} />
+                                    subscription.snippet?.thumbnails?.high?.url &&
+                                    <Thumbnail square source={{ uri: subscription.snippet?.thumbnails.high?.url }} style={styles.thumbnailStyle} />
                                 }
                             </CardItem>
                             <CardItem bordered>
-                                <Text note>{props.subscription.snippet?.description}</Text>
+                                <Text note>{subscription.snippet?.description}</Text>
                             </CardItem>
                             <CardItem style={styles.cardItemStyle}>
                                 <Body>
@@ -43,8 +44,8 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
                             </CardItem>
                             <List>
                                 {
-                                    channelPlaylists.map((item, i) =>
-                                        <ListItem thumbnail key={i}>
+                                    channelPlaylists.map((item) =>
+                                        <ListItem thumbnail key={item.id}>
                                             <Left>
                                                 {
                                                     item.snippet?.thumbnails?.default?.url &&
@@ -55,8 +56,7 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
                                                 <Text numberOfLines={1}>{item.snippet?.title}</Text>
                                                 <Text note numberOfLines={1}>{item.snippet?.description}</Text>
                                             </Body>
-                                            <Right>
-                                            </Right>
+                                            <Right />
                                         </ListItem>
                                     )
                                 }
@@ -68,8 +68,8 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
                             </CardItem>
                             <List>
                                 {
-                                    channelSubscriptions.map((s, i) =>
-                                        <ListItem thumbnail key={i}>
+                                    channelSubscriptions.map((s) =>
+                                        <ListItem thumbnail key={s.id}>
                                             <Left>
                                                 {
                                                     s.snippet?.thumbnails?.default?.url &&
@@ -80,8 +80,7 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
                                                 <Text numberOfLines={1}>{s.snippet?.title}</Text>
                                                 <Text note numberOfLines={1}>{s.snippet?.description}</Text>
                                             </Body>
-                                            <Right>
-                                            </Right>
+                                            <Right />
                                         </ListItem>
                                     )
                                 }
@@ -93,8 +92,8 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
                             </CardItem>
                             <List>
                                 {
-                                    channelChannels.map((c, i) =>
-                                        <ListItem thumbnail key={i}>
+                                    channelChannels.map((c) =>
+                                        <ListItem thumbnail key={c.id}>
                                             <Left>
                                                 {
                                                     c.snippet?.thumbnails?.default?.url &&
@@ -105,8 +104,7 @@ const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
                                                 <Text numberOfLines={1}>{c.snippet?.title}</Text>
                                                 <Text note numberOfLines={1}>{c.snippet?.description}</Text>
                                             </Body>
-                                            <Right>
-                                            </Right>
+                                            <Right />
                                         </ListItem>
                                     )
                                 }

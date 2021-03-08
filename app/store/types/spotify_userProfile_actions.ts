@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
 import { ISpotifyCurrentProfileError, ISpotifyCurrentProfileRequest, ISpotifyCurrentProfileSuccess, Types } from './spotify_userProfile_types';
 
 export function spotifyCurrentProfileRequest(): ISpotifyCurrentProfileRequest {

@@ -1,19 +1,20 @@
 import React from 'react';
 import { Button, Content, Text, View } from 'native-base';
-import { IYoutubeNavigationProps, YoutubeViewType } from '../youtubeView';
+import { StyleSheet } from 'react-native';
+import { IYoutubeNavigationProps, YoutubeViewType } from '../../interfaces/youtubeInterfaces';
 import PlaylistsView from './playlists/playlistsView';
 import SubscriptionsView from './subscriptions/subscriptionsView';
 import AdjustFavoritesView from './adjustFavorites/adjustFavoritesView';
-import { StyleSheet } from 'react-native';
 
-interface IProps extends IYoutubeNavigationProps { }
+type IProps = IYoutubeNavigationProps
 
 const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
+    const { selectedView, setSelectedView } = props;
 
     return (
         <>
             {
-                props.selectedView === YoutubeViewType.MENU &&
+                selectedView === YoutubeViewType.MENU &&
                 <Content>
                     <View style={styles.containerStyle}>
                         <Button rounded success style={styles.buttonStyle} onPress={() => props.setSelectedView(YoutubeViewType.PLAYLISTS)}>
@@ -29,11 +30,11 @@ const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </Content>
             }
             {
-                props.selectedView !== YoutubeViewType.MENU &&
+                selectedView !== YoutubeViewType.MENU &&
                 <>
-                    <PlaylistsView selectedView={props.selectedView} setSelectedView={props.setSelectedView} />
-                    <SubscriptionsView selectedView={props.selectedView} setSelectedView={props.setSelectedView} />
-                    <AdjustFavoritesView selectedView={props.selectedView} setSelectedView={props.setSelectedView} />
+                    <PlaylistsView selectedView={selectedView} setSelectedView={setSelectedView} />
+                    <SubscriptionsView selectedView={selectedView} setSelectedView={setSelectedView} />
+                    <AdjustFavoritesView selectedView={selectedView} setSelectedView={setSelectedView} />
                 </>
             }
         </>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
 import { ChannelListResponse } from '../../youtubeApi/youtube-api-models';
 import { IYoutubeCurrentProfileError, IYoutubeCurrentProfileRequest, IYoutubeCurrentProfileSuccess, Types } from './youtube_userProfile_types';
 

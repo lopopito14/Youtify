@@ -4,6 +4,7 @@ import { pushYoutubeErrorNotification } from '../../../store/types/notifications
 import { Subscription } from '../../../youtubeApi/youtube-api-models';
 import { Subscriptions } from '../../../youtubeApi/youtube-api-subscriptions';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchSubscriptions = () => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -24,21 +25,22 @@ const useFetchSubscriptions = () => {
             await fetchSubscriptions(pageToken);
         }
         else {
+            // eslint-disable-next-line no-console
             console.log("all subscriptions loaded");
         }
     }, [loaded, pageToken]);
 
-    const fetchSubscriptions = async (pageToken: string | undefined = undefined) => {
+    const fetchSubscriptions = async (pageTokenValue: string | undefined = undefined) => {
         try {
-            var response = await new Subscriptions(state.youtubeState.credential.accessToken).list({
+            const response = await new Subscriptions(state.youtubeState.credential.accessToken).list({
                 channelId: state.youtubeState.userProfile.channelId,
                 part: ['snippet', 'contentDetails'],
                 maxResults: 20,
-                pageToken: pageToken,
+                pageToken: pageTokenValue,
                 order: 'alphabetical'
             });
             if (response && response.items) {
-                if (pageToken) {
+                if (pageTokenValue) {
                     setSubscriptions([...subscriptions, ...response.items]);
                 }
                 else {

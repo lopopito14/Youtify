@@ -1,31 +1,14 @@
 import { Body, Button, Header, Icon, Left, Title } from 'native-base';
 import React from 'react';
 import { StyleSheet } from 'react-native';
+import { YoutubeViewType } from '../interfaces/youtubeInterfaces';
 import { youtubeTheme } from './theme';
 import YoutubeMenuView from './youtube/youtubeMenuView';
 
-interface Props { }
-
-export enum YoutubeViewType {
-    MENU,
-    PLAYLISTS,
-    PLAYLIST,
-    SUBSCRIPTIONS,
-    SUBSCRIPTION,
-    ADJUST_FAVORITES
-}
-
-export interface IYoutubeNavigationProps {
-    selectedView: YoutubeViewType;
-    setSelectedView(view: YoutubeViewType): any;
-}
-
-const YoutubeView: React.FunctionComponent<Props> = () => {
+const YoutubeView: React.VoidFunctionComponent = () => {
     const [selectedView, setSelectedView] = React.useState<YoutubeViewType>(YoutubeViewType.MENU);
 
-    const isSelectedView = (view: YoutubeViewType) => {
-        return selectedView === view;
-    }
+    const isSelectedView = (view: YoutubeViewType) => selectedView === view
 
     const headerTitle = () => {
         if (isSelectedView(YoutubeViewType.SUBSCRIPTIONS)) {

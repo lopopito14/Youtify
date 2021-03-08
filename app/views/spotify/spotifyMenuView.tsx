@@ -1,18 +1,19 @@
 import React from 'react';
 import { Button, Content, Text, View } from 'native-base';
-import { ISpotifyNavigationProps, SpotifyViewType } from '../spotifyView';
+import { StyleSheet } from 'react-native';
 import PlaylistsView from './playlists/playlistsView';
 import ArtistsView from './artists/artistsView';
-import { StyleSheet } from 'react-native';
+import { ISpotifyNavigationProps, SpotifyViewType } from '../../interfaces/spotifyInterfaces';
 
-interface IProps extends ISpotifyNavigationProps { }
+type IProps = ISpotifyNavigationProps
 
 const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
+    const { selectedView, setSelectedView } = props;
 
     return (
         <>
             {
-                props.selectedView === SpotifyViewType.MENU &&
+                selectedView === SpotifyViewType.MENU &&
                 <Content>
                     <View style={styles.containerStyle}>
                         <Button rounded success style={styles.buttonStyle} onPress={() => props.setSelectedView(SpotifyViewType.PLAYLISTS)}>
@@ -25,10 +26,10 @@ const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </Content>
             }
             {
-                props.selectedView !== SpotifyViewType.MENU &&
+                selectedView !== SpotifyViewType.MENU &&
                 <>
-                    <PlaylistsView selectedView={props.selectedView} setSelectedView={props.setSelectedView} />
-                    <ArtistsView selectedView={props.selectedView} setSelectedView={props.setSelectedView} />
+                    <PlaylistsView selectedView={selectedView} setSelectedView={setSelectedView} />
+                    <ArtistsView selectedView={selectedView} setSelectedView={setSelectedView} />
                 </>
             }
         </>

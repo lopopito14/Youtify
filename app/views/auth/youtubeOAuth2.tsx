@@ -4,7 +4,7 @@ import React from "react";
 import { Image, StyleSheet } from "react-native";
 import { AuthConfiguration, authorize, AuthorizeResult, refresh, RefreshResult, revoke } from "react-native-app-auth";
 import Context from "../../store/context";
-import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSuccess as youtubeApiAuthorizeSuccess, youtubeApiRefreshError, youtubeApiRefreshRequest, youtubeApiRefreshSucess as youtubeApiRefreshSuccess, youtubeApiRevokeError, youtubeApiRevokeRequest, youtubeApiRevokeSuccess } from "../../store/types/youtube_credential_actions";
+import { youtubeApiAuthorizeError, youtubeApiAuthorizeRequest, youtubeApiAuthorizeSuccess, youtubeApiRefreshError, youtubeApiRefreshRequest, youtubeApiRefreshSuccess, youtubeApiRevokeError, youtubeApiRevokeRequest, youtubeApiRevokeSuccess } from "../../store/types/youtube_credential_actions";
 import { youtubeCurrentProfileError, youtubeCurrentProfileRequest, youtubeCurrentProfileSucess } from "../../store/types/youtube_userProfile_actions";
 import { Channels } from "../../youtubeApi/youtube-api-channels";
 import { settingsTheme } from "../theme";
@@ -36,7 +36,7 @@ const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) => {
 			if (value !== null) {
 				try {
 					dispatch(youtubeApiRefreshRequest());
-					var refreshResult: RefreshResult = await refresh(props.authorizeConfiguration, { refreshToken: value });
+					const refreshResult: RefreshResult = await refresh(props.authorizeConfiguration, { refreshToken: value });
 					if (refreshResult) {
 						dispatch(youtubeApiRefreshSuccess(refreshResult));
 
@@ -49,6 +49,7 @@ const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) => {
 				}
 			}
 		} catch (e) {
+			// eslint-disable-next-line no-console
 			console.error(e);
 		}
 	}
@@ -56,7 +57,7 @@ const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) => {
 	const authorizeYoutube = async () => {
 		try {
 			dispatch(youtubeApiAuthorizeRequest());
-			var authorizeResult: AuthorizeResult = await authorize(props.authorizeConfiguration);
+			const authorizeResult: AuthorizeResult = await authorize(props.authorizeConfiguration);
 			if (authorizeResult) {
 				dispatch(youtubeApiAuthorizeSuccess(authorizeResult));
 				await storeRefreshToken(authorizeResult.refreshToken);
@@ -69,7 +70,7 @@ const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) => {
 	const refreshYoutube = async () => {
 		try {
 			dispatch(youtubeApiRefreshRequest());
-			var refreshResult: RefreshResult = await refresh(props.authorizeConfiguration, { refreshToken: state.youtubeState.credential.refreshToken });
+			const refreshResult: RefreshResult = await refresh(props.authorizeConfiguration, { refreshToken: state.youtubeState.credential.refreshToken });
 			if (refreshResult) {
 				dispatch(youtubeApiRefreshSuccess(refreshResult));
 
@@ -97,7 +98,7 @@ const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) => {
 	const getYoutubeChannelId = async () => {
 		try {
 			dispatch(youtubeCurrentProfileRequest());
-			var response = await new Channels(state.youtubeState.credential.accessToken).list(
+			const response = await new Channels(state.youtubeState.credential.accessToken).list(
 				{
 					mine: true,
 					part: ['snippet', 'contentDetails'],
@@ -115,6 +116,7 @@ const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) => {
 		try {
 			await AsyncStorage.setItem(storageKey, token);
 		} catch (e) {
+			// eslint-disable-next-line no-console
 			console.error(e);
 		}
 	}

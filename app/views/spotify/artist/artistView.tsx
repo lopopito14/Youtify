@@ -1,11 +1,11 @@
 import { Body, Button, Card, CardItem, Content, H1, H2, Icon, Left, List, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base';
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { spotifyTheme } from '../../theme';
-import { ISpotifyNavigationProps, SpotifyViewType } from '../../spotifyView';
 import useFetchArtist from './useFetchArtist';
 import { msToTime } from '../../utils/helpers';
 import usePlayTrack from '../usePlayTrack';
-import { StyleSheet } from 'react-native';
+import { ISpotifyNavigationProps, SpotifyViewType } from '../../../interfaces/spotifyInterfaces';
 
 interface IProps extends ISpotifyNavigationProps {
     artistId: string;
@@ -13,19 +13,21 @@ interface IProps extends ISpotifyNavigationProps {
 
 const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
 
-    const { artist, relatedArtists, relatedArtistsFollowingStatus, artistTopTracks, loaded, onFollow } = useFetchArtist(props.artistId);
+    const { selectedView, artistId } = props;
+
+    const { artist, relatedArtists, relatedArtistsFollowingStatus, artistTopTracks, loaded, onFollow } = useFetchArtist(artistId);
     const { trackIdPlaying, playTrack, stopPlaying } = usePlayTrack();
 
     React.useEffect(() => {
         if (props.selectedView !== SpotifyViewType.ARTIST) {
             stopPlaying();
         }
-    }, [props.selectedView]);
+    }, [selectedView]);
 
     return (
         <>
             {
-                props.selectedView === SpotifyViewType.ARTIST &&
+                selectedView === SpotifyViewType.ARTIST &&
                 <Content style={styles.contentStyle}>
                     {
                         loaded && artist && artistTopTracks && relatedArtists && relatedArtistsFollowingStatus &&
@@ -47,8 +49,8 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                 </Left>
                                 <Body>
                                     {
-                                        artist.genres.map((g, i) =>
-                                            <Text key={i} note>{g}</Text>
+                                        artist.genres.map((g) =>
+                                            <Text key={g} note>{g}</Text>
                                         )
                                     }
                                 </Body>
@@ -71,8 +73,8 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
                             </CardItem>
                             <List>
                                 {
-                                    artistTopTracks.tracks.map((t, i) =>
-                                        <ListItem thumbnail key={i}>
+                                    artistTopTracks.tracks.map((t) =>
+                                        <ListItem thumbnail key={t.id}>
                                             <Body>
                                                 <Text numberOfLines={1}>{t.name}</Text>
                                                 <Text note numberOfLines={1}>{t.artists.map((a) => a.name).join(', ')}</Text>
@@ -98,7 +100,7 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
                             <List>
                                 {
                                     relatedArtists.artists.map((a, i) =>
-                                        <ListItem key={i} thumbnail>
+                                        <ListItem key={a.id} thumbnail>
                                             <Left>
                                                 {
                                                     a.images.length >= 3 &&

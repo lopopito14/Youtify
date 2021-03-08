@@ -1,4 +1,4 @@
-import {Base} from './youtube-api-base';
+import Base from './youtube-api-base';
 import {SearchListParameter, SearchListResponse} from './youtube-api-models';
 
 export interface ISearch {
@@ -11,6 +11,6 @@ export class Search extends Base implements ISearch {
   }
 
   async list(params: SearchListParameter): Promise<SearchListResponse> | never {
-    return await this.getWebRequest<SearchListResponse>(this.buildUri(params));
+    return this.getWebRequest<SearchListResponse>(this.buildUri(params));
   }
 }

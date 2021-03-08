@@ -1,8 +1,9 @@
 import React from 'react';
-import Context from '../../../store/context';
 import SpotifyApi from 'spotify-web-api-js';
+import Context from '../../../store/context';
 import { pushSpotifyErrorNotification } from '../../../store/types/notifications_actions';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchPlaylist = (playlistId: string) => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -18,7 +19,7 @@ const useFetchPlaylist = (playlistId: string) => {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var response = await spotifyApi.getPlaylist(playlistId);
+            const response = await spotifyApi.getPlaylist(playlistId);
             if (response) {
                 setPlaylist(response);
                 setLoaded(true);

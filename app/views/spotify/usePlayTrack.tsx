@@ -1,6 +1,9 @@
+/* eslint-disable no-console */
 import React from 'react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import Sound from 'react-native-sound';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const usePlayTrack = () => {
 
     const [trackIdPlaying, setTrackIdPlaying] = React.useState<string | undefined>(undefined);
@@ -33,7 +36,7 @@ const usePlayTrack = () => {
                 console.log('failed to load the sound', e);
                 return;
             }
-            console.log('duration in seconds: ' + track.getDuration() + 'number of channels: ' + track.getNumberOfChannels());
+            console.log(`duration in seconds: ${track.getDuration()}number of channels: ${track.getNumberOfChannels()}`);
 
             track.play((success) => {
                 if (success) {

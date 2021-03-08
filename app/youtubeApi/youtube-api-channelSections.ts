@@ -1,4 +1,4 @@
-import {Base} from './youtube-api-base';
+import Base from './youtube-api-base';
 import {
   ChannelSectionListParameter,
   ChannelSectionListResponse,
@@ -18,7 +18,7 @@ export class ChannelSections extends Base implements IChannelSections {
   async list(
     params: ChannelSectionListParameter,
   ): Promise<ChannelSectionListResponse> | never {
-    return await this.getWebRequest<ChannelSectionListResponse>(
+    return this.getWebRequest<ChannelSectionListResponse>(
       this.buildUri(params),
     );
   }

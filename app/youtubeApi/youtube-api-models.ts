@@ -1,7 +1,8 @@
-export class ErrorResponseException {
-  errorResponse: ErrorResponse;
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-empty-interface */
+export class ErrorResponseException extends Error {
   constructor(errorResponse: ErrorResponse) {
-    this.errorResponse = errorResponse;
+    super(errorResponse.error.message);
   }
 }
 
@@ -4897,6 +4898,7 @@ export interface ThumbnailSetParameter extends StandardParameters {
   /**
    * Request body metadata
    */
+  // eslint-disable-next-line @typescript-eslint/ban-types
   requestBody?: {};
 
   /**

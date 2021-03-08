@@ -5,7 +5,7 @@ import { TYoutubeCurrentProfileActions, Types } from './youtube_userProfile_type
 
 const reducer: Reducer<IYoutubeProfile, TActions> = (state: IYoutubeProfile = InitialState.youtubeState.userProfile, action: TActions) => {
 
-    var youtubeAction = action as TYoutubeCurrentProfileActions;
+    const youtubeAction = action as TYoutubeCurrentProfileActions;
     if (youtubeAction === null) {
         return state;
     }

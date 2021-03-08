@@ -6,6 +6,7 @@ interface Props {
 	credential: ICredential
 	authorizeDelegate(): Promise<void>;
 	refreshDelegate(): Promise<void>;
+	// eslint-disable-next-line react/no-unused-prop-types
 	revokeDelegate(): Promise<void>;
 }
 

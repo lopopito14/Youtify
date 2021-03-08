@@ -1,11 +1,12 @@
 import React from 'react';
+import { IAdjustableVideo } from '../../../interfaces/youtubeInterfaces';
 import Context from '../../../store/context';
 import { pushYoutubeErrorNotification } from '../../../store/types/notifications_actions';
 import { SearchResult } from '../../../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../../../youtubeApi/youtube-api-playlistItems';
 import { Videos } from '../../../youtubeApi/youtube-api-videos';
-import { IAdjustableVideo } from './adjustFavoritesView';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchAdjustFavorites = () => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -36,14 +37,14 @@ const useFetchAdjustFavorites = () => {
         }
     }, [pageToken]);
 
-    const fetchFavoriteVideos = async (pageToken: string | undefined = undefined) => {
+    const fetchFavoriteVideos = async (pageTokenValue: string | undefined = undefined) => {
 
         try {
-            var playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
+            const playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
                 playlistId: state.youtubeState.userProfile.favoritePlaylistId,
                 part: ['snippet', 'contentDetails'],
                 maxResults: 50,
-                pageToken: pageToken
+                pageToken: pageTokenValue
             });
             if (playlistItemsResponse) {
 
@@ -59,7 +60,7 @@ const useFetchAdjustFavorites = () => {
                         return result;
                     });
 
-                    let videosIds: string[] = [];
+                    const videosIds: string[] = [];
 
                     playlistItemsResponse.items.forEach(i => {
                         if (i.contentDetails?.videoId) {
@@ -67,7 +68,7 @@ const useFetchAdjustFavorites = () => {
                         }
                     });
 
-                    var videosResponse = await new Videos(state.youtubeState.credential.accessToken).list({
+                    const videosResponse = await new Videos(state.youtubeState.credential.accessToken).list({
                         id: videosIds,
                         part: ['snippet', 'contentDetails', 'statistics'],
                         maxResults: 50,
@@ -76,21 +77,19 @@ const useFetchAdjustFavorites = () => {
                     if (videosResponse && videosResponse.items) {
                         const videos = videosResponse.items.filter(v => v.snippet?.channelId && filteredChannelIds.includes(v.snippet?.channelId));
 
-                        let adjustableVideos: IAdjustableVideo[] = [];
+                        const newAdjustableVideos: IAdjustableVideo[] = [];
 
                         videos.forEach(video => {
                             const playlistItem = playlistItemsResponse.items?.find(p => p.contentDetails?.videoId === video.id);
                             if (playlistItem) {
-                                adjustableVideos.push({
-                                    playlistItem: playlistItem,
-                                    video: video
+                                newAdjustableVideos.push({
+                                    playlistItem,
+                                    video
                                 });
                             }
                         });
 
-                        setAdjustableVideos((prev) => {
-                            return [...prev, ...adjustableVideos]
-                        });
+                        setAdjustableVideos((prev) => [...prev, ...newAdjustableVideos]);
                     }
                 }
 
@@ -128,13 +127,10 @@ const useFetchAdjustFavorites = () => {
                         id: adjustableVideo.playlistItem.id
                     });
 
-                    setAdjustableVideos((prev) => {
-                        return prev.filter((i) => i.playlistItem.id !== adjustableVideo.playlistItem.id);
-                    });
+                    setAdjustableVideos((prev) => prev.filter((i) => i.playlistItem.id !== adjustableVideo.playlistItem.id));
                 }
             }
         } catch (error) {
-            console.error(error);
             dispatch(pushYoutubeErrorNotification(error));
         }
     }

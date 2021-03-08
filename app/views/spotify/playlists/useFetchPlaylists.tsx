@@ -1,8 +1,9 @@
 import React from 'react'
-import Context from '../../../store/context';
 import SpotifyApi from 'spotify-web-api-js';
+import Context from '../../../store/context';
 import { pushSpotifyErrorNotification } from '../../../store/types/notifications_actions';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchPlaylists = () => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -22,16 +23,17 @@ const useFetchPlaylists = () => {
             await fetchPlaylists(playlists.length);
         }
         else {
+            // eslint-disable-next-line no-console
             console.log("all playlists loaded");
         }
     }, [loaded, playlists]);
 
-    const fetchPlaylists = async (offset: number = 0) => {
+    const fetchPlaylists = async (offset = 0) => {
         try {
-            var spotifyApi = new SpotifyApi();
+            const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-            var response = await spotifyApi.getUserPlaylists(
+            const response = await spotifyApi.getUserPlaylists(
                 state.spotifyState.userProfile.id,
                 {
                     "limit": 10,

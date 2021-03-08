@@ -5,12 +5,10 @@ import { TSpotifyCredentialsActions, Types } from './spotify_credential_types';
 
 const reducer: Reducer<ICredential, TActions> = (state: ICredential = InitialState.spotifyState.credential, action: TActions) => {
 
-    var spotifyAction = action as TSpotifyCredentialsActions;
+    const spotifyAction = action as TSpotifyCredentialsActions;
     if (spotifyAction === null) {
         return state;
     }
-
-    console.log(spotifyAction.type);
 
     switch (spotifyAction.type) {
         case Types.SPOTIFY_API_AUTHORIZE_REQUEST:

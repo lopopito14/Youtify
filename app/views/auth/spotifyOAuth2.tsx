@@ -1,15 +1,15 @@
 import React from "react";
 import { AuthConfiguration, authorize, refresh, revoke } from "react-native-app-auth";
+import SpotifyApi from 'spotify-web-api-js';
+import { Body, Card, CardItem, Spinner } from "native-base";
+import { Image, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Context from "../../store/context";
 import { spotifyApiAuthorizeError, spotifyApiAuthorizeRequest, spotifyApiAuthorizeSucess as spotifyApiAuthorizeSuccess, spotifyApiRefreshError, spotifyApiRefreshRequest, spotifyApiRefreshSucess as spotifyApiRefreshSuccess, spotifyApiRevokeError, spotifyApiRevokeRequest, spotifyApiRevokeSuccess } from "../../store/types/spotify_credential_actions";
 import { spotifyCurrentProfileError, spotifyCurrentProfileRequest, spotifyCurrentProfileSucess } from "../../store/types/spotify_userProfile_actions";
 import CredentialView from "./credentialView";
-import SpotifyApi from 'spotify-web-api-js';
-import { Body, Card, CardItem, Spinner } from "native-base";
-import { Image, StyleSheet } from "react-native";
 import UserProfileItem from "./userProfileItem";
 import { settingsTheme } from "../theme";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Props {
 	authorizeConfiguration: AuthConfiguration;
@@ -22,7 +22,7 @@ const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 
 	React.useEffect(() => {
 		if (state.spotifyState.credential.isLogged) {
-			if (state.spotifyState.userProfile.id == '') {
+			if (state.spotifyState.userProfile.id === '') {
 				getSpotifyUserId();
 			}
 		} else {
@@ -36,7 +36,7 @@ const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 			if (value !== null) {
 				try {
 					dispatch(spotifyApiRefreshRequest());
-					var refreshResult = await refresh(props.authorizeConfiguration, { refreshToken: value });
+					const refreshResult = await refresh(props.authorizeConfiguration, { refreshToken: value });
 					if (refreshResult) {
 						dispatch(spotifyApiRefreshSuccess(refreshResult));
 
@@ -49,6 +49,7 @@ const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 				}
 			}
 		} catch (e) {
+			// eslint-disable-next-line no-console
 			console.error(e);
 		}
 	}
@@ -56,7 +57,7 @@ const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 	const authorizeSpotify = async () => {
 		try {
 			dispatch(spotifyApiAuthorizeRequest());
-			var authorizeResult = await authorize(props.authorizeConfiguration);
+			const authorizeResult = await authorize(props.authorizeConfiguration);
 			if (authorizeResult) {
 				dispatch(spotifyApiAuthorizeSuccess(authorizeResult));
 				await storeRefreshToken(authorizeResult.refreshToken);
@@ -69,7 +70,7 @@ const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 	const refreshSpotify = async () => {
 		try {
 			dispatch(spotifyApiRefreshRequest());
-			var refreshResult = await refresh(props.authorizeConfiguration, { refreshToken: state.spotifyState.credential.refreshToken });
+			const refreshResult = await refresh(props.authorizeConfiguration, { refreshToken: state.spotifyState.credential.refreshToken });
 			if (refreshResult) {
 				dispatch(spotifyApiRefreshSuccess(refreshResult));
 
@@ -97,9 +98,9 @@ const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 	const getSpotifyUserId = async () => {
 		try {
 			dispatch(spotifyCurrentProfileRequest());
-			var spotifyApi = new SpotifyApi();
+			const spotifyApi = new SpotifyApi();
 			spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
-			var getMeResult = await spotifyApi.getMe(props.authorizeConfiguration);
+			const getMeResult = await spotifyApi.getMe(props.authorizeConfiguration);
 			if (getMeResult) {
 				dispatch(spotifyCurrentProfileSucess(getMeResult));
 			}
@@ -112,6 +113,7 @@ const SpotifyOAuth2: React.FunctionComponent<Props> = (props: Props) => {
 		try {
 			await AsyncStorage.setItem(storageKey, token);
 		} catch (e) {
+			// eslint-disable-next-line no-console
 			console.error(e);
 		}
 	}

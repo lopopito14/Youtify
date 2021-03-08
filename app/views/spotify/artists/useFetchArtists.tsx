@@ -3,6 +3,7 @@ import SpotifyApi from 'spotify-web-api-js';
 import Context from '../../../store/context';
 import { pushSpotifyErrorNotification } from '../../../store/types/notifications_actions';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchArtists = () => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -23,11 +24,12 @@ const useFetchArtists = () => {
             await fetchFollowedArtists(after);
         }
         else {
+            // eslint-disable-next-line no-console
             console.log("all followed artists loaded");
         }
     }, [loaded, after]);
 
-    const fetchFollowedArtists = async (after: string | undefined = undefined) => {
+    const fetchFollowedArtists = async (afterValue: string | undefined = undefined) => {
         try {
             const spotifyApi = new SpotifyApi();
             spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
@@ -36,16 +38,16 @@ const useFetchArtists = () => {
                 {
                     "type": "artist",
                     "limit": 10,
-                    "after": after
+                    "after": afterValue
                 } :
                 {
                     "type": "artist",
                     "limit": 10
                 };
 
-            var response = await spotifyApi.getFollowedArtists(option);
+            const response = await spotifyApi.getFollowedArtists(option);
             if (response) {
-                if (after) {
+                if (afterValue) {
                     setFollowedArtists([...followedArtists, ...response.artists.items]);
                 }
                 else {

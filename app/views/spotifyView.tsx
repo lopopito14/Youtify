@@ -1,30 +1,14 @@
 import React from 'react';
 import { Body, Button, Header, Icon, Left, Title } from 'native-base';
+import { StyleSheet } from 'react-native';
 import { spotifyTheme } from './theme';
 import SpotifyMenuView from './spotify/spotifyMenuView';
-import { StyleSheet } from 'react-native';
+import { SpotifyViewType } from '../interfaces/spotifyInterfaces';
 
-interface IProps { }
-
-export enum SpotifyViewType {
-    MENU,
-    PLAYLISTS,
-    PLAYLIST,
-    ARTISTS,
-    ARTIST
-}
-
-export interface ISpotifyNavigationProps {
-    selectedView: SpotifyViewType;
-    setSelectedView(view: SpotifyViewType): any;
-}
-
-const SpotifyView: React.FunctionComponent<IProps> = () => {
+const SpotifyView: React.VoidFunctionComponent = () => {
     const [selectedView, setSelectedView] = React.useState<SpotifyViewType>(SpotifyViewType.MENU);
 
-    const isSelectedView = (view: SpotifyViewType) => {
-        return selectedView === view;
-    }
+    const isSelectedView = (view: SpotifyViewType) => selectedView === view
 
     const headerTitle = () => {
         if (isSelectedView(SpotifyViewType.ARTISTS)) {

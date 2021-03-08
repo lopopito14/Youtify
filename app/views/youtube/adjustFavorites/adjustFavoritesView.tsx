@@ -1,29 +1,26 @@
 import { Body, Button, Content, H1, Icon, Left, List, ListItem, Right, Spinner, SwipeRow, Text, Thumbnail, View } from 'native-base';
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { PlaylistItem, SearchResult, Video } from '../../../youtubeApi/youtube-api-models';
+import { IYoutubeNavigationProps, IAdjustableVideo, YoutubeViewType } from '../../../interfaces/youtubeInterfaces';
+import { SearchResult } from '../../../youtubeApi/youtube-api-models';
 import { youtubeTheme } from '../../theme';
 import ModalPopup, { ModalType } from '../../utils/modalPopup';
-import { IYoutubeNavigationProps, YoutubeViewType } from '../../youtubeView';
 import useFetchAdjustFavorites from './useFetchAdjustFavorites';
 import useSearch from './useSearch';
 
-interface IProps extends IYoutubeNavigationProps { }
-
-export interface IAdjustableVideo {
-    playlistItem: PlaylistItem;
-    video: Video;
-}
+type IProps = IYoutubeNavigationProps
 
 const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => {
+    const { selectedView } = props;
+
     const { adjustableVideos, progress, loaded, replace } = useFetchAdjustFavorites();
     const { searchResults, openSearch } = useSearch();
     const [adjustableVideo, setAdjustableVideo] = React.useState<IAdjustableVideo | undefined>(undefined);
 
-    const onSearch = React.useCallback((adjustableVideo: IAdjustableVideo) => {
-        if (adjustableVideo.video.snippet?.title) {
-            setAdjustableVideo(adjustableVideo);
-            openSearch(adjustableVideo.video.snippet?.title);
+    const onSearch = React.useCallback((video: IAdjustableVideo) => {
+        if (video.video.snippet?.title) {
+            setAdjustableVideo(video);
+            openSearch(video.video.snippet?.title);
         }
     }, []);
 
@@ -45,7 +42,7 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
     return (
         <>
             {
-                props.selectedView === YoutubeViewType.ADJUST_FAVORITES &&
+                selectedView === YoutubeViewType.ADJUST_FAVORITES &&
                 <>
                     <ModalPopup
                         backgroundColor={youtubeTheme.primaryBackgroundColor}
@@ -57,10 +54,10 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
                     >
                         {
                             searchResults &&
-                            searchResults.map((s, i) =>
+                            searchResults.map((s) =>
                                 <SwipeRow
-                                    key={i}
-                                    disableRightSwipe={true}
+                                    key={s.id?.videoId}
+                                    disableRightSwipe
                                     rightOpenValue={-75}
                                     stopRightSwipe={-75}
                                     body={
@@ -92,8 +89,8 @@ const AdjustFavoritesView: React.FunctionComponent<IProps> = (props: IProps) => 
                                 <H1 style={styles.textStyle}>Issues {adjustableVideos.length}</H1>
                                 <List>
                                     {
-                                        adjustableVideos.map((v, i) =>
-                                            <ListItem thumbnail key={i}>
+                                        adjustableVideos.map((v) =>
+                                            <ListItem thumbnail key={v.video.id}>
                                                 <Left>
                                                     {
                                                         v.video.snippet?.thumbnails?.medium?.url &&

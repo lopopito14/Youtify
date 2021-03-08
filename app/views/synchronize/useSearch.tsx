@@ -1,13 +1,14 @@
 import React from 'react';
+import SpotifyApi from 'spotify-web-api-js';
 import Context from '../../store/context';
 import { pushSpotifyErrorNotification } from '../../store/types/notifications_actions';
-import SpotifyApi from 'spotify-web-api-js';
 import { ILoad } from '../../store/state';
 
 export interface ISearch extends ILoad {
     searchResults: globalThis.SpotifyApi.TrackObjectFull[]
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useSearch = () => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -41,7 +42,7 @@ const useSearch = () => {
                 limit: 10
             };
 
-            var searchTracksResponse = await spotifyApi.searchTracks(query, options);
+            const searchTracksResponse = await spotifyApi.searchTracks(query, options);
             if (searchTracksResponse) {
                 setSearchResults({
                     loaded: true,
@@ -62,4 +63,4 @@ const useSearch = () => {
     return { searchResults, openSearch };
 }
 
-export default useSearch
+export default useSearch;

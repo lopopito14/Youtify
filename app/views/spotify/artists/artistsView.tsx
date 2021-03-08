@@ -1,24 +1,25 @@
 import { Body, Button, Icon, Left, ListItem, Right, Spinner, Text, Thumbnail } from 'native-base';
+import { StyleSheet } from 'react-native';
 import React from 'react';
 import RefreshableList from '../../utils/refreshableList';
 import { spotifyTheme } from '../../theme';
-import { ISpotifyNavigationProps, SpotifyViewType } from '../../spotifyView';
 import ArtistView from '../artist/artistView';
 import useFetchArtists from './useFetchArtists';
-import { StyleSheet } from 'react-native';
+import { ISpotifyNavigationProps, SpotifyViewType } from '../../../interfaces/spotifyInterfaces';
 
-interface IProps extends ISpotifyNavigationProps { }
+type IProps = ISpotifyNavigationProps
 
 const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
+    const { selectedView, setSelectedView } = props;
 
     const { followedArtists, loaded, loadArtists, refreshArtists } = useFetchArtists();
     const [selectedArtistId, setSelectedArtistId] = React.useState<string | undefined>(undefined);
 
     React.useEffect(() => {
-        if (props.selectedView === SpotifyViewType.ARTISTS) {
+        if (selectedView === SpotifyViewType.ARTISTS) {
             setSelectedArtistId(undefined);
         }
-    }, [props.selectedView]);
+    }, [selectedView]);
 
     const onOpenArtist = React.useCallback((id: string) => {
         setSelectedArtistId(id);
@@ -28,8 +29,8 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     return (
         <>
             {
-                props.selectedView === SpotifyViewType.ARTISTS &&
-                <RefreshableList onRefresh={refreshArtists} backgroundColor={spotifyTheme.secondaryColor} lazyLoading={true} onLoad={loadArtists}>
+                selectedView === SpotifyViewType.ARTISTS &&
+                <RefreshableList onRefresh={refreshArtists} backgroundColor={spotifyTheme.secondaryColor} lazyLoading onLoad={loadArtists}>
                     {
                         followedArtists.map((p) =>
                             <ListItem thumbnail key={p.id}>
@@ -59,8 +60,8 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                props.selectedView !== SpotifyViewType.ARTISTS && selectedArtistId &&
-                <ArtistView selectedView={props.selectedView} setSelectedView={props.setSelectedView} artistId={selectedArtistId} />
+                selectedView !== SpotifyViewType.ARTISTS && selectedArtistId &&
+                <ArtistView selectedView={selectedView} setSelectedView={setSelectedView} artistId={selectedArtistId} />
             }
         </>
     )

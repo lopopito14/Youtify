@@ -5,12 +5,10 @@ import { TYoutubeCredentialsActions, Types } from './youtube_credential_types';
 
 const reducer: Reducer<ICredential, TActions> = (state: ICredential = InitialState.youtubeState.credential, action: TActions) => {
 
-    var youtubeAction = action as TYoutubeCredentialsActions;
+    const youtubeAction = action as TYoutubeCredentialsActions;
     if (youtubeAction === null) {
         return state;
     }
-
-    console.log(youtubeAction.type);
 
     switch (youtubeAction.type) {
         case Types.YOUTUBE_API_AUTHORIZE_REQUEST:

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
 import { IPopNotification, IPushSpotifyErrorNotification, IPushSpotifySuccessNotification, IPushSpotifyWarningNotification, IPushYoutubeErrorNotification, IPushYoutubeSuccessNotification, IPushYoutubeWarningNotification, Types } from './notifications_types';
 
 export function pushYoutubeSuccessNotification(result: string) : IPushYoutubeSuccessNotification {
@@ -5,7 +6,7 @@ export function pushYoutubeSuccessNotification(result: string) : IPushYoutubeSuc
         type: Types.PUSH_YOUTUBE_SUCCESS_NOTIFICATION,
         payload: result
     }
-};
+}
 
 export function pushYoutubeWarningNotification(result: string): IPushYoutubeWarningNotification {
     return {

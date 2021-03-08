@@ -7,6 +7,7 @@ import { Subscriptions } from '../../../youtubeApi/youtube-api-subscriptions';
 import { Playlists } from '../../../youtubeApi/youtube-api-playlists';
 import { Channels } from '../../../youtubeApi/youtube-api-channels';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchSubscription = (subscription: Subscription) => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -21,7 +22,8 @@ const useFetchSubscription = (subscription: Subscription) => {
             try {
                 await Promise.all([fetchChannelSections(), fetchSubscriptions()]);
             } catch (error) {
-                console.log('Error => ' + error);
+                // eslint-disable-next-line no-console
+                console.log(`Error => ${error}`);
             } finally {
                 setLoaded(true);
             }
@@ -32,14 +34,14 @@ const useFetchSubscription = (subscription: Subscription) => {
 
     const fetchChannelSections = async () => {
         try {
-            var channelSectionsResponse = await new ChannelSections(state.youtubeState.credential.accessToken).list({
+            const channelSectionsResponse = await new ChannelSections(state.youtubeState.credential.accessToken).list({
                 channelId: subscription.snippet?.resourceId?.channelId ? subscription.snippet.resourceId.channelId : '',
                 part: ['snippet', 'contentDetails']
             });
             if (channelSectionsResponse && channelSectionsResponse.items) {
 
-                let playlistIds: string[] = [];
-                let channelIds: string[] = [];
+                const playlistIds: string[] = [];
+                const channelIds: string[] = [];
 
                 channelSectionsResponse.items.forEach(i => {
                     if (i.contentDetails?.playlists) {
@@ -49,7 +51,7 @@ const useFetchSubscription = (subscription: Subscription) => {
                     }
                 });
 
-                var playlistsResponse = await new Playlists(state.youtubeState.credential.accessToken).list({
+                const playlistsResponse = await new Playlists(state.youtubeState.credential.accessToken).list({
                     id: playlistIds,
                     part: ['snippet', 'contentDetails'],
                     maxResults: 10,
@@ -58,7 +60,7 @@ const useFetchSubscription = (subscription: Subscription) => {
                     setChannelPlaylists(playlistsResponse.items);
                 }
 
-                var channelsResponse = await new Channels(state.youtubeState.credential.accessToken).list({
+                const channelsResponse = await new Channels(state.youtubeState.credential.accessToken).list({
                     id: channelIds,
                     part: ['snippet', 'contentDetails'],
                     maxResults: 10,
@@ -74,7 +76,7 @@ const useFetchSubscription = (subscription: Subscription) => {
 
     const fetchSubscriptions = async () => {
         try {
-            var response = await new Subscriptions(state.youtubeState.credential.accessToken).list({
+            const response = await new Subscriptions(state.youtubeState.credential.accessToken).list({
                 channelId: subscription.snippet?.resourceId?.channelId ? subscription.snippet?.resourceId.channelId : '',
                 part: ['snippet', 'contentDetails'],
                 maxResults: 50,

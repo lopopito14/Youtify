@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
 import { AuthorizeResult, RefreshResult } from 'react-native-app-auth';
 import { IYoutubeApiAuthorizeError, IYoutubeApiAuthorizeRequest, IYoutubeApiAuthorizeSuccess, IYoutubeApiRefreshError, IYoutubeApiRefreshRequest, IYoutubeApiRefreshSuccess, IYoutubeApiRevokeError, IYoutubeApiRevokeRequest, IYoutubeApiRevokeSuccess, Types } from './youtube_credential_types';
 
@@ -27,7 +28,7 @@ export function youtubeApiRefreshRequest(): IYoutubeApiRefreshRequest {
     }
 }
 
-export function youtubeApiRefreshSucess(result: RefreshResult): IYoutubeApiRefreshSuccess {
+export function youtubeApiRefreshSuccess(result: RefreshResult): IYoutubeApiRefreshSuccess {
     return {
         type: Types.YOUTUBE_API_REFRESH_SUCCESS,
         payload: result

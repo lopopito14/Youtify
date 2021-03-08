@@ -5,12 +5,10 @@ import { TSpotifyCurrentProfileActions, Types } from './spotify_userProfile_type
 
 const reducer: Reducer<ISpotifyProfile, TActions> = (state: ISpotifyProfile = InitialState.spotifyState.userProfile, action: TActions) => {
 
-    var spotifyAction = action as TSpotifyCurrentProfileActions;
+    const spotifyAction = action as TSpotifyCurrentProfileActions;
     if (spotifyAction === null) {
         return state;
     }
-
-    console.log(spotifyAction.type);
 
     switch (spotifyAction.type) {
         case Types.SPOTIFY_CURRENT_PROFILE_REQUEST:

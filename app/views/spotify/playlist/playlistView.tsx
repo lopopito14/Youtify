@@ -1,11 +1,11 @@
 import { Body, Button, Card, CardItem, Content, H1, H2, Icon, Left, Spinner, Text, Thumbnail } from 'native-base';
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { spotifyTheme } from '../../theme';
-import { ISpotifyNavigationProps, SpotifyViewType } from '../../spotifyView';
 import { msToTime } from '../../utils/helpers';
 import useFetchPlaylist from './useFetchPlaylist';
 import usePlayTrack from '../usePlayTrack';
-import { StyleSheet } from 'react-native';
+import { ISpotifyNavigationProps, SpotifyViewType } from '../../../interfaces/spotifyInterfaces';
 
 interface IProps extends ISpotifyNavigationProps {
     playlistId: string;
@@ -13,19 +13,21 @@ interface IProps extends ISpotifyNavigationProps {
 
 const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
 
-    const { playlist, loaded } = useFetchPlaylist(props.playlistId);
+    const { playlistId, selectedView } = props;
+
+    const { playlist, loaded } = useFetchPlaylist(playlistId);
     const { trackIdPlaying, playTrack, stopPlaying } = usePlayTrack();
 
     React.useEffect(() => {
-        if (props.selectedView !== SpotifyViewType.PLAYLIST) {
+        if (selectedView !== SpotifyViewType.PLAYLIST) {
             stopPlaying();
         }
-    }, [props.selectedView]);
+    }, [selectedView]);
 
     return (
         <>
             {
-                props.selectedView === SpotifyViewType.PLAYLIST &&
+                selectedView === SpotifyViewType.PLAYLIST &&
                 <Content style={styles.contentStyle}>
                     {
                         loaded && playlist &&
@@ -49,7 +51,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                             {
                                 playlist.tracks.items.map((t, i) =>
                                 (t.track.type === 'track' &&
-                                    <CardItem bordered key={i} style={styles.cardItemStyle}>
+                                    <CardItem bordered key={t.track.id} style={styles.cardItemStyle}>
                                         <Text style={styles.numberingStyle}>{i + 1}</Text>
                                         <Body>
                                             <Text numberOfLines={1}>{t.track.name}</Text>

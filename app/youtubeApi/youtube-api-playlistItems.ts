@@ -1,4 +1,5 @@
-import {Base} from './youtube-api-base';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Base from './youtube-api-base';
 import {
   PlaylistItemDeleteParameter,
   PlaylistItemInsertParameter,
@@ -23,19 +24,21 @@ export class PlaylistItems extends Base implements IPlaylistItems {
   async list(
     params: PlaylistItemListParameter,
   ): Promise<PlaylistItemListResponse> | never {
-    return await this.getWebRequest<PlaylistItemListResponse>(
+    return this.getWebRequest<PlaylistItemListResponse>(
       this.buildUri(params),
     );
   }
+
   async insert(
     params: PlaylistItemInsertParameter,
   ): Promise<PlaylistItemInsertResponse> | never {
-    return await this.postWebRequest<PlaylistItemListResponse>(
+    return this.postWebRequest<PlaylistItemListResponse>(
       this.buildUri(params),
       params.requestBody
     );
   }
+
   async delete(params: PlaylistItemDeleteParameter): Promise<any> | never {
-    return await this.deleteWebRequest_(this.buildUri(params));
+    return this.deleteWebRequest(this.buildUri(params));
   }
 }

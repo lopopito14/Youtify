@@ -9,13 +9,15 @@ interface Props {
 }
 
 const UserProfileItem: React.FunctionComponent<Props> = (props: Props) => {
+    const { title, description } = props;
+
     return (
         <CardItem style={styles.cardItemStyle}>
             <Left>
-                <H3>{props.title}:</H3>
+                <H3>{title}:</H3>
             </Left>
             <Body>
-                <Text>{props.description}</Text>
+                <Text>{description}</Text>
             </Body>
         </CardItem>
     )

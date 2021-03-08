@@ -4,6 +4,7 @@ import { pushYoutubeErrorNotification } from '../../../store/types/notifications
 import { SearchResult } from '../../../youtubeApi/youtube-api-models';
 import { Search } from '../../../youtubeApi/youtube-api-search';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useSearch = () => {
     const { state, dispatch } = React.useContext(Context);
 
@@ -15,10 +16,10 @@ const useSearch = () => {
             return;
         }
         try {
-            let publishedBefore = undefined;
-            let publishedAfter = undefined;
+            const publishedBefore = undefined;
+            const publishedAfter = undefined;
 
-            /*if (adjustableVideo.video.snippet?.publishedAt) {
+            /* if (adjustableVideo.video.snippet?.publishedAt) {
                 const date = new Date(adjustableVideo.video.snippet?.publishedAt);
                 const startDate = new Date(date.setMonth(date.getMonth() - 6));
                 const endDate = new Date(date.setMonth(date.getMonth() + 12));
@@ -28,12 +29,12 @@ const useSearch = () => {
 
                 publishedBefore = publishedBefore.slice(0, 19) + publishedBefore.slice(23);
                 publishedAfter = publishedAfter.slice(0, 19) + publishedAfter.slice(23);
-            }*/
+            } */
 
             const searchResponse = await new Search(state.youtubeState.credential.accessToken).list({
                 maxResults: 10,
-                publishedBefore: publishedBefore,
-                publishedAfter: publishedAfter,
+                publishedBefore,
+                publishedAfter,
                 part: ['snippet'],
                 q: query
             });

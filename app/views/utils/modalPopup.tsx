@@ -9,47 +9,49 @@ export enum ModalType {
 
 interface IProps {
     title: string;
-    type: ModalType,
+    type: ModalType;
     visible: boolean;
     backgroundColor: string;
     okCallback(): Promise<void>;
     cancelCallback(): Promise<void>;
-    children?: React.ReactNode
+    // eslint-disable-next-line react/require-default-props
+    children?: React.ReactNode;
 }
 
 const ModalPopup: React.FunctionComponent<IProps> = (props: IProps) => {
+    const { title, type, visible, backgroundColor, okCallback, cancelCallback, children } = props;
     return (
         <Modal
             animationType="fade"
-            transparent={true}
-            visible={props.visible}>
-            <View style={{ ...styles.modalStyle, backgroundColor: props.backgroundColor }}>
+            transparent
+            visible={visible}>
+            <View style={{ ...styles.modalStyle, backgroundColor }}>
                 <View style={styles.contentStyle}>
-                    <H1 style={styles.titleStyle}>{props.title}</H1>
+                    <H1 style={styles.titleStyle}>{title}</H1>
                     {
-                        props.children &&
+                        children &&
                         <ScrollView showsVerticalScrollIndicator={false}>
                             {
-                                props.children
+                                children
                             }
                         </ScrollView>
                     }
                     <View style={styles.viewButtonContainerStyle}>
                         {
-                            props.type === ModalType.OK_CANCEL &&
+                            type === ModalType.OK_CANCEL &&
                             <>
-                                <Button rounded success onPress={props.okCallback} style={{ ...styles.buttonStyle, ...styles.leftButtonStyle }}>
+                                <Button rounded success onPress={okCallback} style={{ ...styles.buttonStyle, ...styles.leftButtonStyle }}>
                                     <Text>     Ok     </Text>
                                 </Button>
-                                <Button rounded danger onPress={props.cancelCallback} style={{ ...styles.buttonStyle, ...styles.rightButtonStyle }}>
+                                <Button rounded danger onPress={cancelCallback} style={{ ...styles.buttonStyle, ...styles.rightButtonStyle }}>
                                     <Text>Cancel</Text>
                                 </Button>
                             </>
                         }
                         {
-                            props.type === ModalType.CANCEL &&
+                            type === ModalType.CANCEL &&
                             <>
-                                <Button rounded danger onPress={props.cancelCallback} style={styles.buttonStyle}>
+                                <Button rounded danger onPress={cancelCallback} style={styles.buttonStyle}>
                                     <Text>Cancel</Text>
                                 </Button>
                             </>

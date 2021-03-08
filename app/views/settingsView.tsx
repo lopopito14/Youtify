@@ -1,15 +1,14 @@
+/* eslint-disable no-console */
 import React from 'react';
-import YoutubeOAuth2 from './auth/youtubeOAuth2';
-import SpotifyOAuth2 from './auth/spotifyOAuth2';
 import { Body, Content, Header, Left, Title } from 'native-base';
 import { ScrollView, StyleSheet } from 'react-native';
 import { AuthConfiguration } from 'react-native-app-auth';
-import { settingsTheme } from './theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { settingsTheme } from './theme';
+import SpotifyOAuth2 from './auth/spotifyOAuth2';
+import YoutubeOAuth2 from './auth/youtubeOAuth2';
 
-interface Props { }
-
-const SettingsView: React.FunctionComponent<Props> = () => {
+const SettingsView: React.VoidFunctionComponent = () => {
 
 	const youtubeAuthorizeConfiguration: AuthConfiguration = {
 		clientId: '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
@@ -41,11 +40,12 @@ const SettingsView: React.FunctionComponent<Props> = () => {
 		},
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const purgeLocalStorage = React.useCallback(async () => {
 		try {
 			const keys = await AsyncStorage.getAllKeys();
 
-			let promises = keys.map(async key => {
+			const promises = keys.map(async key => {
 				if (key.startsWith('Playlist ')) {
 					await AsyncStorage.removeItem(key);
 				}

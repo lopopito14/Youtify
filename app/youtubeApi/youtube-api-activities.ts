@@ -1,4 +1,4 @@
-import {Base} from './youtube-api-base';
+import Base from './youtube-api-base';
 import {
   ActivityListParameter,
   ActivityListResponse,
@@ -16,7 +16,7 @@ export class Activities extends Base implements IActivities {
   async list(
     params: ActivityListParameter,
   ): Promise<ActivityListResponse> | never {
-    return await this.getWebRequest<ActivityListResponse>(
+    return this.getWebRequest<ActivityListResponse>(
       this.buildUri(params),
     );
   }
