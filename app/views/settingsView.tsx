@@ -16,7 +16,7 @@ const SettingsView: React.VoidFunctionComponent = () => {
 	const { log, error } = logger();
 	const [youtubeAuthorizeConfiguration] = React.useState<AuthConfiguration>({
 		clientId: '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
-		redirectUrl: 'com.lopopitoconverter:/youtubeoauth2callback',
+		redirectUrl: 'com.youtify:/youtubeoauth2callback',
 		scopes: [
 			'https://www.googleapis.com/auth/youtube.readonly',
 			'https://www.googleapis.com/auth/youtube.force-ssl'
@@ -28,7 +28,7 @@ const SettingsView: React.VoidFunctionComponent = () => {
 	});
 	const [spotifyAuthorizeConfiguration] = React.useState<AuthConfiguration>({
 		clientId: 'f215a46cd2624bdf93203ab0e584350a',
-		redirectUrl: 'com.lopopitoconverter:/spotifyoauth2callback',
+		redirectUrl: 'com.youtify:/spotifyoauth2callback',
 		scopes: [
 			'user-read-email',
 			'playlist-modify-public',

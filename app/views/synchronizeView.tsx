@@ -106,7 +106,7 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 
 	const headerTitle = () => {
 		if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
-			return "Synchronize Playlist";
+			return "Synchronize Playlists";
 		}
 
 		return 'Synchronize';
@@ -115,7 +115,7 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 	const buildAccordion = () => {
 		const array: { title: JSX.Element, content: JSX.Element }[] = [];
 
-		const title = <H1>Filtre</H1>;
+		const title = <H1>Filters</H1>;
 		const content =
 			<List>
 				{
