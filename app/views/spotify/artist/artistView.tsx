@@ -19,10 +19,10 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { trackIdPlaying, playTrack, stopPlaying } = usePlayTrack();
 
     React.useEffect(() => {
-        if (props.selectedView !== SpotifyViewType.ARTIST) {
+        if (selectedView !== SpotifyViewType.ARTIST) {
             stopPlaying();
         }
-    }, [selectedView]);
+    }, [selectedView, stopPlaying]);
 
     return (
         <>
@@ -94,12 +94,12 @@ const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
                             </List>
                             <CardItem bordered style={styles.cardItemStyle}>
                                 <Body>
-                                    <H2>{`Related Artists (${relatedArtists.artists.length})`}</H2>
+                                    <H2>{`Related Artists (${relatedArtists.length})`}</H2>
                                 </Body>
                             </CardItem>
                             <List>
                                 {
-                                    relatedArtists.artists.map((a, i) =>
+                                    relatedArtists.map((a, i) =>
                                         <ListItem key={a.id} thumbnail>
                                             <Left>
                                                 {

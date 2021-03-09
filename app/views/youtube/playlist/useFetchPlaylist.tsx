@@ -13,17 +13,7 @@ const useFetchPlaylist = (playlist: Playlist) => {
     const [youtubeVideos, setYoutubeVideos] = React.useState<Video[]>([]);
     const [pageToken, setPageToken] = React.useState<string | undefined>(undefined);
 
-    React.useEffect(() => {
-        fetchPlaylistVideos();
-    }, [playlist]);
-
-    React.useEffect(() => {
-        if (pageToken) {
-            fetchPlaylistVideos(pageToken);
-        }
-    }, [pageToken]);
-
-    const fetchPlaylistVideos = async (pageTokenValue: string | undefined = undefined) => {
+    const fetchPlaylistVideos = React.useCallback(async (pageTokenValue: string | undefined = undefined) => {
         try {
             const playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
                 playlistId: playlist.id ? playlist.id : '',
@@ -64,7 +54,17 @@ const useFetchPlaylist = (playlist: Playlist) => {
         } catch (error) {
             dispatch(pushYoutubeErrorNotification(error));
         }
-    }
+    }, [dispatch, playlist.id, state.youtubeState.credential.accessToken]);
+
+    React.useEffect(() => {
+        fetchPlaylistVideos();
+    }, [fetchPlaylistVideos]);
+
+    React.useEffect(() => {
+        if (pageToken) {
+            fetchPlaylistVideos(pageToken);
+        }
+    }, [fetchPlaylistVideos, pageToken]);
 
     return { youtubeVideos, loaded };
 }

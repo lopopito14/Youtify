@@ -7,6 +7,7 @@ import { Playlist } from '../../../youtubeApi/youtube-api-models';
 import useFetchPlaylist from './useFetchPlaylist';
 import { getYoutubeVideoDuration, msToTime } from '../../utils/helpers';
 import { IYoutubeNavigationProps, YoutubeViewType } from '../../../interfaces/youtubeInterfaces';
+import logger from '../../utils/logger';
 
 interface IProps extends IYoutubeNavigationProps {
     playlist: Playlist;
@@ -15,30 +16,31 @@ interface IProps extends IYoutubeNavigationProps {
 const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { playlist, selectedView } = props;
 
+    const { error } = logger();
+
     const { youtubeVideos, loaded } = useFetchPlaylist(playlist);
     const [videoIdPlaying, setVideoIdPlaying] = React.useState<string | undefined>(undefined);
 
     const playerRef = React.useRef<YoutubeIframeRef>(null);
 
     // eslint-disable-next-line @typescript-eslint/ban-types
-    const onStateChange = (state: String) => {
+    const onStateChange = React.useCallback((state: String) => {
         if (state === "ended") {
             setVideoIdPlaying(undefined);
         }
-    }
+    }, []);
 
-    const onError = (error: string) => {
-        // eslint-disable-next-line no-console
-        console.log(error);
-    }
+    const onError = React.useCallback((e: string) => {
+        error(e);
+    }, [error]);
 
-    const playBackward = () => {
+    const playBackward = React.useCallback(() => {
         playerRef.current?.getCurrentTime().then(currentTime =>
             playerRef.current?.seekTo(currentTime - 30, false)
         );
-    }
+    }, [playerRef]);
 
-    const togglePlaying = (videoId: string) => {
+    const togglePlaying = React.useCallback((videoId: string) => {
         setVideoIdPlaying((prev) => {
             const sameVideo = videoId === prev;
             if (sameVideo) {
@@ -47,13 +49,13 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
             return videoId;
 
         });
-    }
+    }, []);
 
-    const playForward = () => {
+    const playForward = React.useCallback(() => {
         playerRef.current?.getCurrentTime().then(currentTime =>
             playerRef.current?.seekTo(currentTime + 30, true)
         );
-    }
+    }, [playerRef]);
 
     const getYoutubeDuration = (duration: string | undefined | null) => {
         if (duration) {

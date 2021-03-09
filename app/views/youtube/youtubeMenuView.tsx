@@ -17,13 +17,13 @@ const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
                 selectedView === YoutubeViewType.MENU &&
                 <Content>
                     <View style={styles.containerStyle}>
-                        <Button rounded success style={styles.buttonStyle} onPress={() => props.setSelectedView(YoutubeViewType.PLAYLISTS)}>
+                        <Button rounded success style={styles.buttonStyle} onPress={() => setSelectedView(YoutubeViewType.PLAYLISTS)}>
                             <Text>Playlists</Text>
                         </Button>
-                        <Button rounded info style={styles.buttonStyle} onPress={() => props.setSelectedView(YoutubeViewType.SUBSCRIPTIONS)}>
+                        <Button rounded info style={styles.buttonStyle} onPress={() => setSelectedView(YoutubeViewType.SUBSCRIPTIONS)}>
                             <Text>Subscriptions</Text>
                         </Button>
-                        <Button rounded dark style={styles.buttonStyle} onPress={() => props.setSelectedView(YoutubeViewType.ADJUST_FAVORITES)}>
+                        <Button rounded dark style={styles.buttonStyle} onPress={() => setSelectedView(YoutubeViewType.ADJUST_FAVORITES)}>
                             <Text>Adjust Favorites</Text>
                         </Button>
                     </View>
@@ -32,9 +32,18 @@ const YoutubeMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
             {
                 selectedView !== YoutubeViewType.MENU &&
                 <>
-                    <PlaylistsView selectedView={selectedView} setSelectedView={setSelectedView} />
-                    <SubscriptionsView selectedView={selectedView} setSelectedView={setSelectedView} />
-                    <AdjustFavoritesView selectedView={selectedView} setSelectedView={setSelectedView} />
+                    {
+                        (selectedView === YoutubeViewType.PLAYLISTS || selectedView === YoutubeViewType.PLAYLIST) &&
+                        <PlaylistsView selectedView={selectedView} setSelectedView={setSelectedView} />
+                    }
+                    {
+                        (selectedView === YoutubeViewType.SUBSCRIPTIONS || selectedView === YoutubeViewType.SUBSCRIPTION) &&
+                        <SubscriptionsView selectedView={selectedView} setSelectedView={setSelectedView} />
+                    }
+                    {
+                        selectedView === YoutubeViewType.ADJUST_FAVORITES &&
+                        <AdjustFavoritesView selectedView={selectedView} setSelectedView={setSelectedView} />
+                    }
                 </>
             }
         </>

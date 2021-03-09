@@ -15,30 +15,18 @@ const useFetchAdjustFavorites = () => {
     const [adjustableVideos, setAdjustableVideos] = React.useState<IAdjustableVideo[]>([]);
     const [pageToken, setPageToken] = React.useState<string | undefined>(undefined);
 
-    const filteredChannelIds = [
-        "UC6murUWtqOwnTL68pwjoGjQ", // EuphoricHardStyleZ
-        "UCv-XlFFGN30KJkG8BhvF7nA", // Hard Records
-        "UCBOQta0mgFd7a9Ss3CYbXAA", // The Legendary Uploadzz
-        "UCQxonuu3uUCnt7DdV9KZljA", // Hardstyle Zone Music
-        "UCzH6Fc7Ba-S4U83P5ZR6dLA", // Rawstyle Nation
-        "UCuSoYG4BvzRVnNfkwXICBpg", // Hard Edits
-        "UC67WZta3Qqm-P2Eu3fej1bw"  // HARDSTYLE Records
-    ];
+    const [filteredChannelIds] = React.useState<string[]>(
+        [
+            "UC6murUWtqOwnTL68pwjoGjQ", // EuphoricHardStyleZ
+            "UCv-XlFFGN30KJkG8BhvF7nA", // Hard Records
+            "UCBOQta0mgFd7a9Ss3CYbXAA", // The Legendary Uploadzz
+            "UCQxonuu3uUCnt7DdV9KZljA", // Hardstyle Zone Music
+            "UCzH6Fc7Ba-S4U83P5ZR6dLA", // Rawstyle Nation
+            "UCuSoYG4BvzRVnNfkwXICBpg", // Hard Edits
+            "UC67WZta3Qqm-P2Eu3fej1bw"  // HARDSTYLE Records
+        ]);
 
-    React.useEffect(() => {
-        if (!loaded) {
-            fetchFavoriteVideos();
-        }
-    }, []);
-
-    React.useEffect(() => {
-        if (pageToken) {
-            fetchFavoriteVideos(pageToken);
-        }
-    }, [pageToken]);
-
-    const fetchFavoriteVideos = async (pageTokenValue: string | undefined = undefined) => {
-
+    const fetchFavoriteVideos = React.useCallback(async (pageTokenValue: string | undefined = undefined) => {
         try {
             const playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
                 playlistId: state.youtubeState.userProfile.favoritePlaylistId,
@@ -103,10 +91,19 @@ const useFetchAdjustFavorites = () => {
         } catch (error) {
             dispatch(pushYoutubeErrorNotification(error));
         }
-    }
+    }, [dispatch, filteredChannelIds, state.youtubeState.credential.accessToken, state.youtubeState.userProfile.favoritePlaylistId]);
 
-    const replace = async (searchResult: SearchResult, adjustableVideo: IAdjustableVideo) => {
+    React.useEffect(() => {
+        fetchFavoriteVideos();
+    }, [fetchFavoriteVideos]);
 
+    React.useEffect(() => {
+        if (pageToken) {
+            fetchFavoriteVideos(pageToken);
+        }
+    }, [fetchFavoriteVideos, pageToken]);
+
+    const replace = React.useCallback(async (searchResult: SearchResult, adjustableVideo: IAdjustableVideo) => {
         try {
             const insertVideoResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).insert({
                 part: ['snippet'],
@@ -133,7 +130,7 @@ const useFetchAdjustFavorites = () => {
         } catch (error) {
             dispatch(pushYoutubeErrorNotification(error));
         }
-    }
+    }, [dispatch, state.youtubeState.credential.accessToken, state.youtubeState.userProfile.favoritePlaylistId]);
 
     return { adjustableVideos, progress, loaded, replace };
 }

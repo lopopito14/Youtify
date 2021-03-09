@@ -14,6 +14,7 @@
     "appcenter": "4.0.2",
     "appcenter-analytics": "4.0.2",
     "appcenter-crashes": "4.0.2",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "native-base": "^2.15.0",
     "react": "16.13.1",
     "react-native": "0.63.3",

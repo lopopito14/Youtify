@@ -25,7 +25,7 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const onOpenSubscription = React.useCallback((subscription: Subscription) => {
         setSelectedSubscription(subscription);
         setSelectedView(YoutubeViewType.SUBSCRIPTION);
-    }, []);
+    }, [setSelectedView]);
 
     return (
         <>
@@ -61,7 +61,7 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                selectedView !== YoutubeViewType.SUBSCRIPTIONS && selectedSubscription &&
+                selectedView === YoutubeViewType.SUBSCRIPTION && selectedSubscription &&
                 <SubscriptionView selectedView={selectedView} setSelectedView={setSelectedView} subscription={selectedSubscription} />
             }
         </>

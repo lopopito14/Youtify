@@ -11,6 +11,8 @@ interface Props {
 }
 
 const CredentialView: React.FunctionComponent<Props> = (props: Props) => {
+	const { credential, authorizeDelegate, refreshDelegate } = props;
+
 	const [canLogOn, setcanLogOn] = React.useState(true);
 	const [remainingTime, setRemainingTime] = React.useState('');
 	const [interval, setinterval] = React.useState(0);
@@ -23,10 +25,10 @@ const CredentialView: React.FunctionComponent<Props> = (props: Props) => {
 	}, []);
 
 	React.useEffect(() => {
-		if (props.credential.isLogged) {
+		if (credential.isLogged) {
 
 			const currentDate = new Date(Date.now());
-			const expirationDate = new Date(props.credential.accessTokenExpirationDate);
+			const expirationDate = new Date(credential.accessTokenExpirationDate);
 
 			const remainingMilliSeconds = expirationDate.getTime() - currentDate.getTime();
 			if (remainingMilliSeconds > 0) {
@@ -43,16 +45,16 @@ const CredentialView: React.FunctionComponent<Props> = (props: Props) => {
 			setcanLogOn(true);
 			setRemainingTime('Please log on !');
 		}
-	}, [interval, canLogOn]);
+	}, [interval, canLogOn, credential.isLogged, credential.accessTokenExpirationDate]);
 
 	const logOn = React.useCallback(async () => {
-		if (props.credential.refreshToken === '') {
-			await props.authorizeDelegate();
+		if (credential.refreshToken === '') {
+			await authorizeDelegate();
 		}
 		else {
-			await props.refreshDelegate();
+			await refreshDelegate();
 		}
-	}, []);
+	}, [authorizeDelegate, credential.refreshToken, refreshDelegate]);
 
 	return (
 		<>

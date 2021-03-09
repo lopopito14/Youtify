@@ -28,8 +28,14 @@ const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
             {
                 selectedView !== SpotifyViewType.MENU &&
                 <>
-                    <PlaylistsView selectedView={selectedView} setSelectedView={setSelectedView} />
-                    <ArtistsView selectedView={selectedView} setSelectedView={setSelectedView} />
+                    {
+                        (selectedView === SpotifyViewType.PLAYLISTS || selectedView === SpotifyViewType.PLAYLIST) &&
+                        <PlaylistsView selectedView={selectedView} setSelectedView={setSelectedView} />
+                    }
+                    {
+                        (selectedView === SpotifyViewType.ARTISTS || selectedView === SpotifyViewType.ARTIST) &&
+                        <ArtistsView selectedView={selectedView} setSelectedView={setSelectedView} />
+                    }
                 </>
             }
         </>

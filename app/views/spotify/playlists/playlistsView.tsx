@@ -26,7 +26,7 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const onOpenPlaylist = React.useCallback((id: string) => {
         setselectedPlaylistId(id);
         setSelectedView(SpotifyViewType.PLAYLIST);
-    }, []);
+    }, [setSelectedView]);
 
     return (
         <>
@@ -58,7 +58,7 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                selectedView !== SpotifyViewType.PLAYLISTS && selectedPlaylistId &&
+                selectedView === SpotifyViewType.PLAYLIST && selectedPlaylistId &&
                 <PlaylistView selectedView={selectedView} setSelectedView={setSelectedView} playlistId={selectedPlaylistId} />
             }
         </>

@@ -7,6 +7,7 @@ import { Playlist, PlaylistItem } from '../youtubeApi/youtube-api-models';
 import { PlaylistItems } from '../youtubeApi/youtube-api-playlistItems';
 import { ILoad } from '../store/state';
 import { IMyPlaylists, IYoutubeMonthPlaylist } from '../interfaces/synchronizeInterfaces';
+import logger from './utils/logger';
 
 interface IYoutubePlaylists extends ILoad {
     playlists: Playlist[];
@@ -20,6 +21,11 @@ interface ISpotifyPlaylists extends ILoad {
 const usePlaylistsSynchronizer = () => {
     const { state, dispatch } = React.useContext(Context);
 
+    const { log } = logger();
+
+    // const [initYoutube, setInitYoutube] = React.useState<boolean>(true);
+    // const [initSpotify, setInitSpotify] = React.useState<boolean>(true);
+    const [initMerge, setInitMerge] = React.useState<boolean>(true);
     const [myPlaylist, setMyPlaylist] = React.useState<IMyPlaylists>({
         loaded: false,
         loading: false,
@@ -39,114 +45,7 @@ const usePlaylistsSynchronizer = () => {
     const [youtubePlaylistsPageToken, setYoutubePlaylistsPageToken] = React.useState<string | undefined>(undefined);
     const [spotifyPlaylistsOffset, setSpotifyPlaylistsOffset] = React.useState<number | undefined>(undefined);
 
-    React.useEffect(() => {
-        if (state.youtubeState.userProfile.loaded) {
-            if (!myPlaylist.loaded) {
-                fetchFavoritePlaylistItems();
-            }
-
-            if (!youtubePlaylists.loaded) {
-                fetchYoutubePlaylists();
-            }
-        }
-    }, [state.youtubeState.userProfile.loaded]);
-
-    React.useEffect(() => {
-        if (favoritepageToken) {
-            fetchFavoritePlaylistItems(favoritepageToken);
-        }
-    }, [favoritepageToken]);
-
-    React.useEffect(() => {
-        if (youtubePlaylistsPageToken) {
-            fetchYoutubePlaylists(youtubePlaylistsPageToken);
-        }
-    }, [youtubePlaylistsPageToken]);
-
-    React.useEffect(() => {
-        if (state.spotifyState.userProfile.loaded) {
-            if (!spotifyPlaylists.loaded) {
-                fetchSpotifyPlaylists();
-            }
-        }
-    }, [state.spotifyState.userProfile.loaded]);
-
-    React.useEffect(() => {
-        if (spotifyPlaylistsOffset) {
-            fetchSpotifyPlaylists(spotifyPlaylistsOffset);
-        }
-    }, [spotifyPlaylistsOffset]);
-
-    React.useEffect(() => {
-        if (myPlaylist.loaded && youtubePlaylists.loaded && spotifyPlaylists.loaded) {
-
-            for (let i = 0; i < myPlaylist.playlists.length; i += 1) {
-                const monthlyPlaylist = myPlaylist.playlists[i];
-
-                const youtubePlaylist = youtubePlaylists.playlists.find(p => p.snippet?.title === monthlyPlaylist.title);
-                const spotifyPlaylist = spotifyPlaylists.playlists.find(p => p.name === monthlyPlaylist.title);
-
-                setMyPlaylist((previous) => ({
-                    ...previous,
-                    playlists: [
-                        ...previous.playlists.slice(0, i),
-                        {
-                            ...monthlyPlaylist,
-                            spotifyPlaylist,
-                            youtubePlaylist
-                        },
-                        ...previous.playlists.slice(i + 1),
-                    ]
-                }));
-            }
-        }
-    }, [myPlaylist.loaded, youtubePlaylists.loaded, spotifyPlaylists.loaded]);
-
-    const createPlaylists = React.useCallback(async (monthPlaylist: IYoutubeMonthPlaylist) => {
-        if (monthPlaylist.spotifyPlaylist === undefined) {
-            try {
-                const spotifyApi = new SpotifyApi();
-                spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
-
-                const options = {
-                    "name": monthPlaylist.title,
-                    "description": "",
-                    "public": true,
-                };
-
-                const createSpotifyPlaylistResponse = await spotifyApi.createPlaylist(state.spotifyState.userProfile.id, options);
-                if (createSpotifyPlaylistResponse) {
-                    fetchSpotifyPlaylists();
-                    dispatch(pushSpotifySuccessNotification(`Spotify playlist '${monthPlaylist.title}' created !`));
-                }
-            } catch (error) {
-                dispatch(pushSpotifyErrorNotification(error));
-            }
-        }
-
-        if (monthPlaylist.youtubePlaylist === undefined) {
-            try {
-                const createYoutubePlaylistResponse = await new Playlists(state.youtubeState.credential.accessToken).insert({
-                    part: ['snippet', 'contentDetails'],
-                    requestBody: {
-                        snippet: {
-                            title: monthPlaylist.title
-                        }
-                    }
-                });
-                if (createYoutubePlaylistResponse) {
-                    fetchYoutubePlaylists();
-                    dispatch(pushYoutubeSuccessNotification(`Youtube playlist '${monthPlaylist.title}' created !`));
-                }
-            } catch (error) {
-                dispatch(pushYoutubeErrorNotification(error));
-            }
-        }
-    }, []);
-
-    const matchPlaylistName = (name: string): boolean => new RegExp("Playlist [0-9]{4} - [0-9]{2}").test(name)
-
-    const fetchFavoritePlaylistItems = async (pageToken: string | undefined = undefined) => {
+    const fetchFavoritePlaylistItems = React.useCallback(async (pageToken: string | undefined = undefined) => {
         try {
             setMyPlaylist((previous) => ({
                 ...previous,
@@ -162,49 +61,53 @@ const usePlaylistsSynchronizer = () => {
             });
             if (playlistItemsResponse && playlistItemsResponse.items && playlistItemsResponse.pageInfo?.totalResults) {
 
-                const copy = { ...myPlaylist };
+                setMyPlaylist((prev) => {
+                    const copy = { ...prev };
 
-                let year: number | undefined;
-                let month: number | undefined;
-                let items: PlaylistItem[] = [];
+                    let year: number | undefined;
+                    let month: number | undefined;
+                    let items: PlaylistItem[] = [];
 
-                for (let index = 0; index < playlistItemsResponse.items.length; index += 1) {
-                    const item = playlistItemsResponse.items[index];
+                    if (playlistItemsResponse && playlistItemsResponse.items && playlistItemsResponse.pageInfo?.totalResults) {
+                        for (let index = 0; index < playlistItemsResponse.items.length; index += 1) {
+                            const item = playlistItemsResponse.items[index];
 
-                    if (item.snippet?.publishedAt) {
-                        const date = new Date(item.snippet?.publishedAt);
-                        const currentYear = date.getFullYear();
-                        const currentMonth = date.getMonth() + 1;
+                            if (item.snippet?.publishedAt) {
+                                const date = new Date(item.snippet?.publishedAt);
+                                const currentYear = date.getFullYear();
+                                const currentMonth = date.getMonth() + 1;
 
-                        if (!year || !month) {
-                            year = date.getFullYear();
-                            month = date.getMonth() + 1;
-                            items.push(item);
-                        } else if (currentYear > year || (currentYear === year && currentMonth >= month)) {
-                            // if (year == currentYear && month == currentMonth) {
-                            items.push(item);
-                        } else {
-                            // eslint-disable-next-line @typescript-eslint/no-loop-func
-                            const playlist = copy.playlists.find(p => p.year === year && p.month === month);
-                            if (playlist) {
-                                items.forEach(i => playlist.favoriteitems.push(i));
-                            } else {
-                                copy.playlists.push({
-                                    year,
-                                    month,
-                                    title: `Playlist ${year} - ${(month < 10) ? '0' : ''}${month}`,
-                                    favoriteitems: items,
-                                })
+                                if (!year || !month) {
+                                    year = date.getFullYear();
+                                    month = date.getMonth() + 1;
+                                    items.push(item);
+                                } else if (currentYear > year || (currentYear === year && currentMonth >= month)) {
+                                    // if (year == currentYear && month == currentMonth) {
+                                    items.push(item);
+                                } else {
+                                    // eslint-disable-next-line @typescript-eslint/no-loop-func
+                                    const playlist = copy.playlists.find(p => p.year === year && p.month === month);
+                                    if (playlist) {
+                                        items.forEach(i => playlist.favoriteitems.push(i));
+                                    } else {
+                                        copy.playlists.push({
+                                            year,
+                                            month,
+                                            title: `Playlist ${year} - ${(month < 10) ? '0' : ''}${month}`,
+                                            favoriteitems: items,
+                                        })
+                                    }
+
+                                    year = currentYear;
+                                    month = currentMonth;
+                                    items = [item];
+                                }
                             }
-
-                            year = currentYear;
-                            month = currentMonth;
-                            items = [item];
                         }
                     }
-                }
 
-                setMyPlaylist(copy);
+                    return copy;
+                });
 
                 // // todo => removed in production mode
                 // const lastItem = playlistItemsResponse.items[playlistItemsResponse.items.length - 1];
@@ -230,17 +133,17 @@ const usePlaylistsSynchronizer = () => {
                     }));
                 }
             }
-        } catch (error) {
+        } catch (e) {
             setMyPlaylist((previous) => ({
                 ...previous,
                 loading: false,
                 loaded: false
             }));
-            dispatch(pushYoutubeErrorNotification(error));
+            dispatch(pushYoutubeErrorNotification(e));
         }
-    }
+    }, [dispatch, state.youtubeState.credential.accessToken, state.youtubeState.userProfile.favoritePlaylistId]);
 
-    const fetchYoutubePlaylists = async (pageToken: string | undefined = undefined) => {
+    const fetchYoutubePlaylists = React.useCallback(async (pageToken: string | undefined = undefined) => {
         try {
             if (pageToken) {
                 setYoutubePlaylists((prev) => ({
@@ -286,17 +189,17 @@ const usePlaylistsSynchronizer = () => {
                     }));
                 }
             }
-        } catch (error) {
+        } catch (e) {
             setYoutubePlaylists((prev) => ({
                 ...prev,
                 loading: false,
                 loaded: false
             }));
-            dispatch(pushYoutubeErrorNotification(error));
+            dispatch(pushYoutubeErrorNotification(e));
         }
-    }
+    }, [dispatch, state.youtubeState.credential.accessToken, state.youtubeState.userProfile.channelId]);
 
-    const fetchSpotifyPlaylists = async (offset: number | undefined = undefined) => {
+    const fetchSpotifyPlaylists = React.useCallback(async (offset: number | undefined = undefined) => {
         try {
             setSpotifyPlaylists((prev) => ({
                 ...prev,
@@ -347,15 +250,124 @@ const usePlaylistsSynchronizer = () => {
                     setSpotifyPlaylistsOffset(response.offset + limit);
                 }
             }
-        } catch (error) {
+        } catch (e) {
             setSpotifyPlaylists((prev) => ({
                 ...prev,
                 loading: false,
                 loaded: false
             }));
-            dispatch(pushSpotifyErrorNotification(error));
+            dispatch(pushSpotifyErrorNotification(e));
         }
-    }
+    }, [dispatch, state.spotifyState.credential.accessToken, state.spotifyState.userProfile.id]);
+
+    React.useEffect(() => {
+        fetchFavoritePlaylistItems();
+        fetchYoutubePlaylists();
+    }, [fetchFavoritePlaylistItems, fetchYoutubePlaylists]);
+
+    React.useEffect(() => {
+        if (favoritepageToken) {
+            fetchFavoritePlaylistItems(favoritepageToken);
+        } else {
+            log('all favorites loaded');
+        }
+    }, [favoritepageToken, fetchFavoritePlaylistItems, log]);
+
+    React.useEffect(() => {
+        if (youtubePlaylistsPageToken) {
+            fetchYoutubePlaylists(youtubePlaylistsPageToken);
+        } else {
+            log('all youtube playlists loaded');
+        }
+    }, [youtubePlaylistsPageToken, fetchYoutubePlaylists, log]);
+
+    React.useEffect(() => {
+        fetchSpotifyPlaylists();
+    }, [fetchSpotifyPlaylists]);
+
+    React.useEffect(() => {
+        if (spotifyPlaylistsOffset) {
+            fetchSpotifyPlaylists(spotifyPlaylistsOffset);
+        } else {
+            log('all spotify playlists loaded');
+        }
+    }, [spotifyPlaylistsOffset, fetchSpotifyPlaylists, log]);
+
+    React.useEffect(() => {
+        if (myPlaylist.loaded && youtubePlaylists.loaded && spotifyPlaylists.loaded) {
+
+            log('avant merge init !');
+
+            if (initMerge) {
+                log('merge playlist !');
+                setInitMerge(false);
+
+                for (let i = 0; i < myPlaylist.playlists.length; i += 1) {
+                    const monthlyPlaylist = myPlaylist.playlists[i];
+
+                    const youtubePlaylist = youtubePlaylists.playlists.find(p => p.snippet?.title === monthlyPlaylist.title);
+                    const spotifyPlaylist = spotifyPlaylists.playlists.find(p => p.name === monthlyPlaylist.title);
+
+                    setMyPlaylist((previous) => ({
+                        ...previous,
+                        playlists: [
+                            ...previous.playlists.slice(0, i),
+                            {
+                                ...monthlyPlaylist,
+                                spotifyPlaylist,
+                                youtubePlaylist
+                            },
+                            ...previous.playlists.slice(i + 1),
+                        ]
+                    }));
+                }
+            }
+        }
+    }, [myPlaylist.loaded, youtubePlaylists.loaded, spotifyPlaylists.loaded, myPlaylist.playlists, youtubePlaylists.playlists, spotifyPlaylists.playlists, log, initMerge]);
+
+    const createPlaylists = React.useCallback(async (monthPlaylist: IYoutubeMonthPlaylist) => {
+        if (monthPlaylist.spotifyPlaylist === undefined) {
+            try {
+                const spotifyApi = new SpotifyApi();
+                spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
+
+                const options = {
+                    "name": monthPlaylist.title,
+                    "description": "",
+                    "public": true,
+                };
+
+                const createSpotifyPlaylistResponse = await spotifyApi.createPlaylist(state.spotifyState.userProfile.id, options);
+                if (createSpotifyPlaylistResponse) {
+                    await fetchSpotifyPlaylists();
+                    dispatch(pushSpotifySuccessNotification(`Spotify playlist '${monthPlaylist.title}' created !`));
+                }
+            } catch (error) {
+                dispatch(pushSpotifyErrorNotification(error));
+            }
+        }
+
+        if (monthPlaylist.youtubePlaylist === undefined) {
+            try {
+                const createYoutubePlaylistResponse = await new Playlists(state.youtubeState.credential.accessToken).insert({
+                    part: ['snippet', 'contentDetails'],
+                    requestBody: {
+                        snippet: {
+                            title: monthPlaylist.title
+                        }
+                    }
+                });
+                if (createYoutubePlaylistResponse) {
+                    await fetchYoutubePlaylists();
+                    dispatch(pushYoutubeSuccessNotification(`Youtube playlist '${monthPlaylist.title}' created !`));
+                }
+            } catch (error) {
+                dispatch(pushYoutubeErrorNotification(error));
+            }
+        }
+    }, [dispatch, fetchSpotifyPlaylists, fetchYoutubePlaylists, state.spotifyState.credential.accessToken, state.spotifyState.userProfile.id, state.youtubeState.credential.accessToken]);
+
+    const matchPlaylistName = (name: string): boolean => new RegExp("Playlist [0-9]{4} - [0-9]{2}").test(name)
 
     return { myPlaylist, createPlaylists };
 }

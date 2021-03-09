@@ -11,23 +11,23 @@ const useFetchPlaylist = (playlistId: string) => {
     const [loaded, setLoaded] = React.useState(false);
 
     React.useEffect(() => {
-        fetchPlaylist();
-    }, []);
+        const fetchPlaylist = async () => {
+            try {
+                const spotifyApi = new SpotifyApi();
+                spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-    const fetchPlaylist = async () => {
-        try {
-            const spotifyApi = new SpotifyApi();
-            spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
-
-            const response = await spotifyApi.getPlaylist(playlistId);
-            if (response) {
-                setPlaylist(response);
-                setLoaded(true);
+                const response = await spotifyApi.getPlaylist(playlistId);
+                if (response) {
+                    setPlaylist(response);
+                    setLoaded(true);
+                }
+            } catch (error) {
+                dispatch(pushSpotifyErrorNotification(error));
             }
-        } catch (error) {
-            dispatch(pushSpotifyErrorNotification(error));
-        }
-    }
+        };
+
+        fetchPlaylist();
+    }, [dispatch, playlistId, state.spotifyState.credential.accessToken]);
 
     return { playlist, loaded };
 }

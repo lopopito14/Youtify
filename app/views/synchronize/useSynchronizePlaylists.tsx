@@ -7,7 +7,8 @@ import { PlaylistItems } from '../../youtubeApi/youtube-api-playlistItems';
 import { ILoad } from '../../store/state';
 import { Videos } from '../../youtubeApi/youtube-api-videos';
 import { Video } from '../../youtubeApi/youtube-api-models';
-import { IYoutubeMonthPlaylist } from '../../interfaces/synchronizeInterfaces';
+import { IMyFavorite, IMySpotify, IMyYoutube, IYoutubeMonthPlaylist } from '../../interfaces/synchronizeInterfaces';
+import logger from '../utils/logger';
 
 interface IYoutubeVideos extends ILoad {
 	videos: Video[];
@@ -21,26 +22,10 @@ interface IMyPlaylist extends ILoad {
 	items: IMyPlaylistItem[]
 }
 
-export interface IMyPlaylistItem {
+interface IMyPlaylistItem {
 	favorite: IMyFavorite,
 	youtube?: IMyYoutube,
 	spotify?: IMySpotify
-}
-
-export interface IMyFavorite {
-	videoId: string,
-	title: string,
-	exists: boolean
-}
-
-export interface IMySpotify {
-	id: string,
-	title: string
-}
-
-export interface IMyYoutube {
-	videoId: string,
-	title: string
 }
 
 interface ISynchro {
@@ -54,8 +39,13 @@ interface ISynchro {
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
+
 	const { state, dispatch } = React.useContext(Context);
 
+	const { log, error } = logger();
+
+	const [youtubePlaylistId] = React.useState<string | undefined | null>(myPlaylist.youtubePlaylist?.id);
+	const [spotifyPlaylistId] = React.useState<string | undefined>(myPlaylist.spotifyPlaylist?.id);
 	const [localSave, setLocalSave] = React.useState<IMyPlaylist>({
 		loading: false,
 		loaded: false,
@@ -78,7 +68,214 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 	const [nonAffectedVideos, setNonAffectedVideos] = React.useState<Video[]>([]);
 	const [nonAffectedTracks, setNonAffectedTracks] = React.useState<globalThis.SpotifyApi.TrackObjectFull[]>([]);
 
+	const ArtistsName = "Artists";
+	const TitleName = "Title";
+
+	const [artistsSeparator] = React.useState<string[]>([
+		" - ",
+		" & ",
+		" ft. ",
+		" ft ",
+		" Ft. ",
+		" Ft ",
+		" feat. ",
+		" feat ",
+		" Feat. ",
+		" Feat ",
+		" featuring ",
+		" vs. ",
+		" vs ",
+		" Vs. ",
+		" Vs ",
+		", ",
+		" x ",
+		" X ",
+		" and ",
+		" with ",
+		" With "
+	]);
+
+	const [titleUpdates] = React.useState<Record<string, string>>(
+		{
+			"²": "2",
+			" | ": " ",
+			"F.": "F. ",
+			"Mc Tha Watcher": "Tha Watcher",
+			" HQ ": " ",
+			" Rip ": " ",
+			"Preview": " ",
+			"Q-dance": " ",
+			"Q-Base": " ",
+			"QORE": " ",
+			"Official": " ",
+			" Video": " ",
+			" Out Now": " ",
+			"Soundtrack": " ",
+			"Aftermovie": " ",
+			"Dj Anime": "Anime",
+			" anthem ": " ",
+			" by ": " ",
+			"SPEQTRUM": " ",
+			"Topic": " ",
+			" vs ": " "
+		});
+
+	const [titleRegex] = React.useState<RegExp>(() => {
+
+		const SeparatorName = "Separator";
+		const Artists = `(?<${ArtistsName}>[A-Za-z0-9_\\s\\.\\&\\-\\'\\,\\²\\#\\"]*)`;
+
+		const SpaceDelimiter = "(\\s{2,3})";
+		const DashDelimiter = "(\\s*(-|–)\\s+)|(\\s+(-|–)\\s*)";
+		const ColonDelimiter = "(\\s*(:)\\s+)|(\\s+(:)\\s*)";
+
+		const Separator = `(?<${SeparatorName}>${SpaceDelimiter}|${DashDelimiter}|${ColonDelimiter})`;
+		const Title = `(?<${TitleName}>[A-Za-z0-9_\\s\\.\\&\\-\\'\\,\\²\\#\\"]*)`;
+
+		return new RegExp(`${Artists}${Separator}${Title}`)
+	});
+
+	const fetchYoutubeVideos = React.useCallback(async (pageToken: string | undefined = undefined) => {
+		if (youtubePlaylistId) {
+			try {
+				setYoutubeVideos((prev) => ({
+					...prev,
+					loading: true,
+					loaded: false,
+					videos: pageToken ? [...prev.videos] : []
+				}));
+
+				const playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
+					playlistId: youtubePlaylistId,
+					part: ['contentDetails'],
+					maxResults: 50,
+					pageToken
+				});
+
+				if (playlistItemsResponse) {
+
+					if (playlistItemsResponse.items) {
+						const videosIds: string[] = [];
+
+						playlistItemsResponse.items.forEach(i => {
+							if (i.contentDetails?.videoId) {
+								videosIds.push(i.contentDetails?.videoId);
+							}
+						});
+
+						const videosResponse = await new Videos(state.youtubeState.credential.accessToken).list({
+							id: videosIds,
+							part: ['snippet', 'contentDetails', 'statistics'],
+							maxResults: 50,
+						});
+
+						if (videosResponse && videosResponse.items) {
+							const { items } = videosResponse;
+							setYoutubeVideos((prev) => ({
+								...prev,
+								videos: [
+									...prev.videos,
+									...items
+								]
+							}));
+						}
+					}
+
+					if (playlistItemsResponse.nextPageToken) {
+						setPlaylistItemPageToken(playlistItemsResponse.nextPageToken);
+					} else {
+						setYoutubeVideos((prev) => ({
+							...prev,
+							loading: false,
+							loaded: true
+						}));
+						setPlaylistItemPageToken(undefined);
+					}
+				}
+			} catch (e) {
+				setYoutubeVideos((prev) => ({
+					...prev,
+					loading: false,
+					loaded: false
+				}));
+				dispatch(pushYoutubeErrorNotification(e));
+			}
+		}
+	}, [dispatch, youtubePlaylistId, state.youtubeState.credential.accessToken]);
+
+	const fetchSpotifyTracks = React.useCallback(async (offset: number | undefined = undefined) => {
+		if (spotifyPlaylistId) {
+			try {
+				setSpotifyTracks((prev) => ({
+					...prev,
+					loading: true,
+					loaded: false,
+					tracks: offset ? [...prev.tracks] : []
+				}));
+
+				const spotifyApi = new SpotifyApi();
+				spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
+
+				const limit = 50;
+				// eslint-disable-next-line @typescript-eslint/ban-types
+				let options: Object;
+				if (offset) {
+					options = {
+						"market": state.spotifyState.userProfile.country,
+						"limit": limit,
+						"offset": offset,
+					}
+				}
+				else {
+					options = {
+						"market": state.spotifyState.userProfile.country,
+						"limit": limit
+					}
+				}
+
+				const response = await spotifyApi.getPlaylistTracks(spotifyPlaylistId, options);
+				if (response) {
+
+					const filteredTracks: globalThis.SpotifyApi.TrackObjectFull[] = [];
+					response.items.forEach(t => {
+						if (t.track.type === 'track') {
+							filteredTracks.push(t.track);
+						}
+					});
+
+					setSpotifyTracks((prev) => ({
+						...prev,
+						tracks: [
+							...prev.tracks,
+							...filteredTracks
+						]
+					}));
+
+					if (response.next === null) {
+						setSpotifyTracksPageOffset(undefined);
+						setSpotifyTracks((prev) => ({
+							...prev,
+							loading: false,
+							loaded: true
+						}));
+					} else {
+						setSpotifyTracksPageOffset(response.offset + limit);
+					}
+				}
+			} catch (e) {
+				setSpotifyTracks((prev) => ({
+					...prev,
+					loading: false,
+					loaded: false
+				}));
+				dispatch(pushSpotifyErrorNotification(e));
+			}
+		}
+	}, [dispatch, spotifyPlaylistId, state.spotifyState.credential.accessToken, state.spotifyState.userProfile.country]);
+
 	React.useEffect(() => {
+
+		log('get save !');
 
 		const getSave = async () => {
 
@@ -97,10 +294,8 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 					const myPlaylistSave = JSON.parse(value) as IMyPlaylist;
 					if (myPlaylistSave) {
 
-						// eslint-disable-next-line no-console
-						console.log("save loaded !");
-						// eslint-disable-next-line no-console
-						console.log(myPlaylistSave.items);
+						log("save loaded !");
+						log(myPlaylistSave.items);
 
 						items = [...myPlaylistSave.items];
 
@@ -154,15 +349,13 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 								}
 							});
 						} else {
-							// eslint-disable-next-line no-console
-							console.log("No favorite items.");
+							log("No favorite items.");
 						}
 
 					}
 				} else {
 
-					// eslint-disable-next-line no-console
-					console.log("save created !");
+					log("save created !");
 
 					if (myPlaylist.favoriteitems) {
 
@@ -180,13 +373,11 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 						});
 
 					} else {
-						// eslint-disable-next-line no-console
-						console.log("No favorite items.");
+						log("No favorite items.");
 					}
 				}
 			} catch (e) {
-				// eslint-disable-next-line no-console
-				console.error(e);
+				error(e);
 			} finally {
 				setLocalSave((prev) => ({
 					...prev,
@@ -198,9 +389,12 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 		}
 
 		getSave();
-	}, []);
+	}, [error, log, myPlaylist.favoriteitems, myPlaylist.title]);
 
 	React.useEffect(() => {
+
+		log('filter non affected !');
+
 		if (localSave) {
 			if (youtubeVideos.loaded) {
 				const bindedVideoIds = localSave.items.reduce((ids: string[], i: IMyPlaylistItem) => {
@@ -229,10 +423,10 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 				}
 			}
 		}
-	}, [localSave, youtubeVideos.loaded, spotifyTracks.loaded])
+	}, [localSave, youtubeVideos.loaded, spotifyTracks.loaded, youtubeVideos.videos, spotifyTracks.tracks, log])
 
 	React.useEffect(() => {
-		if (myPlaylist.youtubePlaylist?.id) {
+		if (youtubePlaylistId) {
 			fetchYoutubeVideos();
 		} else {
 			setYoutubeVideos((prev) => ({
@@ -241,16 +435,16 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 				loaded: true
 			}));
 		}
-	}, [myPlaylist.youtubePlaylist?.id]);
+	}, [fetchYoutubeVideos, youtubePlaylistId]);
 
 	React.useEffect(() => {
 		if (playlistItemPageToken) {
 			fetchYoutubeVideos(playlistItemPageToken);
 		}
-	}, [playlistItemPageToken]);
+	}, [fetchYoutubeVideos, playlistItemPageToken]);
 
 	React.useEffect(() => {
-		if (myPlaylist.spotifyPlaylist?.id) {
+		if (spotifyPlaylistId) {
 			fetchSpotifyTracks();
 		} else {
 			setSpotifyTracks((prev) => ({
@@ -259,30 +453,27 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 				loaded: true
 			}));
 		}
-	}, [myPlaylist.spotifyPlaylist?.id]);
+	}, [fetchSpotifyTracks, spotifyPlaylistId]);
 
 	React.useEffect(() => {
 		if (spotifyTracksPageOffset) {
 			fetchSpotifyTracks(spotifyTracksPageOffset);
 		}
-	}, [spotifyTracksPageOffset]);
+	}, [fetchSpotifyTracks, spotifyTracksPageOffset]);
 
 	const saveFile = React.useCallback(async () => {
 		if (localSave) {
 			try {
-				// eslint-disable-next-line no-console
-				console.log(`save ${myPlaylist.title} => `);
-				// eslint-disable-next-line no-console
-				console.log(localSave.items);
+				log(`save ${myPlaylist.title} => `);
+				log(localSave.items);
 
 				const jsonValue = JSON.stringify(localSave);
 				await AsyncStorage.setItem(myPlaylist.title, jsonValue);
 			} catch (e) {
-				// eslint-disable-next-line no-console
-				console.error(e);
+				error(e);
 			}
 		}
-	}, [localSave]);
+	}, [error, localSave, log, myPlaylist.title]);
 
 	const resetSave = React.useCallback(async () => {
 
@@ -303,8 +494,7 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 			});
 
 		} else {
-			// eslint-disable-next-line no-console
-			console.log("No favorite items.");
+			log("No favorite items.");
 		}
 
 		setLocalSave((prev) => ({
@@ -314,192 +504,56 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 			items
 		}));
 
-	}, [localSave, setLocalSave]);
+	}, [log, myPlaylist.favoriteitems]);
 
-	const fetchYoutubeVideos = async (pageToken: string | undefined = undefined) => {
-		if (myPlaylist.youtubePlaylist?.id) {
+	const deleteYoutubePlaylistVideos = React.useCallback(async () => {
+		if (youtubePlaylistId) {
 			try {
-				setYoutubeVideos((prev) => ({
-					...prev,
-					loading: true,
-					loaded: false,
-					videos: pageToken ? [...prev.videos] : []
-				}));
 
 				const playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
-					playlistId: myPlaylist.youtubePlaylist?.id,
-					part: ['contentDetails'],
-					maxResults: 50,
-					pageToken
+					playlistId: youtubePlaylistId,
+					part: ['id'],
+					maxResults: 50
 				});
 
-				if (playlistItemsResponse) {
+				if (playlistItemsResponse && playlistItemsResponse.items) {
 
-					if (playlistItemsResponse.items) {
-						const videosIds: string[] = [];
-
-						playlistItemsResponse.items.forEach(i => {
-							if (i.contentDetails?.videoId) {
-								videosIds.push(i.contentDetails?.videoId);
-							}
-						});
-
-						const videosResponse = await new Videos(state.youtubeState.credential.accessToken).list({
-							id: videosIds,
-							part: ['snippet', 'contentDetails', 'statistics'],
-							maxResults: 50,
-						});
-
-						if (videosResponse && videosResponse.items) {
-							const { items } = videosResponse;
-							setYoutubeVideos((prev) => ({
-								...prev,
-								videos: [
-									...prev.videos,
-									...items
-								]
-							}));
-						}
-					}
-
-					if (playlistItemsResponse.nextPageToken) {
-						setPlaylistItemPageToken(playlistItemsResponse.nextPageToken);
-					} else {
-						setYoutubeVideos((prev) => ({
-							...prev,
-							loading: false,
-							loaded: true
-						}));
-						setPlaylistItemPageToken(undefined);
-					}
-				}
-			} catch (error) {
-				setYoutubeVideos((prev) => ({
-					...prev,
-					loading: false,
-					loaded: false
-				}));
-				dispatch(pushYoutubeErrorNotification(error));
-			}
-		}
-	}
-
-	const fetchSpotifyTracks = async (offset: number | undefined = undefined) => {
-		if (myPlaylist.spotifyPlaylist?.id) {
-			try {
-				setSpotifyTracks((prev) => ({
-					...prev,
-					loading: true,
-					loaded: false,
-					tracks: offset ? [...prev.tracks] : []
-				}));
-
-				const spotifyApi = new SpotifyApi();
-				spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
-
-				const limit = 50;
-				// eslint-disable-next-line @typescript-eslint/ban-types
-				let options: Object;
-				if (offset) {
-					options = {
-						"market": state.spotifyState.userProfile.country,
-						"limit": limit,
-						"offset": offset,
-					}
-				}
-				else {
-					options = {
-						"market": state.spotifyState.userProfile.country,
-						"limit": limit
-					}
-				}
-
-				const response = await spotifyApi.getPlaylistTracks(myPlaylist.spotifyPlaylist.id, options);
-				if (response) {
-
-					const filteredTracks: globalThis.SpotifyApi.TrackObjectFull[] = [];
-					response.items.forEach(t => {
-						if (t.track.type === 'track') {
-							filteredTracks.push(t.track);
+					const promises = playlistItemsResponse.items.map(async playlistItem => {
+						if (playlistItem.id) {
+							await new PlaylistItems(state.youtubeState.credential.accessToken).delete({
+								id: playlistItem.id
+							});
 						}
 					});
 
-					setSpotifyTracks((prev) => ({
+					await Promise.all(promises);
+
+					setYoutubeVideos((prev) => ({
 						...prev,
-						tracks: [
-							...prev.tracks,
-							...filteredTracks
-						]
+						videos: []
 					}));
 
-					if (response.next === null) {
-						setSpotifyTracksPageOffset(undefined);
-						setSpotifyTracks((prev) => ({
-							...prev,
-							loading: false,
-							loaded: true
-						}));
-					} else {
-						setSpotifyTracksPageOffset(response.offset + limit);
-					}
+					setLocalSave((prev) => ({
+						...prev,
+						items: prev.items.map(i => ({
+							...i,
+							youtube: undefined
+						}))
+					}));
+
+					dispatch(pushYoutubeSuccessNotification(`${myPlaylist.title} cleaned !`));
 				}
-			} catch (error) {
-				setSpotifyTracks((prev) => ({
-					...prev,
-					loading: false,
-					loaded: false
-				}));
-				dispatch(pushSpotifyErrorNotification(error));
+			} catch (e) {
+				dispatch(pushYoutubeErrorNotification(e));
 			}
 		}
-	}
 
-	const deleteYoutubePlaylistVideos = async () => {
+	}, [dispatch, myPlaylist.title, youtubePlaylistId, state.youtubeState.credential.accessToken]);
 
-		try {
-
-			const playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
-				playlistId: myPlaylist.youtubePlaylist?.id ? myPlaylist.youtubePlaylist?.id : '',
-				part: ['id'],
-				maxResults: 50
-			});
-
-			if (playlistItemsResponse && playlistItemsResponse.items) {
-
-				const promises = playlistItemsResponse.items.map(async playlistItem => {
-					if (playlistItem.id) {
-						await new PlaylistItems(state.youtubeState.credential.accessToken).delete({
-							id: playlistItem.id
-						});
-					}
-				});
-
-				await Promise.all(promises);
-
-				setYoutubeVideos((prev) => ({
-					...prev,
-					videos: []
-				}));
-
-				setLocalSave((prev) => ({
-					...prev,
-					items: prev.items.map(i => ({
-						...i,
-						youtube: undefined
-					}))
-				}));
-
-				dispatch(pushYoutubeSuccessNotification(`${myPlaylist.title} cleaned !`));
-			}
-		} catch (error) {
-			dispatch(pushYoutubeErrorNotification(error));
-		}
-	}
-
-	const synchronizeYoutubePlaylist = async () => {
+	const synchronizeYoutubePlaylist = React.useCallback(async () => {
 
 		try {
-			if (myPlaylist.youtubePlaylist) {
+			if (youtubePlaylistId) {
 
 				const playlistItemsToRemove = youtubeVideos.videos.filter(i => !myPlaylist.favoriteitems.map(fav => fav.snippet?.resourceId?.videoId).includes(i.id));
 				const playlistItemsToAdd = myPlaylist.favoriteitems.filter(i => !youtubeVideos.videos.map(v => v.id).includes(i.snippet?.resourceId?.videoId));
@@ -518,7 +572,7 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 							part: ['snippet'],
 							requestBody: {
 								snippet: {
-									playlistId: myPlaylist.youtubePlaylist?.id,
+									playlistId: youtubePlaylistId,
 									resourceId: playlistItemToAdd.snippet?.resourceId
 								}
 							}
@@ -541,14 +595,13 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 					}))
 				}));
 			}
-		} catch (error) {
-			dispatch(pushYoutubeErrorNotification(error));
+		} catch (e) {
+			dispatch(pushYoutubeErrorNotification(e));
 		}
-	}
+	}, [dispatch, fetchYoutubeVideos, myPlaylist.favoriteitems, myPlaylist.title, state.youtubeState.credential.accessToken, youtubePlaylistId, youtubeVideos.videos]);
 
-	const deleteSpotifyPlaylistTracks = async () => {
-
-		if (!myPlaylist.spotifyPlaylist?.id) {
+	const deleteSpotifyPlaylistTracks = React.useCallback(async () => {
+		if (!spotifyPlaylistId) {
 			return;
 		}
 
@@ -566,7 +619,7 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 				});
 			});
 
-			const removeTrackResponse = await spotifyApi.removeTracksFromPlaylist(myPlaylist.spotifyPlaylist?.id, uris);
+			const removeTrackResponse = await spotifyApi.removeTracksFromPlaylist(spotifyPlaylistId, uris);
 			if (removeTrackResponse) {
 
 				setSpotifyTracks((prev) => ({
@@ -582,80 +635,15 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 					}))
 				}));
 			}
-		} catch (error) {
-			dispatch(pushSpotifyErrorNotification(error));
+		} catch (e) {
+			dispatch(pushSpotifyErrorNotification(e));
 		}
-	}
+	}, [dispatch, spotifyPlaylistId, spotifyTracks.tracks, state.spotifyState.credential.accessToken]);
 
-	const ArtistsName = "Artists";
-	const SeparatorName = "Separator";
-	const TitleName = "Title";
-	const Artists = `(?<${ArtistsName}>[A-Za-z0-9_\\s\\.\\&\\-\\'\\,\\²\\#\\"]*)`;
-
-	const SpaceDelimiter = "(\\s{2,3})";
-	const DashDelimiter = "(\\s*(-|–)\\s+)|(\\s+(-|–)\\s*)";
-	const ColonDelimiter = "(\\s*(:)\\s+)|(\\s+(:)\\s*)";
-
-	const Separator = `(?<${SeparatorName}>${SpaceDelimiter}|${DashDelimiter}|${ColonDelimiter})`;
-	const Title = `(?<${TitleName}>[A-Za-z0-9_\\s\\.\\&\\-\\'\\,\\²\\#\\"]*)`;
-
-	const ArtistsSeparator: string[] = [
-		" - ",
-		" & ",
-		" ft. ",
-		" ft ",
-		" Ft. ",
-		" Ft ",
-		" feat. ",
-		" feat ",
-		" Feat. ",
-		" Feat ",
-		" featuring ",
-		" vs. ",
-		" vs ",
-		" Vs. ",
-		" Vs ",
-		", ",
-		" x ",
-		" X ",
-		" and ",
-		" with ",
-		" With "
-	];
-
-	const TitleUpdates: Record<string, string> =
-	{
-		"²": "2",
-		" | ": " ",
-		"F.": "F. ",
-		"Mc Tha Watcher": "Tha Watcher",
-		" HQ ": " ",
-		" Rip ": " ",
-		"Preview": " ",
-		"Q-dance": " ",
-		"Q-Base": " ",
-		"QORE": " ",
-		"Official": " ",
-		" Video": " ",
-		" Out Now": " ",
-		"Soundtrack": " ",
-		"Aftermovie": " ",
-		"Dj Anime": "Anime",
-		" anthem ": " ",
-		" by ": " ",
-		"SPEQTRUM": " ",
-		"Topic": " ",
-		" vs ": " "
-	};
-
-	const Pattern = `${Artists}${Separator}${Title}`;
-
-	const TitleRegex = new RegExp(Pattern);
-
-	const updateRawTitle = (title: string) => {
+	const updateRawTitle = React.useCallback((title: string) => {
 		let updatedTitle = title;
 
-		Object.entries(TitleUpdates).forEach(keyValuePair => {
+		Object.entries(titleUpdates).forEach(keyValuePair => {
 			const [key, value] = keyValuePair;
 			updatedTitle = updatedTitle.replace(key, value);
 		});
@@ -665,10 +653,9 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 		}
 
 		return updatedTitle;
-	}
+	}, [titleUpdates]);
 
-	const synchronizeSpotifyPlaylist = async () => {
-
+	const synchronizeSpotifyPlaylist = React.useCallback(async () => {
 		try {
 
 			const spotifyApi = new SpotifyApi();
@@ -685,18 +672,17 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 					const { title } = item.favorite;
 					const updatedTitle = updateRawTitle(title);
 
-					const matchArray = updatedTitle.match(TitleRegex);
+					const matchArray = updatedTitle.match(titleRegex);
 					if (matchArray && matchArray.groups) {
 
 						const artistsName = matchArray.groups[ArtistsName];
 						const titleName = matchArray.groups[TitleName];
 
-						const artists = artistsName.trim().split(new RegExp(`(${ArtistsSeparator.join('|')})`)).filter(r => !ArtistsSeparator.includes(r));
+						const artists = artistsName.trim().split(new RegExp(`(${artistsSeparator.join('|')})`)).filter(r => !artistsSeparator.includes(r));
 
 						const search = `${titleName} ${artists.join(" ")}`;
 
-						// eslint-disable-next-line no-console
-						console.log(`search => ${search}`);
+						log(`search => ${search}`);
 
 						const options: globalThis.SpotifyApi.SearchForItemParameterObject = {
 							limit: 1
@@ -720,7 +706,7 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 
 			const sync: ISynchro[] = await Promise.all(promises);
 
-			if (myPlaylist.spotifyPlaylist?.id) {
+			if (spotifyPlaylistId) {
 
 				const uris: string[] = [];
 
@@ -731,7 +717,7 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 				});
 
 				if (uris.length > 0) {
-					const respons = await spotifyApi.addTracksToPlaylist(myPlaylist.spotifyPlaylist.id, uris);
+					const respons = await spotifyApi.addTracksToPlaylist(spotifyPlaylistId, uris);
 					if (respons) {
 
 						await fetchSpotifyTracks();
@@ -772,12 +758,12 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 					}
 				}
 			}
-		} catch (error) {
-			dispatch(pushSpotifyErrorNotification(error));
+		} catch (e) {
+			dispatch(pushSpotifyErrorNotification(e));
 		}
-	}
+	}, [state.spotifyState.credential.accessToken, localSave.items, spotifyPlaylistId, updateRawTitle, titleRegex, artistsSeparator, log, fetchSpotifyTracks, dispatch]);
 
-	const bindYoutubeVideo = async (videoId: string, video: Video) => {
+	const bindYoutubeVideo = React.useCallback(async (videoId: string, video: Video) => {
 		setLocalSave((prev) => {
 			const playlistItem = prev.items.find(i => i.favorite.videoId === videoId);
 			if (playlistItem) {
@@ -802,9 +788,13 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 
 			return prev;
 		});
-	}
+	}, []);
 
-	const bindSpotifyTrack = async (videoId: string, track: globalThis.SpotifyApi.TrackObjectFull) => {
+	const bindSpotifyTrack = React.useCallback(async (videoId: string, track: globalThis.SpotifyApi.TrackObjectFull) => {
+		if (!spotifyPlaylistId) {
+			return;
+		}
+
 		try {
 			const spotifyTrack = spotifyTracks.tracks.find(t => t.id === track.id);
 			if (!spotifyTrack) {
@@ -812,7 +802,7 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 					const spotifyApi = new SpotifyApi();
 					spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
 
-					const addTracksResponse = await spotifyApi.addTracksToPlaylist(myPlaylist.spotifyPlaylist.id, [track.uri]);
+					const addTracksResponse = await spotifyApi.addTracksToPlaylist(spotifyPlaylistId, [track.uri]);
 					if (addTracksResponse) {
 						await fetchSpotifyTracks();
 					}
@@ -868,10 +858,10 @@ const useSynchronizePlaylists = (myPlaylist: IYoutubeMonthPlaylist) => {
 
 				return prev;
 			});
-		} catch (error) {
-			dispatch(pushSpotifyErrorNotification(error));
+		} catch (e) {
+			dispatch(pushSpotifyErrorNotification(e));
 		}
-	}
+	}, [dispatch, fetchSpotifyTracks, myPlaylist.spotifyPlaylist, spotifyPlaylistId, spotifyTracks.tracks, state.spotifyState.credential.accessToken]);
 
 	return { localSave, saveFile, resetSave, youtubeVideos, spotifyTracks, nonAffectedVideos, nonAffectedTracks, deleteYoutubePlaylistVideos, deleteSpotifyPlaylistTracks, synchronizeYoutubePlaylist, synchronizeSpotifyPlaylist, bindYoutubeVideo, bindSpotifyTrack };
 };

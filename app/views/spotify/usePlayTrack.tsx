@@ -1,10 +1,12 @@
-/* eslint-disable no-console */
 import React from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Sound from 'react-native-sound';
+import logger from '../utils/logger';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const usePlayTrack = () => {
+
+    const { log } = logger();
 
     const [trackIdPlaying, setTrackIdPlaying] = React.useState<string | undefined>(undefined);
     const [sound, setSound] = React.useState<Sound | undefined>(undefined);
@@ -33,16 +35,16 @@ const usePlayTrack = () => {
 
         const track = new Sound(url, Sound.MAIN_BUNDLE, (e) => {
             if (e) {
-                console.log('failed to load the sound', e);
+                log(`failed to load the sound => ${e}`);
                 return;
             }
-            console.log(`duration in seconds: ${track.getDuration()}number of channels: ${track.getNumberOfChannels()}`);
+            log(`duration in seconds: ${track.getDuration()}number of channels: ${track.getNumberOfChannels()}`);
 
             track.play((success) => {
                 if (success) {
-                    console.log('successfully finished playing');
+                    log('successfully finished playing');
                 } else {
-                    console.log('playback failed due to audio decoding errors');
+                    log('playback failed due to audio decoding errors');
                 }
                 setTrackIdPlaying(undefined);
             });
@@ -50,7 +52,7 @@ const usePlayTrack = () => {
 
         setSound(track);
 
-    }, [sound, trackIdPlaying]);
+    }, [log, sound, trackIdPlaying]);
 
     return { trackIdPlaying, playTrack, stopPlaying };
 }

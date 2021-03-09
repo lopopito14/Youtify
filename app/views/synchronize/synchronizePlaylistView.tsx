@@ -4,10 +4,10 @@ import { StyleSheet } from 'react-native';
 import { spotifyTheme, synchronizeTheme, youtubeTheme } from '../theme';
 import ModalPopup, { ModalType } from '../utils/modalPopup';
 import { defaultThumbnail, getYoutubeVideoDuration, msToTime } from '../utils/helpers';
-import useSynchronizePlaylists, { IMyFavorite, IMySpotify, IMyYoutube } from './useSynchronizePlaylists';
+import useSynchronizePlaylists from './useSynchronizePlaylists';
 import { Video } from '../../youtubeApi/youtube-api-models';
 import useSearch from './useSearch';
-import { ISynchronizeNavigationProps, IYoutubeMonthPlaylist } from '../../interfaces/synchronizeInterfaces';
+import { IMyFavorite, IMySpotify, IMyYoutube, ISynchronizeNavigationProps, IYoutubeMonthPlaylist } from '../../interfaces/synchronizeInterfaces';
 
 interface IProps extends ISynchronizeNavigationProps {
 	myPlaylist: IYoutubeMonthPlaylist;
@@ -27,121 +27,7 @@ enum BindingMode {
 	BindSpotifyTrack,
 }
 
-const styles = StyleSheet.create({
-	modalSearchInputStyle: {
-		width: 350
-	},
-	separatorStyle: {
-		height: 5
-	},
-	modalRowStyle: {
-		flexDirection: 'row'
-	},
-	modalRowThumbnailStyle: {
-		width: 80,
-		height: 80
-	},
-	modalRowTextContainerStyle: {
-		marginLeft: 5,
-		alignSelf: 'center'
-	},
-	modalRowTextStyle: {
-		maxWidth: 250
-	},
-	contentStyle: {
-		backgroundColor: synchronizeTheme.secondaryColor
-	},
-	cardStyle: {
-		backgroundColor: synchronizeTheme.secondaryColor
-	},
-	cardItemStyle: {
-		backgroundColor: synchronizeTheme.secondaryColor
-	},
-	titleStyle: {
-		color: 'white'
-	},
-	favoriteTextStyle: {
-		marginLeft: 30
-	},
-	saveButtonStyle: {
-		borderColor: synchronizeTheme.secondaryColor,
-		borderWidth: 1
-	},
-	logoStyle: {
-		fontSize: 50
-	},
-	spotifyLogoStyle: {
-		color: spotifyTheme.primaryColor,
-	},
-	youtubeLogoStyle: {
-		color: youtubeTheme.primaryColor,
-	},
-	spotifyText: {
-		color: spotifyTheme.primaryColor
-	},
-	youtubeText: {
-		color: youtubeTheme.primaryColor
-	},
-	buttonContainerStyle: {
-		display: 'flex',
-		flexDirection: 'row'
-	},
-	buttonStyle: {
-		marginRight: 10,
-		borderColor: synchronizeTheme.secondaryColor,
-		borderWidth: 1
-	},
-	cardListStyle: {
-		borderColor: "white",
-		borderBottomColor: "transparent",
-		borderLeftWidth: 5,
-		borderTopWidth: 5,
-		borderRightWidth: 0,
-		borderBottomWidth: 0,
-		backgroundColor: synchronizeTheme.secondaryColor
-	},
-	cardListItemStyle: {
-		backgroundColor: synchronizeTheme.secondaryColor,
-		borderRadius: 0
-	},
-	favoriteNumberingContainerStyle: {
-		maxWidth: 50
-	},
-	favoriteNumberingTextStyle: {
-		color: "white"
-	},
-	favoriteItemTextStyle: {
-		color: "white",
-		overflow: 'hidden'
-	},
-	thumbnailContainerStyle: {
-		maxWidth: 90
-	},
-	thumbnailButtonStyle: {
-		width: 80,
-		height: 80,
-		backgroundColor: "transparent"
-	},
-	thumbnailStyle: {
-		borderRadius: 20,
-		borderWidth: 2,
-		width: 80,
-		height: 80
-	},
-	thumbnailSpotifyStyle: {
-		borderColor: spotifyTheme.primaryColor,
-	},
-	thumbnailYoutubeStyle: {
-		borderColor: youtubeTheme.primaryColor,
-	},
-	textStyle: {
-		fontSize: 18,
-		color: "white"
-	}
-});
-
 const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
-
 	const { myPlaylist } = props;
 
 	const { localSave, saveFile, resetSave, youtubeVideos, spotifyTracks, nonAffectedVideos, nonAffectedTracks, deleteYoutubePlaylistVideos, deleteSpotifyPlaylistTracks, synchronizeYoutubePlaylist, synchronizeSpotifyPlaylist, bindYoutubeVideo, bindSpotifyTrack } = useSynchronizePlaylists(myPlaylist);
@@ -156,26 +42,26 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 	React.useEffect(() => {
 		switch (actionMode) {
 			case ActionMode.DeleteYoutubeVideos:
-				setActionTitle(`Delete youtube playlist "${props.myPlaylist.title}" ?`);
+				setActionTitle(`Delete youtube playlist "${myPlaylist.title}" ?`);
 				break;
 
 			case ActionMode.SynchronizeYoutube:
-				setActionTitle(`Synchronize youtube playlist "${props.myPlaylist.title}" ?`);
+				setActionTitle(`Synchronize youtube playlist "${myPlaylist.title}" ?`);
 				break;
 
 			case ActionMode.DeleteSpotifyTracks:
-				setActionTitle(`Delete spotify playlist "${props.myPlaylist.title}" items ?`);
+				setActionTitle(`Delete spotify playlist "${myPlaylist.title}" items ?`);
 				break;
 
 			case ActionMode.SynchronizeSpotify:
-				setActionTitle(`Synchronize spotify playlist "${props.myPlaylist.title}" ?`);
+				setActionTitle(`Synchronize spotify playlist "${myPlaylist.title}" ?`);
 				break;
 
 			default:
 				setActionTitle('');
 				break;
 		}
-	}, [actionMode]);
+	}, [actionMode, myPlaylist.title]);
 
 	const modalActionOkCallback = React.useCallback(async () => {
 
@@ -204,7 +90,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 				break;
 		}
 
-	}, [actionMode]);
+	}, [actionMode, deleteSpotifyPlaylistTracks, deleteYoutubePlaylistVideos, synchronizeSpotifyPlaylist, synchronizeYoutubePlaylist]);
 
 	const modalActionCancelCallback = React.useCallback(async () => {
 		setActionMode(ActionMode.None);
@@ -234,7 +120,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 		setBindingMode(BindingMode.None);
 		setSearch('');
 		openSearch(undefined);
-	}, []);
+	}, [openSearch]);
 
 	const onBind = React.useCallback((favorite: IMyFavorite, mode: BindingMode) => {
 		setSearch(favorite?.title);
@@ -253,7 +139,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 		setSearch('');
 		openSearch(undefined);
 
-	}, [bindingMode, selectedFavorite]);
+	}, [bindYoutubeVideo, openSearch, selectedFavorite]);
 
 	const onReplaceSpotify = React.useCallback(async (track: SpotifyApi.TrackObjectFull) => {
 
@@ -266,7 +152,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 		setSearch('');
 		openSearch(undefined);
 
-	}, [bindingMode, selectedFavorite]);
+	}, [bindSpotifyTrack, openSearch, selectedFavorite]);
 
 	const onSearch = React.useCallback(() => {
 		openSearch(search);
@@ -609,5 +495,118 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 		</>
 	)
 };
+
+const styles = StyleSheet.create({
+	modalSearchInputStyle: {
+		width: 350
+	},
+	separatorStyle: {
+		height: 5
+	},
+	modalRowStyle: {
+		flexDirection: 'row'
+	},
+	modalRowThumbnailStyle: {
+		width: 80,
+		height: 80
+	},
+	modalRowTextContainerStyle: {
+		marginLeft: 5,
+		alignSelf: 'center'
+	},
+	modalRowTextStyle: {
+		maxWidth: 250
+	},
+	contentStyle: {
+		backgroundColor: synchronizeTheme.secondaryColor
+	},
+	cardStyle: {
+		backgroundColor: synchronizeTheme.secondaryColor
+	},
+	cardItemStyle: {
+		backgroundColor: synchronizeTheme.secondaryColor
+	},
+	titleStyle: {
+		color: 'white'
+	},
+	favoriteTextStyle: {
+		marginLeft: 30
+	},
+	saveButtonStyle: {
+		borderColor: synchronizeTheme.secondaryColor,
+		borderWidth: 1
+	},
+	logoStyle: {
+		fontSize: 50
+	},
+	spotifyLogoStyle: {
+		color: spotifyTheme.primaryColor,
+	},
+	youtubeLogoStyle: {
+		color: youtubeTheme.primaryColor,
+	},
+	spotifyText: {
+		color: spotifyTheme.primaryColor
+	},
+	youtubeText: {
+		color: youtubeTheme.primaryColor
+	},
+	buttonContainerStyle: {
+		display: 'flex',
+		flexDirection: 'row'
+	},
+	buttonStyle: {
+		marginRight: 10,
+		borderColor: synchronizeTheme.secondaryColor,
+		borderWidth: 1
+	},
+	cardListStyle: {
+		borderColor: "white",
+		borderBottomColor: "transparent",
+		borderLeftWidth: 5,
+		borderTopWidth: 5,
+		borderRightWidth: 0,
+		borderBottomWidth: 0,
+		backgroundColor: synchronizeTheme.secondaryColor
+	},
+	cardListItemStyle: {
+		backgroundColor: synchronizeTheme.secondaryColor,
+		borderRadius: 0
+	},
+	favoriteNumberingContainerStyle: {
+		maxWidth: 50
+	},
+	favoriteNumberingTextStyle: {
+		color: "white"
+	},
+	favoriteItemTextStyle: {
+		color: "white",
+		overflow: 'hidden'
+	},
+	thumbnailContainerStyle: {
+		maxWidth: 90
+	},
+	thumbnailButtonStyle: {
+		width: 80,
+		height: 80,
+		backgroundColor: "transparent"
+	},
+	thumbnailStyle: {
+		borderRadius: 20,
+		borderWidth: 2,
+		width: 80,
+		height: 80
+	},
+	thumbnailSpotifyStyle: {
+		borderColor: spotifyTheme.primaryColor,
+	},
+	thumbnailYoutubeStyle: {
+		borderColor: youtubeTheme.primaryColor,
+	},
+	textStyle: {
+		fontSize: 18,
+		color: "white"
+	}
+});
 
 export default SynchronizePlaylistView;

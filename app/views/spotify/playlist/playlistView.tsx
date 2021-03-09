@@ -22,7 +22,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
         if (selectedView !== SpotifyViewType.PLAYLIST) {
             stopPlaying();
         }
-    }, [selectedView]);
+    }, [selectedView, stopPlaying]);
 
     return (
         <>

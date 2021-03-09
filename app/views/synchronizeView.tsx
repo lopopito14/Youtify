@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React from 'react';
 import { Accordion, Badge, Body, Button, Content, H1, Header, Icon, Left, List, ListItem, Right, Spinner, Switch, Text, Title, View } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,6 +6,7 @@ import { spotifyTheme, synchronizeTheme, youtubeTheme } from './theme';
 import { SynchronizeViewType, IYoutubeMonthPlaylist } from '../interfaces/synchronizeInterfaces';
 import usePlaylistsSynchronizer from './usePlaylistsSynchronizer';
 import SynchronizePlaylistView from './synchronize/synchronizePlaylistView';
+import logger from './utils/logger';
 
 interface YearFilter {
 	year: number;
@@ -15,14 +15,19 @@ interface YearFilter {
 
 const SynchronizeView: React.VoidFunctionComponent = () => {
 
+	const { log, error } = logger();
+
 	const { myPlaylist, createPlaylists } = usePlaylistsSynchronizer();
-	const [selectedView, setSelectedView] = React.useState<SynchronizeViewType>(SynchronizeViewType.SYNCHRONIZE);
+	const [selectedView, setSelectedView] = React.useState<SynchronizeViewType>(SynchronizeViewType.SYNCHRONIZE_PLAYLISTS);
 	const [selectedPlaylist, setSelectedPlaylist] = React.useState<IYoutubeMonthPlaylist | undefined>(undefined);
 	const [yearFilter, setYearFilter] = React.useState<YearFilter[] | undefined>(undefined);
 
 	const yearFilterKey = "synchronize-year-filter";
 
 	React.useEffect(() => {
+
+		log("load save !");
+
 		if (myPlaylist.loaded) {
 
 			const buildYearsFilter = async () => {
@@ -50,7 +55,7 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 						}
 					}
 				} catch (e) {
-					console.error(e);
+					error(e);
 				}
 
 				setYearFilter(yearsFilter);
@@ -58,9 +63,12 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 
 			buildYearsFilter();
 		}
-	}, [myPlaylist.loaded]);
+	}, [error, log, myPlaylist.loaded, myPlaylist.playlists]);
 
 	React.useEffect(() => {
+
+		log("save save !");
+
 		if (yearFilter) {
 
 			const saveYearsFilter = async () => {
@@ -68,15 +76,15 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 					const jsonValue = JSON.stringify(yearFilter);
 					await AsyncStorage.setItem(yearFilterKey, jsonValue);
 				} catch (e) {
-					console.error(e);
+					error(e);
 				}
 			}
 
 			saveYearsFilter();
 		}
-	}, [yearFilter]);
+	}, [error, log, yearFilter]);
 
-	const isSelectedView = (view: SynchronizeViewType) => selectedView === view
+	const isSelectedView = React.useCallback((view: SynchronizeViewType) => selectedView === view, [selectedView]);
 
 	const headerTitle = () => {
 		if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
@@ -88,7 +96,7 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 
 	const onBackButtonPressed = React.useCallback(() => {
 		if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
-			setSelectedView(SynchronizeViewType.SYNCHRONIZE);
+			setSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLISTS);
 		}
 	}, [isSelectedView]);
 
@@ -136,7 +144,7 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 			<Header noShadow style={styles.headerStyle} androidStatusBarColor={synchronizeTheme.secondaryColor}>
 				<Left>
 					{
-						!isSelectedView(SynchronizeViewType.SYNCHRONIZE) &&
+						!isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLISTS) &&
 						<Button transparent onPress={onBackButtonPressed}>
 							<Icon name='arrow-back' />
 						</Button>
@@ -147,7 +155,7 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 				</Body>
 			</Header>
 			{
-				selectedView === SynchronizeViewType.SYNCHRONIZE &&
+				selectedView === SynchronizeViewType.SYNCHRONIZE_PLAYLISTS &&
 				<>
 					{
 						myPlaylist.loaded && yearFilter &&

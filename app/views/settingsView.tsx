@@ -1,16 +1,18 @@
-/* eslint-disable no-console */
 import React from 'react';
-import { Body, Content, Header, Left, Title } from 'native-base';
+import { Body, Button, Content, Header, Left, Text, Title } from 'native-base';
 import { ScrollView, StyleSheet } from 'react-native';
 import { AuthConfiguration } from 'react-native-app-auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { settingsTheme } from './theme';
 import SpotifyOAuth2 from './auth/spotifyOAuth2';
 import YoutubeOAuth2 from './auth/youtubeOAuth2';
+import logger from './utils/logger';
 
 const SettingsView: React.VoidFunctionComponent = () => {
 
-	const youtubeAuthorizeConfiguration: AuthConfiguration = {
+	const { log, error } = logger();
+
+	const [youtubeAuthorizeConfiguration] = React.useState<AuthConfiguration>({
 		clientId: '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
 		redirectUrl: 'com.lopopitoconverter:/youtubeoauth2callback',
 		scopes: [
@@ -21,9 +23,9 @@ const SettingsView: React.VoidFunctionComponent = () => {
 			authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
 			tokenEndpoint: 'https://oauth2.googleapis.com/token',
 		},
-	}
+	});
 
-	const spotifyAuthorizeConfiguration: AuthConfiguration = {
+	const [spotifyAuthorizeConfiguration] = React.useState<AuthConfiguration>({
 		clientId: 'f215a46cd2624bdf93203ab0e584350a',
 		redirectUrl: 'com.lopopitoconverter:/spotifyoauth2callback',
 		scopes: [
@@ -38,9 +40,8 @@ const SettingsView: React.VoidFunctionComponent = () => {
 			authorizationEndpoint: 'https://accounts.spotify.com/authorize',
 			tokenEndpoint: 'https://accounts.spotify.com/api/token',
 		},
-	}
+	});
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const purgeLocalStorage = React.useCallback(async () => {
 		try {
 			const keys = await AsyncStorage.getAllKeys();
@@ -52,12 +53,12 @@ const SettingsView: React.VoidFunctionComponent = () => {
 			});
 
 			await Promise.all(promises);
-			console.log("Local playlists purged !");
+			log("Local playlists purged !");
 
 		} catch (e) {
-			console.log(e);
+			error(e);
 		}
-	}, []);
+	}, [error, log]);
 
 	return (
 		<>
@@ -74,9 +75,9 @@ const SettingsView: React.VoidFunctionComponent = () => {
 				<Content>
 					<YoutubeOAuth2 authorizeConfiguration={youtubeAuthorizeConfiguration} />
 					<SpotifyOAuth2 authorizeConfiguration={spotifyAuthorizeConfiguration} />
-					{/* <Button onPress={purgeLocalStorage}>
+					<Button onPress={purgeLocalStorage} disabled>
 						<Text>Purge local storage</Text>
-					</Button> */}
+					</Button>
 				</Content>
 			</ScrollView>
 		</>

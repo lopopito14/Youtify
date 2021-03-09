@@ -51,7 +51,7 @@ const NotificationToast: React.VoidFunctionComponent = () => {
                     break;
             }
         }
-    }, [state.notifications.notifications]);
+    }, [dispatch, state.notifications.notifications]);
 
     return (<></>)
 }
