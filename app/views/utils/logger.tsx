@@ -9,6 +9,9 @@ const logger = () => {
     // const [warningOptions] = React.useState('color: yellow');
     // const [errorOptions] = React.useState('color: red');
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     const log = React.useCallback((message: any) => {
         console.log(`${message}`);
     }, []);

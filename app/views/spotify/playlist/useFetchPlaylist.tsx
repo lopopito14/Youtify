@@ -5,11 +5,17 @@ import { pushSpotifyErrorNotification } from '../../../store/types/notifications
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchPlaylist = (playlistId: string) => {
-    const { state, dispatch } = React.useContext(Context);
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
+    const { state, dispatch } = React.useContext(Context);
     const [playlist, setPlaylist] = React.useState<globalThis.SpotifyApi.SinglePlaylistResponse>();
     const [loaded, setLoaded] = React.useState(false);
 
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
     React.useEffect(() => {
         const fetchPlaylist = async () => {
             try {

@@ -13,12 +13,20 @@ interface IProps extends IYoutubeNavigationProps {
 const SubscriptionView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { subscription, selectedView } = props;
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { channelPlaylists, channelChannels, channelSubscriptions, loaded } = useFetchSubscription(subscription);
+
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const isSelected = React.useCallback((view: YoutubeViewType) => selectedView === view, [selectedView]);
 
     return (
         <>
             {
-                selectedView === YoutubeViewType.SUBSCRIPTION &&
+                isSelected(YoutubeViewType.SUBSCRIPTION) &&
                 <Content style={styles.contentStyle}>
                     {
                         loaded && channelPlaylists &&

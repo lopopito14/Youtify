@@ -11,27 +11,37 @@ import { ISpotifyNavigationProps, SpotifyViewType } from '../../../interfaces/sp
 type IProps = ISpotifyNavigationProps
 
 const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
-
     const { selectedView, setSelectedView } = props;
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { playlists, loaded, loadPlaylists, refreshPlaylists } = useFetchPlaylists();
     const [selectedPlaylistId, setselectedPlaylistId] = React.useState<string | undefined>(undefined);
 
-    React.useEffect(() => {
-        if (selectedView === SpotifyViewType.PLAYLISTS) {
-            setselectedPlaylistId(undefined);
-        }
-    }, [selectedView]);
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const isSelected = React.useCallback((view: SpotifyViewType) => selectedView === view, [selectedView]);
 
     const onOpenPlaylist = React.useCallback((id: string) => {
         setselectedPlaylistId(id);
         setSelectedView(SpotifyViewType.PLAYLIST);
     }, [setSelectedView]);
 
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
+    React.useEffect(() => {
+        if (isSelected(SpotifyViewType.PLAYLISTS)) {
+            setselectedPlaylistId(undefined);
+        }
+    }, [isSelected]);
+
     return (
         <>
             {
-                selectedView === SpotifyViewType.PLAYLISTS &&
+                isSelected(SpotifyViewType.PLAYLISTS) &&
                 <RefreshableList onRefresh={refreshPlaylists} backgroundColor={spotifyTheme.secondaryColor} lazyLoading onLoad={loadPlaylists}>
                     {
                         playlists.map((p) =>
@@ -58,7 +68,7 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                selectedView === SpotifyViewType.PLAYLIST && selectedPlaylistId &&
+                isSelected(SpotifyViewType.PLAYLIST) && selectedPlaylistId &&
                 <PlaylistView selectedView={selectedView} setSelectedView={setSelectedView} playlistId={selectedPlaylistId} />
             }
         </>

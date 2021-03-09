@@ -10,15 +10,20 @@ import logger from '../../utils/logger';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchSubscription = (subscription: Subscription) => {
+
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { state, dispatch } = React.useContext(Context);
-
     const { log } = logger();
-
     const [channelPlaylists, setChannelPlaylists] = React.useState<Playlist[]>([]);
     const [channelChannels, setChannelChannels] = React.useState<Channel[]>([]);
     const [channelSubscriptions, setChannelSubscriptions] = React.useState<Subscription[]>([]);
     const [loaded, setLoaded] = React.useState(false);
 
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
     React.useEffect(() => {
 
         const fetchChannelSections = async () => {

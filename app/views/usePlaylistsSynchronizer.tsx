@@ -19,18 +19,18 @@ interface ISpotifyPlaylists extends ILoad {
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const usePlaylistsSynchronizer = () => {
+
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { state, dispatch } = React.useContext(Context);
-
     const { log } = logger();
-
-    // const [initYoutube, setInitYoutube] = React.useState<boolean>(true);
-    // const [initSpotify, setInitSpotify] = React.useState<boolean>(true);
     const [initMerge, setInitMerge] = React.useState<boolean>(true);
     const [myPlaylist, setMyPlaylist] = React.useState<IMyPlaylists>({
         loaded: false,
         loading: false,
         playlists: []
-    })
+    });
     const [favoritepageToken, setfavoritepageToken] = React.useState<string | undefined>(undefined);
     const [youtubePlaylists, setYoutubePlaylists] = React.useState<IYoutubePlaylists>({
         loaded: false,
@@ -45,6 +45,9 @@ const usePlaylistsSynchronizer = () => {
     const [youtubePlaylistsPageToken, setYoutubePlaylistsPageToken] = React.useState<string | undefined>(undefined);
     const [spotifyPlaylistsOffset, setSpotifyPlaylistsOffset] = React.useState<number | undefined>(undefined);
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     const fetchFavoritePlaylistItems = React.useCallback(async (pageToken: string | undefined = undefined) => {
         try {
             setMyPlaylist((previous) => ({
@@ -260,6 +263,51 @@ const usePlaylistsSynchronizer = () => {
         }
     }, [dispatch, state.spotifyState.credential.accessToken, state.spotifyState.userProfile.id]);
 
+    const createPlaylists = React.useCallback(async (monthPlaylist: IYoutubeMonthPlaylist) => {
+        if (monthPlaylist.spotifyPlaylist === undefined) {
+            try {
+                const spotifyApi = new SpotifyApi();
+                spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
+
+                const options = {
+                    "name": monthPlaylist.title,
+                    "description": "",
+                    "public": true,
+                };
+
+                const createSpotifyPlaylistResponse = await spotifyApi.createPlaylist(state.spotifyState.userProfile.id, options);
+                if (createSpotifyPlaylistResponse) {
+                    await fetchSpotifyPlaylists();
+                    dispatch(pushSpotifySuccessNotification(`Spotify playlist '${monthPlaylist.title}' created !`));
+                }
+            } catch (error) {
+                dispatch(pushSpotifyErrorNotification(error));
+            }
+        }
+
+        if (monthPlaylist.youtubePlaylist === undefined) {
+            try {
+                const createYoutubePlaylistResponse = await new Playlists(state.youtubeState.credential.accessToken).insert({
+                    part: ['snippet', 'contentDetails'],
+                    requestBody: {
+                        snippet: {
+                            title: monthPlaylist.title
+                        }
+                    }
+                });
+                if (createYoutubePlaylistResponse) {
+                    await fetchYoutubePlaylists();
+                    dispatch(pushYoutubeSuccessNotification(`Youtube playlist '${monthPlaylist.title}' created !`));
+                }
+            } catch (error) {
+                dispatch(pushYoutubeErrorNotification(error));
+            }
+        }
+    }, [dispatch, fetchSpotifyPlaylists, fetchYoutubePlaylists, state.spotifyState.credential.accessToken, state.spotifyState.userProfile.id, state.youtubeState.credential.accessToken]);
+
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
     React.useEffect(() => {
         fetchFavoritePlaylistItems();
         fetchYoutubePlaylists();
@@ -324,48 +372,6 @@ const usePlaylistsSynchronizer = () => {
             }
         }
     }, [myPlaylist.loaded, youtubePlaylists.loaded, spotifyPlaylists.loaded, myPlaylist.playlists, youtubePlaylists.playlists, spotifyPlaylists.playlists, log, initMerge]);
-
-    const createPlaylists = React.useCallback(async (monthPlaylist: IYoutubeMonthPlaylist) => {
-        if (monthPlaylist.spotifyPlaylist === undefined) {
-            try {
-                const spotifyApi = new SpotifyApi();
-                spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
-
-                const options = {
-                    "name": monthPlaylist.title,
-                    "description": "",
-                    "public": true,
-                };
-
-                const createSpotifyPlaylistResponse = await spotifyApi.createPlaylist(state.spotifyState.userProfile.id, options);
-                if (createSpotifyPlaylistResponse) {
-                    await fetchSpotifyPlaylists();
-                    dispatch(pushSpotifySuccessNotification(`Spotify playlist '${monthPlaylist.title}' created !`));
-                }
-            } catch (error) {
-                dispatch(pushSpotifyErrorNotification(error));
-            }
-        }
-
-        if (monthPlaylist.youtubePlaylist === undefined) {
-            try {
-                const createYoutubePlaylistResponse = await new Playlists(state.youtubeState.credential.accessToken).insert({
-                    part: ['snippet', 'contentDetails'],
-                    requestBody: {
-                        snippet: {
-                            title: monthPlaylist.title
-                        }
-                    }
-                });
-                if (createYoutubePlaylistResponse) {
-                    await fetchYoutubePlaylists();
-                    dispatch(pushYoutubeSuccessNotification(`Youtube playlist '${monthPlaylist.title}' created !`));
-                }
-            } catch (error) {
-                dispatch(pushYoutubeErrorNotification(error));
-            }
-        }
-    }, [dispatch, fetchSpotifyPlaylists, fetchYoutubePlaylists, state.spotifyState.credential.accessToken, state.spotifyState.userProfile.id, state.youtubeState.credential.accessToken]);
 
     const matchPlaylistName = (name: string): boolean => new RegExp("Playlist [0-9]{4} - [0-9]{2}").test(name)
 

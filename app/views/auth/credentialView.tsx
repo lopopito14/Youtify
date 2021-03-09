@@ -13,10 +13,28 @@ interface Props {
 const CredentialView: React.FunctionComponent<Props> = (props: Props) => {
 	const { credential, authorizeDelegate, refreshDelegate } = props;
 
+	/// ###### ///
+	/// STATES ///
+	/// ###### ///
 	const [canLogOn, setcanLogOn] = React.useState(true);
 	const [remainingTime, setRemainingTime] = React.useState('');
 	const [interval, setinterval] = React.useState(0);
 
+	/// ######### ///
+	/// CALLBACKS ///
+	/// ######### ///
+	const logOn = React.useCallback(async () => {
+		if (credential.refreshToken === '') {
+			await authorizeDelegate();
+		}
+		else {
+			await refreshDelegate();
+		}
+	}, [authorizeDelegate, credential.refreshToken, refreshDelegate]);
+
+	/// ####### ///
+	/// EFFECTS ///
+	/// ####### ///
 	React.useEffect(() => {
 		const counterInterval = setInterval(() => {
 			setinterval((prev) => prev + 1);
@@ -46,15 +64,6 @@ const CredentialView: React.FunctionComponent<Props> = (props: Props) => {
 			setRemainingTime('Please log on !');
 		}
 	}, [interval, canLogOn, credential.isLogged, credential.accessTokenExpirationDate]);
-
-	const logOn = React.useCallback(async () => {
-		if (credential.refreshToken === '') {
-			await authorizeDelegate();
-		}
-		else {
-			await refreshDelegate();
-		}
-	}, [authorizeDelegate, credential.refreshToken, refreshDelegate]);
 
 	return (
 		<>

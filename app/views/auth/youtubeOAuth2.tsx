@@ -19,20 +19,69 @@ interface IProps {
 const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) => {
 	const { authorizeConfiguration } = props;
 
+	/// ###### ///
+	/// STATES ///
+	/// ###### ///
 	const { error } = logger();
-
 	const { state, dispatch } = React.useContext(Context);
+	const [storageKey] = React.useState<string>("youtube_refresh_token");
 
-	const storageKey = "youtube_refresh_token";
-
+	/// ######### ///
+	/// CALLBACKS ///
+	/// ######### ///
 	const storeRefreshToken = React.useCallback(async (token: string) => {
 		try {
 			await AsyncStorage.setItem(storageKey, token);
 		} catch (e) {
 			error(e);
 		}
-	}, [error]);
+	}, [error, storageKey]);
 
+	const authorizeYoutube = React.useCallback(async () => {
+		try {
+			dispatch(youtubeApiAuthorizeRequest());
+			const authorizeResult: AuthorizeResult = await authorize(authorizeConfiguration);
+			if (authorizeResult) {
+				dispatch(youtubeApiAuthorizeSuccess(authorizeResult));
+				await storeRefreshToken(authorizeResult.refreshToken);
+			}
+		} catch (e) {
+			dispatch(youtubeApiAuthorizeError(e));
+		}
+	}, [authorizeConfiguration, dispatch, storeRefreshToken]);
+
+	const refreshYoutube = React.useCallback(async () => {
+		try {
+			dispatch(youtubeApiRefreshRequest());
+			const refreshResult: RefreshResult = await refresh(authorizeConfiguration, { refreshToken: state.youtubeState.credential.refreshToken });
+			if (refreshResult) {
+				dispatch(youtubeApiRefreshSuccess(refreshResult));
+
+				if (refreshResult.refreshToken) {
+					await storeRefreshToken(refreshResult.refreshToken);
+				}
+			}
+		} catch (e) {
+			dispatch(youtubeApiRefreshError(e));
+		}
+	}, [authorizeConfiguration, dispatch, state.youtubeState.credential.refreshToken, storeRefreshToken]);
+
+	const revokeYoutube = React.useCallback(async () => {
+		try {
+			dispatch(youtubeApiRevokeRequest());
+			await revoke(authorizeConfiguration, { tokenToRevoke: state.youtubeState.credential.refreshToken });
+
+			dispatch(youtubeApiRevokeSuccess());
+			await storeRefreshToken('');
+		} catch (e) {
+			dispatch(youtubeApiRevokeError(e));
+		}
+	}, [authorizeConfiguration, dispatch, state.youtubeState.credential.refreshToken, storeRefreshToken]);
+
+
+	/// ####### ///
+	/// EFFECTS ///
+	/// ####### ///
 	React.useEffect(() => {
 
 		const tryRefreshYoutube = async () => {
@@ -82,48 +131,7 @@ const YoutubeOAuth2: React.FunctionComponent<IProps> = (props: IProps) => {
 		} else {
 			tryRefreshYoutube();
 		}
-	}, [authorizeConfiguration, dispatch, error, state.youtubeState.credential.accessToken, state.youtubeState.credential.isLogged, state.youtubeState.userProfile.loaded, storeRefreshToken]);
-
-	const authorizeYoutube = React.useCallback(async () => {
-		try {
-			dispatch(youtubeApiAuthorizeRequest());
-			const authorizeResult: AuthorizeResult = await authorize(authorizeConfiguration);
-			if (authorizeResult) {
-				dispatch(youtubeApiAuthorizeSuccess(authorizeResult));
-				await storeRefreshToken(authorizeResult.refreshToken);
-			}
-		} catch (e) {
-			dispatch(youtubeApiAuthorizeError(e));
-		}
-	}, [authorizeConfiguration, dispatch, storeRefreshToken]);
-
-	const refreshYoutube = React.useCallback(async () => {
-		try {
-			dispatch(youtubeApiRefreshRequest());
-			const refreshResult: RefreshResult = await refresh(authorizeConfiguration, { refreshToken: state.youtubeState.credential.refreshToken });
-			if (refreshResult) {
-				dispatch(youtubeApiRefreshSuccess(refreshResult));
-
-				if (refreshResult.refreshToken) {
-					await storeRefreshToken(refreshResult.refreshToken);
-				}
-			}
-		} catch (e) {
-			dispatch(youtubeApiRefreshError(e));
-		}
-	}, [authorizeConfiguration, dispatch, state.youtubeState.credential.refreshToken, storeRefreshToken]);
-
-	const revokeYoutube = React.useCallback(async () => {
-		try {
-			dispatch(youtubeApiRevokeRequest());
-			await revoke(authorizeConfiguration, { tokenToRevoke: state.youtubeState.credential.refreshToken });
-
-			dispatch(youtubeApiRevokeSuccess());
-			await storeRefreshToken('');
-		} catch (e) {
-			dispatch(youtubeApiRevokeError(e));
-		}
-	}, [authorizeConfiguration, dispatch, state.youtubeState.credential.refreshToken, storeRefreshToken]);
+	}, [authorizeConfiguration, dispatch, error, state.youtubeState.credential.accessToken, state.youtubeState.credential.isLogged, state.youtubeState.userProfile.loaded, storageKey, storeRefreshToken]);
 
 	return (
 		<Card>

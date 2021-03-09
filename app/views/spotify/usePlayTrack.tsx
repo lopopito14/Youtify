@@ -6,11 +6,16 @@ import logger from '../utils/logger';
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const usePlayTrack = () => {
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { log } = logger();
-
     const [trackIdPlaying, setTrackIdPlaying] = React.useState<string | undefined>(undefined);
     const [sound, setSound] = React.useState<Sound | undefined>(undefined);
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     const stopPlaying = React.useCallback(() => {
         if (sound) {
             sound.pause();

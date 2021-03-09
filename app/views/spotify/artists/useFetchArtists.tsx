@@ -6,14 +6,19 @@ import logger from '../../utils/logger';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchArtists = () => {
-    const { state, dispatch } = React.useContext(Context);
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
+    const { state, dispatch } = React.useContext(Context);
     const { log } = logger();
-    const [init, setInit] = React.useState<boolean>(true);
     const [followedArtists, setFollowedArtists] = React.useState<globalThis.SpotifyApi.ArtistObjectFull[]>([]);
     const [loaded, setLoaded] = React.useState(false);
     const [after, setAfter] = React.useState<string | undefined>(undefined);
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     const fetchFollowedArtists = React.useCallback(async (afterValue: string | undefined = undefined) => {
         try {
             const spotifyApi = new SpotifyApi();
@@ -33,7 +38,7 @@ const useFetchArtists = () => {
             const response = await spotifyApi.getFollowedArtists(option);
             if (response) {
                 if (afterValue) {
-                    setFollowedArtists([...followedArtists, ...response.artists.items]);
+                    setFollowedArtists(prev => [...prev, ...response.artists.items]);
                 }
                 else {
                     setFollowedArtists(response.artists.items);
@@ -49,14 +54,7 @@ const useFetchArtists = () => {
         } catch (error) {
             dispatch(pushSpotifyErrorNotification(error));
         }
-    }, [dispatch, followedArtists, state.spotifyState.credential.accessToken]);
-
-    React.useEffect(() => {
-        if (init) {
-            setInit(false);
-            fetchFollowedArtists();
-        }
-    }, [fetchFollowedArtists, init]);
+    }, [dispatch, state.spotifyState.credential.accessToken]);
 
     const refreshArtists = React.useCallback(async () => {
         await fetchFollowedArtists()
@@ -70,6 +68,13 @@ const useFetchArtists = () => {
             log("all followed artists loaded");
         }
     }, [loaded, fetchFollowedArtists, after, log]);
+
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
+    React.useEffect(() => {
+        fetchFollowedArtists();
+    }, [fetchFollowedArtists]);
 
     return { followedArtists, loaded, loadArtists, refreshArtists };
 }

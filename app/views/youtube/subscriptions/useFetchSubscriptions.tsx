@@ -7,13 +7,19 @@ import logger from '../../utils/logger';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchSubscriptions = () => {
-    const { state, dispatch } = React.useContext(Context);
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
+    const { state, dispatch } = React.useContext(Context);
     const { log } = logger();
     const [loaded, setLoaded] = React.useState(false);
     const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
     const [pageToken, setPageToken] = React.useState<string | undefined>(undefined);
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     const fetchSubscriptions = React.useCallback(async (pageTokenValue: string | undefined = undefined) => {
 
         try {
@@ -49,10 +55,6 @@ const useFetchSubscriptions = () => {
         }
     }, [dispatch, state.youtubeState.credential.accessToken, state.youtubeState.userProfile.channelId]);
 
-    React.useEffect(() => {
-        fetchSubscriptions();
-    }, [fetchSubscriptions]);
-
     const refreshSubscriptions = React.useCallback(async () => {
         await fetchSubscriptions();
     }, [fetchSubscriptions]);
@@ -64,6 +66,13 @@ const useFetchSubscriptions = () => {
             log('all subscriptions loaded');
         }
     }, [fetchSubscriptions, loaded, log, pageToken]);
+
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
+    React.useEffect(() => {
+        fetchSubscriptions();
+    }, [fetchSubscriptions]);
 
     return { subscriptions, loaded, loadSubscriptions, refreshSubscriptions };
 }

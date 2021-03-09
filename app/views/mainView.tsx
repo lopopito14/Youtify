@@ -20,10 +20,23 @@ enum MainViewType {
 }
 
 const MainView: React.VoidFunctionComponent = () => {
-	const [state, dispatch] = React.useReducer(reducer, InitialState);
 
+	/// ###### ///
+	/// STATES ///
+	/// ###### ///
+	const [state, dispatch] = React.useReducer(reducer, InitialState);
 	const [selectedView, setSelectedView] = React.useState<MainViewType>(MainViewType.NONE);
 
+	/// ######### ///
+	/// CALLBACKS ///
+	/// ######### ///
+	const isSelected = React.useCallback((view: MainViewType) => selectedView === view, [selectedView]);
+
+	const footerOpacity = React.useCallback((view: MainViewType) => isSelected(view) ? 1 : 0.5, [isSelected]);
+
+	/// ####### ///
+	/// EFFECTS ///
+	/// ####### ///
 	React.useEffect(() => {
 		if (state.spotifyState.credential.isLogged && !state.youtubeState.credential.isLogged) {
 			setSelectedView(MainViewType.SPOTIFY);
@@ -34,11 +47,7 @@ const MainView: React.VoidFunctionComponent = () => {
 		} else {
 			setSelectedView(MainViewType.NONE);
 		}
-	}, [state.spotifyState.credential.isLogged, state.youtubeState.credential.isLogged])
-
-	const isSelected = (view: MainViewType) => selectedView === view
-
-	const footerOpacity = (view: MainViewType) => isSelected(view) ? 1 : 0.5
+	}, [state.spotifyState.credential.isLogged, state.youtubeState.credential.isLogged]);
 
 	const footerBackgroundColor = () => {
 		if (isSelected(MainViewType.YOUTUBE)) {

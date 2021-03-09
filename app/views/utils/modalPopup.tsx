@@ -20,6 +20,7 @@ interface IProps {
 
 const ModalPopup: React.FunctionComponent<IProps> = (props: IProps) => {
     const { title, type, visible, backgroundColor, okCallback, cancelCallback, children } = props;
+
     return (
         <Modal
             animationType="fade"

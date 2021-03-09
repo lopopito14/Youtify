@@ -7,12 +7,18 @@ import { Videos } from '../../../youtubeApi/youtube-api-videos';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchPlaylist = (playlist: Playlist) => {
-    const { state, dispatch } = React.useContext(Context);
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
+    const { state, dispatch } = React.useContext(Context);
     const [loaded, setLoaded] = React.useState(false);
     const [youtubeVideos, setYoutubeVideos] = React.useState<Video[]>([]);
     const [pageToken, setPageToken] = React.useState<string | undefined>(undefined);
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     const fetchPlaylistVideos = React.useCallback(async (pageTokenValue: string | undefined = undefined) => {
         try {
             const playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
@@ -56,6 +62,9 @@ const useFetchPlaylist = (playlist: Playlist) => {
         }
     }, [dispatch, playlist.id, state.youtubeState.credential.accessToken]);
 
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
     React.useEffect(() => {
         fetchPlaylistVideos();
     }, [fetchPlaylistVideos]);

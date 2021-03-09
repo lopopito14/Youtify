@@ -7,14 +7,19 @@ import logger from '../../utils/logger';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchPlaylists = () => {
+
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { state, dispatch } = React.useContext(Context);
-
     const { log } = logger();
-
     const [loaded, setLoaded] = React.useState(false);
     const [playlists, setPlaylists] = React.useState<Playlist[]>([]);
     const [pageToken, setPageToken] = React.useState<string | undefined>(undefined);
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     const fetchPlaylists = React.useCallback(async (pageTokenValue: string | undefined = undefined) => {
         try {
             const response = await new Playlists(state.youtubeState.credential.accessToken).list({
@@ -49,10 +54,6 @@ const useFetchPlaylists = () => {
         }
     }, [dispatch, state.youtubeState.credential.accessToken, state.youtubeState.userProfile.channelId]);
 
-    React.useEffect(() => {
-        fetchPlaylists();
-    }, [fetchPlaylists]);
-
     const refreshPlaylist = React.useCallback(async () => {
         await fetchPlaylists();
     }, [fetchPlaylists]);
@@ -65,6 +66,13 @@ const useFetchPlaylists = () => {
             log("all playlists loaded");
         }
     }, [fetchPlaylists, loaded, log, pageToken]);
+
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
+    React.useEffect(() => {
+        fetchPlaylists();
+    }, [fetchPlaylists]);
 
     return { playlists, loaded, loadPlaylist, refreshPlaylist };
 }

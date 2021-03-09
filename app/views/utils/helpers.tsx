@@ -1,4 +1,8 @@
-export const getYoutubeVideoDuration = (duration: string): number => {
+export const getYoutubeVideoDuration = (duration: string | undefined | null): number => {
+    if (!duration) {
+        return 0
+    }
+
     const regexPtms = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/;
     let hours = 0; let minutes = 0; let seconds = 0;
 

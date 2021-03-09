@@ -15,15 +15,35 @@ interface YearFilter {
 
 const SynchronizeView: React.VoidFunctionComponent = () => {
 
+	/// ###### ///
+	/// STATES ///
+	/// ###### ///
 	const { log, error } = logger();
-
 	const { myPlaylist, createPlaylists } = usePlaylistsSynchronizer();
 	const [selectedView, setSelectedView] = React.useState<SynchronizeViewType>(SynchronizeViewType.SYNCHRONIZE_PLAYLISTS);
 	const [selectedPlaylist, setSelectedPlaylist] = React.useState<IYoutubeMonthPlaylist | undefined>(undefined);
 	const [yearFilter, setYearFilter] = React.useState<YearFilter[] | undefined>(undefined);
+	const [yearFilterKey] = React.useState<string>("synchronize-year-filter");
 
-	const yearFilterKey = "synchronize-year-filter";
+	/// ######### ///
+	/// CALLBACKS ///
+	/// ######### ///
+	const isSelectedView = React.useCallback((view: SynchronizeViewType) => selectedView === view, [selectedView]);
 
+	const onBackButtonPressed = React.useCallback(() => {
+		if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
+			setSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLISTS);
+		}
+	}, [isSelectedView]);
+
+	const onOpenSynchronizePlaylist = React.useCallback((monthPlaylist: IYoutubeMonthPlaylist) => {
+		setSelectedPlaylist(monthPlaylist);
+		setSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST);
+	}, []);
+
+	/// ####### ///
+	/// EFFECTS ///
+	/// ####### ///
 	React.useEffect(() => {
 
 		log("load save !");
@@ -63,7 +83,7 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 
 			buildYearsFilter();
 		}
-	}, [error, log, myPlaylist.loaded, myPlaylist.playlists]);
+	}, [error, log, myPlaylist.loaded, myPlaylist.playlists, yearFilterKey]);
 
 	React.useEffect(() => {
 
@@ -82,9 +102,7 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 
 			saveYearsFilter();
 		}
-	}, [error, log, yearFilter]);
-
-	const isSelectedView = React.useCallback((view: SynchronizeViewType) => selectedView === view, [selectedView]);
+	}, [error, log, yearFilter, yearFilterKey]);
 
 	const headerTitle = () => {
 		if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
@@ -93,17 +111,6 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 
 		return 'Synchronize';
 	}
-
-	const onBackButtonPressed = React.useCallback(() => {
-		if (isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST)) {
-			setSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLISTS);
-		}
-	}, [isSelectedView]);
-
-	const onOpenSynchronizePlaylist = React.useCallback((monthPlaylist: IYoutubeMonthPlaylist) => {
-		setSelectedPlaylist(monthPlaylist);
-		setSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST);
-	}, []);
 
 	const buildAccordion = () => {
 		const array: { title: JSX.Element, content: JSX.Element }[] = [];
@@ -155,7 +162,7 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 				</Body>
 			</Header>
 			{
-				selectedView === SynchronizeViewType.SYNCHRONIZE_PLAYLISTS &&
+				isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLISTS) &&
 				<>
 					{
 						myPlaylist.loaded && yearFilter &&
@@ -232,7 +239,7 @@ const SynchronizeView: React.VoidFunctionComponent = () => {
 				</>
 			}
 			{
-				selectedView === SynchronizeViewType.SYNCHRONIZE_PLAYLIST && selectedPlaylist &&
+				isSelectedView(SynchronizeViewType.SYNCHRONIZE_PLAYLIST) && selectedPlaylist &&
 				<SynchronizePlaylistView selectedView={selectedView} setSelectedView={setSelectedView} myPlaylist={selectedPlaylist} />
 			}
 		</>

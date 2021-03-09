@@ -12,12 +12,17 @@ interface IProps extends ISpotifyNavigationProps {
 }
 
 const ArtistView: React.FunctionComponent<IProps> = (props: IProps) => {
-
     const { selectedView, artistId } = props;
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { artist, relatedArtists, relatedArtistsFollowingStatus, artistTopTracks, loaded, onFollow } = useFetchArtist(artistId);
     const { trackIdPlaying, playTrack, stopPlaying } = usePlayTrack();
 
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
     React.useEffect(() => {
         if (selectedView !== SpotifyViewType.ARTIST) {
             stopPlaying();

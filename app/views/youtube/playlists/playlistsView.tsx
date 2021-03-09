@@ -14,24 +14,35 @@ type IProps = IYoutubeNavigationProps
 const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { selectedView, setSelectedView } = props;
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { playlists, loaded, loadPlaylist, refreshPlaylist } = useFetchPlaylists();
     const [selectedPlaylist, setSelectedPlaylist] = React.useState<Playlist | undefined>(undefined);
 
-    React.useEffect(() => {
-        if (selectedView === YoutubeViewType.PLAYLISTS) {
-            setSelectedPlaylist(undefined);
-        }
-    }, [selectedView]);
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const isSelected = React.useCallback((view: YoutubeViewType) => selectedView === view, [selectedView]);
 
     const onOpenPlaylist = React.useCallback((playlist: Playlist) => {
         setSelectedPlaylist(playlist);
         setSelectedView(YoutubeViewType.PLAYLIST);
     }, [setSelectedView]);
 
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
+    React.useEffect(() => {
+        if (isSelected(YoutubeViewType.PLAYLISTS)) {
+            setSelectedPlaylist(undefined);
+        }
+    }, [isSelected]);
+
     return (
         <>
             {
-                selectedView === YoutubeViewType.PLAYLISTS &&
+                isSelected(YoutubeViewType.PLAYLISTS) &&
                 <RefreshableList onRefresh={refreshPlaylist} backgroundColor={youtubeTheme.secondaryColor} lazyLoading onLoad={loadPlaylist}>
                     {
                         playlists.map((p) =>
@@ -58,7 +69,7 @@ const PlaylistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                selectedView === YoutubeViewType.PLAYLIST && selectedPlaylist &&
+                isSelected(YoutubeViewType.PLAYLIST) && selectedPlaylist &&
                 <PlaylistView selectedView={selectedView} setSelectedView={setSelectedView} playlist={selectedPlaylist} />
             }
         </>

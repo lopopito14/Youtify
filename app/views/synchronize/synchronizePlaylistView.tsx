@@ -30,6 +30,9 @@ enum BindingMode {
 const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
 	const { myPlaylist } = props;
 
+	/// ###### ///
+	/// STATES ///
+	/// ###### ///
 	const { localSave, saveFile, resetSave, youtubeVideos, spotifyTracks, nonAffectedVideos, nonAffectedTracks, deleteYoutubePlaylistVideos, deleteSpotifyPlaylistTracks, synchronizeYoutubePlaylist, synchronizeSpotifyPlaylist, bindYoutubeVideo, bindSpotifyTrack } = useSynchronizePlaylists(myPlaylist);
 	const [actionMode, setActionMode] = React.useState<ActionMode>(ActionMode.None);
 	const [actionTitle, setActionTitle] = React.useState<string>('');
@@ -39,30 +42,9 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 	const [search, setSearch] = React.useState('');
 	const { searchResults, openSearch } = useSearch();
 
-	React.useEffect(() => {
-		switch (actionMode) {
-			case ActionMode.DeleteYoutubeVideos:
-				setActionTitle(`Delete youtube playlist "${myPlaylist.title}" ?`);
-				break;
-
-			case ActionMode.SynchronizeYoutube:
-				setActionTitle(`Synchronize youtube playlist "${myPlaylist.title}" ?`);
-				break;
-
-			case ActionMode.DeleteSpotifyTracks:
-				setActionTitle(`Delete spotify playlist "${myPlaylist.title}" items ?`);
-				break;
-
-			case ActionMode.SynchronizeSpotify:
-				setActionTitle(`Synchronize spotify playlist "${myPlaylist.title}" ?`);
-				break;
-
-			default:
-				setActionTitle('');
-				break;
-		}
-	}, [actionMode, myPlaylist.title]);
-
+	/// ######### ///
+	/// CALLBACKS ///
+	/// ######### ///
 	const modalActionOkCallback = React.useCallback(async () => {
 
 		const selectedMode = actionMode;
@@ -95,22 +77,6 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 	const modalActionCancelCallback = React.useCallback(async () => {
 		setActionMode(ActionMode.None);
 	}, []);
-
-	React.useEffect(() => {
-		switch (bindingMode) {
-			case BindingMode.BindYoutubeVideo:
-				setBindingTitle(`Bind Youtube Video`);
-				break;
-
-			case BindingMode.BindSpotifyTrack:
-				setBindingTitle(`Bind Spotify Track`);
-				break;
-
-			default:
-				setBindingTitle('');
-				break;
-		}
-	}, [bindingMode]);
 
 	const modalBindingOkCallback = React.useCallback(async () => {
 		// do nothing
@@ -158,6 +124,49 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 		openSearch(search);
 	}, [search, openSearch]);
 
+	/// ####### ///
+	/// EFFECTS ///
+	/// ####### ///
+	React.useEffect(() => {
+		switch (bindingMode) {
+			case BindingMode.BindYoutubeVideo:
+				setBindingTitle(`Bind Youtube Video`);
+				break;
+
+			case BindingMode.BindSpotifyTrack:
+				setBindingTitle(`Bind Spotify Track`);
+				break;
+
+			default:
+				setBindingTitle('');
+				break;
+		}
+	}, [bindingMode]);
+
+	React.useEffect(() => {
+		switch (actionMode) {
+			case ActionMode.DeleteYoutubeVideos:
+				setActionTitle(`Delete youtube playlist "${myPlaylist.title}" ?`);
+				break;
+
+			case ActionMode.SynchronizeYoutube:
+				setActionTitle(`Synchronize youtube playlist "${myPlaylist.title}" ?`);
+				break;
+
+			case ActionMode.DeleteSpotifyTracks:
+				setActionTitle(`Delete spotify playlist "${myPlaylist.title}" items ?`);
+				break;
+
+			case ActionMode.SynchronizeSpotify:
+				setActionTitle(`Synchronize spotify playlist "${myPlaylist.title}" ?`);
+				break;
+
+			default:
+				setActionTitle('');
+				break;
+		}
+	}, [actionMode, myPlaylist.title]);
+
 	const getYoutubeThumbnail = (saveYoutube: IMyYoutube | undefined) => {
 
 		if (saveYoutube) {
@@ -193,7 +202,7 @@ const SynchronizePlaylistView: React.FunctionComponent<IProps> = (props: IProps)
 	const getYoutubeDuration = (saveYoutube: IMyYoutube) => {
 
 		const item = youtubeVideos.videos.find(i => i.id === saveYoutube.videoId);
-		if (item && item.contentDetails?.duration) {
+		if (item) {
 			return msToTime(getYoutubeVideoDuration(item.contentDetails?.duration));
 		}
 

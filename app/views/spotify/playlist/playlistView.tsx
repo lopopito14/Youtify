@@ -12,22 +12,32 @@ interface IProps extends ISpotifyNavigationProps {
 }
 
 const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
-
     const { playlistId, selectedView } = props;
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { playlist, loaded } = useFetchPlaylist(playlistId);
     const { trackIdPlaying, playTrack, stopPlaying } = usePlayTrack();
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const isSelected = React.useCallback((view: SpotifyViewType) => selectedView === view, [selectedView]);
+
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
     React.useEffect(() => {
-        if (selectedView !== SpotifyViewType.PLAYLIST) {
+        if (!isSelected(SpotifyViewType.PLAYLIST)) {
             stopPlaying();
         }
-    }, [selectedView, stopPlaying]);
+    }, [isSelected, stopPlaying]);
 
     return (
         <>
             {
-                selectedView === SpotifyViewType.PLAYLIST &&
+                isSelected(SpotifyViewType.PLAYLIST) &&
                 <Content style={styles.contentStyle}>
                     {
                         loaded && playlist &&

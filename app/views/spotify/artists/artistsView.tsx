@@ -12,24 +12,35 @@ type IProps = ISpotifyNavigationProps
 const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { selectedView, setSelectedView } = props;
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { followedArtists, loaded, loadArtists, refreshArtists } = useFetchArtists();
     const [selectedArtistId, setSelectedArtistId] = React.useState<string | undefined>(undefined);
 
-    React.useEffect(() => {
-        if (selectedView === SpotifyViewType.ARTISTS) {
-            setSelectedArtistId(undefined);
-        }
-    }, [selectedView]);
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const isSelected = React.useCallback((view: SpotifyViewType) => selectedView === view, [selectedView]);
 
     const onOpenArtist = React.useCallback((id: string) => {
         setSelectedArtistId(id);
         setSelectedView(SpotifyViewType.ARTIST);
     }, [setSelectedView]);
 
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
+    React.useEffect(() => {
+        if (isSelected(SpotifyViewType.ARTISTS)) {
+            setSelectedArtistId(undefined);
+        }
+    }, [isSelected]);
+
     return (
         <>
             {
-                selectedView === SpotifyViewType.ARTISTS &&
+                isSelected(SpotifyViewType.ARTISTS) &&
                 <RefreshableList onRefresh={refreshArtists} backgroundColor={spotifyTheme.secondaryColor} lazyLoading onLoad={loadArtists}>
                     {
                         followedArtists.map((p) =>
@@ -60,7 +71,7 @@ const ArtistsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                selectedView === SpotifyViewType.ARTIST && selectedArtistId &&
+                isSelected(SpotifyViewType.ARTIST) && selectedArtistId &&
                 <ArtistView selectedView={selectedView} setSelectedView={setSelectedView} artistId={selectedArtistId} />
             }
         </>

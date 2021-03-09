@@ -13,24 +13,35 @@ type IProps = IYoutubeNavigationProps
 const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { selectedView, setSelectedView } = props;
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { subscriptions, loaded, loadSubscriptions, refreshSubscriptions } = useFetchSubscriptions();
     const [selectedSubscription, setSelectedSubscription] = React.useState<Subscription | undefined>(undefined);
 
-    React.useEffect(() => {
-        if (selectedView === YoutubeViewType.SUBSCRIPTIONS) {
-            setSelectedSubscription(undefined);
-        }
-    }, [selectedView]);
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const isSelected = React.useCallback((view: YoutubeViewType) => selectedView === view, [selectedView]);
 
     const onOpenSubscription = React.useCallback((subscription: Subscription) => {
         setSelectedSubscription(subscription);
         setSelectedView(YoutubeViewType.SUBSCRIPTION);
     }, [setSelectedView]);
 
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
+    React.useEffect(() => {
+        if (isSelected(YoutubeViewType.SUBSCRIPTIONS)) {
+            setSelectedSubscription(undefined);
+        }
+    }, [isSelected]);
+
     return (
         <>
             {
-                selectedView === YoutubeViewType.SUBSCRIPTIONS &&
+                isSelected(YoutubeViewType.SUBSCRIPTIONS) &&
                 <RefreshableList onRefresh={refreshSubscriptions} backgroundColor={youtubeTheme.secondaryColor} lazyLoading onLoad={loadSubscriptions}>
                     {
                         subscriptions.map((s) =>
@@ -61,7 +72,7 @@ const SubscriptionsView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </RefreshableList>
             }
             {
-                selectedView === YoutubeViewType.SUBSCRIPTION && selectedSubscription &&
+                isSelected(YoutubeViewType.SUBSCRIPTION) && selectedSubscription &&
                 <SubscriptionView selectedView={selectedView} setSelectedView={setSelectedView} subscription={selectedSubscription} />
             }
         </>

@@ -6,9 +6,26 @@ import { youtubeTheme } from './theme';
 import YoutubeMenuView from './youtube/youtubeMenuView';
 
 const YoutubeView: React.VoidFunctionComponent = () => {
+
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const [selectedView, setSelectedView] = React.useState<YoutubeViewType>(YoutubeViewType.MENU);
 
-    const isSelectedView = (view: YoutubeViewType) => selectedView === view
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const isSelectedView = React.useCallback((view: YoutubeViewType) => selectedView === view, [selectedView]);
+
+    const onBackButtonPressed = React.useCallback(() => {
+        if (isSelectedView(YoutubeViewType.PLAYLIST)) {
+            setSelectedView(YoutubeViewType.PLAYLISTS);
+        } else if (isSelectedView(YoutubeViewType.SUBSCRIPTION)) {
+            setSelectedView(YoutubeViewType.SUBSCRIPTIONS);
+        } else {
+            setSelectedView(YoutubeViewType.MENU);
+        }
+    }, [isSelectedView]);
 
     const headerTitle = () => {
         if (isSelectedView(YoutubeViewType.SUBSCRIPTIONS)) {
@@ -29,16 +46,6 @@ const YoutubeView: React.VoidFunctionComponent = () => {
 
         return 'Youtube';
     }
-
-    const onBackButtonPressed = React.useCallback(() => {
-        if (selectedView === YoutubeViewType.PLAYLIST) {
-            setSelectedView(YoutubeViewType.PLAYLISTS);
-        } else if (selectedView === YoutubeViewType.SUBSCRIPTION) {
-            setSelectedView(YoutubeViewType.SUBSCRIPTIONS);
-        } else {
-            setSelectedView(YoutubeViewType.MENU);
-        }
-    }, [selectedView, setSelectedView]);
 
     return (
         <>

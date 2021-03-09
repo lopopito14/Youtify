@@ -6,9 +6,28 @@ import SpotifyMenuView from './spotify/spotifyMenuView';
 import { SpotifyViewType } from '../interfaces/spotifyInterfaces';
 
 const SpotifyView: React.VoidFunctionComponent = () => {
+
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const [selectedView, setSelectedView] = React.useState<SpotifyViewType>(SpotifyViewType.MENU);
 
-    const isSelectedView = (view: SpotifyViewType) => selectedView === view
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const isSelectedView = React.useCallback((view: SpotifyViewType) => selectedView === view, [selectedView]);
+
+    const onBackButtonPressed = React.useCallback(() => {
+        if (isSelectedView(SpotifyViewType.ARTIST)) {
+            setSelectedView(SpotifyViewType.ARTISTS);
+        }
+        else if (isSelectedView(SpotifyViewType.PLAYLIST)) {
+            setSelectedView(SpotifyViewType.PLAYLISTS);
+        }
+        else {
+            setSelectedView(SpotifyViewType.MENU);
+        }
+    }, [isSelectedView]);
 
     const headerTitle = () => {
         if (isSelectedView(SpotifyViewType.ARTISTS)) {
@@ -26,18 +45,6 @@ const SpotifyView: React.VoidFunctionComponent = () => {
 
         return 'Spotify';
     }
-
-    const onBackButtonPressed = React.useCallback(() => {
-        if (selectedView === SpotifyViewType.ARTIST) {
-            setSelectedView(SpotifyViewType.ARTISTS);
-        }
-        else if (selectedView === SpotifyViewType.PLAYLIST) {
-            setSelectedView(SpotifyViewType.PLAYLISTS);
-        }
-        else {
-            setSelectedView(SpotifyViewType.MENU);
-        }
-    }, [selectedView, setSelectedView]);
 
     return (
         <>

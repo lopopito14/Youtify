@@ -16,13 +16,17 @@ interface IProps extends IYoutubeNavigationProps {
 const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { playlist, selectedView } = props;
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { error } = logger();
-
     const { youtubeVideos, loaded } = useFetchPlaylist(playlist);
     const [videoIdPlaying, setVideoIdPlaying] = React.useState<string | undefined>(undefined);
-
     const playerRef = React.useRef<YoutubeIframeRef>(null);
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     // eslint-disable-next-line @typescript-eslint/ban-types
     const onStateChange = React.useCallback((state: String) => {
         if (state === "ended") {
@@ -56,14 +60,6 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
             playerRef.current?.seekTo(currentTime + 30, true)
         );
     }, [playerRef]);
-
-    const getYoutubeDuration = (duration: string | undefined | null) => {
-        if (duration) {
-            return msToTime(getYoutubeVideoDuration(duration));
-        }
-
-        return '';
-    }
 
     return (
         <>
@@ -111,7 +107,7 @@ const PlaylistView: React.FunctionComponent<IProps> = (props: IProps) => {
                                                     <Text numberOfLines={3}>{video.snippet?.title}</Text>
                                                     <Text note numberOfLines={1}>{video.snippet?.channelTitle}</Text>
                                                     <Text note numberOfLines={1}>{video.statistics?.viewCount} views</Text>
-                                                    <Text note numberOfLines={1}>{getYoutubeDuration(video.contentDetails?.duration)}</Text>
+                                                    <Text note numberOfLines={1}>{msToTime(getYoutubeVideoDuration(video.contentDetails?.duration))}</Text>
                                                 </Body>
                                                 {
                                                     video.id && video.snippet?.thumbnails?.medium?.url &&

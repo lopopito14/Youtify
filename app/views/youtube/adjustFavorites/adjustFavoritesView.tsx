@@ -12,10 +12,16 @@ type IProps = IYoutubeNavigationProps
 
 const AdjustFavoritesView: React.FunctionComponent<IProps> = () => {
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { adjustableVideos, progress, loaded, replace } = useFetchAdjustFavorites();
     const { searchResults, openSearch } = useSearch();
     const [adjustableVideo, setAdjustableVideo] = React.useState<IAdjustableVideo | undefined>(undefined);
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     const onSearch = React.useCallback((video: IAdjustableVideo) => {
         if (video.video.snippet?.title) {
             setAdjustableVideo(video);

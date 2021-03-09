@@ -6,17 +6,61 @@ import logger from '../../utils/logger';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchArtist = (artistId: string) => {
+
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { state, dispatch } = React.useContext(Context);
-
     const { error } = logger();
-
-    const [init, setInit] = React.useState<boolean>(true);
     const [artist, setArtist] = React.useState<globalThis.SpotifyApi.SingleArtistResponse>();
     const [relatedArtists, setRelatedArtists] = React.useState<globalThis.SpotifyApi.ArtistObjectFull[]>();
     const [relatedArtistsFollowingStatus, setRelatedArtistsFollowingStatus] = React.useState<boolean[] | undefined>([]);
     const [artistTopTracks, setArtistTopTracks] = React.useState<globalThis.SpotifyApi.ArtistsTopTracksResponse>();
     const [loaded, setLoaded] = React.useState(false);
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const onFollow = React.useCallback(async (id: string) => {
+        if (relatedArtists) {
+            try {
+                const spotifyApi = new SpotifyApi();
+                spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
+
+                const position = relatedArtists.findIndex((a) => a.id === id);
+
+                if (position !== undefined && relatedArtistsFollowingStatus) {
+
+                    const followStatus = relatedArtistsFollowingStatus[position];
+                    if (followStatus) {
+                        await spotifyApi.unfollowArtists([id]);
+                    } else {
+                        await spotifyApi.followArtists([id]);
+                    }
+
+                    setRelatedArtistsFollowingStatus((prev) => {
+
+                        if (!prev) {
+                            return prev;
+                        }
+
+                        return [
+                            ...prev?.slice(0, position),
+                            !followStatus,
+                            ...prev.slice(position + 1)
+                        ]
+                    });
+                }
+            } catch (e) {
+                dispatch(pushSpotifyErrorNotification(e));
+            }
+        }
+
+    }, [dispatch, relatedArtists, relatedArtistsFollowingStatus, state.spotifyState.credential.accessToken]);
+
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
     React.useEffect(() => {
 
         const fetchArtist = async () => {
@@ -87,48 +131,8 @@ const useFetchArtist = (artistId: string) => {
             }
         }
 
-        if (init) {
-            setInit(false);
-            fetchAllArtistDatas();
-        }
-    }, [artistId, dispatch, state.spotifyState.credential.accessToken, state.spotifyState.userProfile.country, init, error]);
-
-    const onFollow = React.useCallback(async (id: string) => {
-        if (relatedArtists) {
-            try {
-                const spotifyApi = new SpotifyApi();
-                spotifyApi.setAccessToken(state.spotifyState.credential.accessToken);
-
-                const position = relatedArtists.findIndex((a) => a.id === id);
-
-                if (position !== undefined && relatedArtistsFollowingStatus) {
-
-                    const followStatus = relatedArtistsFollowingStatus[position];
-                    if (followStatus) {
-                        await spotifyApi.unfollowArtists([id]);
-                    } else {
-                        await spotifyApi.followArtists([id]);
-                    }
-
-                    setRelatedArtistsFollowingStatus((prev) => {
-
-                        if (!prev) {
-                            return prev;
-                        }
-
-                        return [
-                            ...prev?.slice(0, position),
-                            !followStatus,
-                            ...prev.slice(position + 1)
-                        ]
-                    });
-                }
-            } catch (e) {
-                dispatch(pushSpotifyErrorNotification(e));
-            }
-        }
-
-    }, [dispatch, relatedArtists, relatedArtistsFollowingStatus, state.spotifyState.credential.accessToken]);
+        fetchAllArtistDatas();
+    }, [artistId, dispatch, state.spotifyState.credential.accessToken, state.spotifyState.userProfile.country, error]);
 
     return { artist, relatedArtists, relatedArtistsFollowingStatus, artistTopTracks, loaded, onFollow }
 }

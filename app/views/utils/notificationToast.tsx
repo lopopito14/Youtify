@@ -5,10 +5,16 @@ import { NotificationType } from '../../store/state';
 import { popNotification } from '../../store/types/notifications_actions';
 
 const NotificationToast: React.VoidFunctionComponent = () => {
+
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
     const { state, dispatch } = React.useContext(Context);
+    const [duration] = React.useState<number>(2000);
 
-    const duration = 2000;
-
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
     React.useEffect(() => {
         if (state.notifications.notifications.length > 0) {
             const notification = state.notifications.notifications[0];
@@ -51,7 +57,7 @@ const NotificationToast: React.VoidFunctionComponent = () => {
                     break;
             }
         }
-    }, [dispatch, state.notifications.notifications]);
+    }, [dispatch, duration, state.notifications.notifications]);
 
     return (<></>)
 }

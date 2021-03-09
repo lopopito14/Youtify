@@ -14,6 +14,9 @@ interface IProps {
 const RefreshableList: React.FunctionComponent<IProps> = (props: IProps) => {
     const { children, lazyLoading, onRefresh, onLoad, backgroundColor } = props;
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     const onScroll = React.useCallback(async (event: NativeScrollEvent) => {
         const endPageReached = (e: NativeScrollEvent) => e.layoutMeasurement.height + e.contentOffset.y >= e.contentSize.height - 1;
         if (lazyLoading && endPageReached(event)) {

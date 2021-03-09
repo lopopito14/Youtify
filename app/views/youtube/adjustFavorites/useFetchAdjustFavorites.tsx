@@ -8,13 +8,15 @@ import { Videos } from '../../../youtubeApi/youtube-api-videos';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useFetchAdjustFavorites = () => {
-    const { state, dispatch } = React.useContext(Context);
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
+    const { state, dispatch } = React.useContext(Context);
     const [loaded, setLoaded] = React.useState(false);
     const [progress, setProgress] = React.useState(0);
     const [adjustableVideos, setAdjustableVideos] = React.useState<IAdjustableVideo[]>([]);
     const [pageToken, setPageToken] = React.useState<string | undefined>(undefined);
-
     const [filteredChannelIds] = React.useState<string[]>(
         [
             "UC6murUWtqOwnTL68pwjoGjQ", // EuphoricHardStyleZ
@@ -26,6 +28,9 @@ const useFetchAdjustFavorites = () => {
             "UC67WZta3Qqm-P2Eu3fej1bw"  // HARDSTYLE Records
         ]);
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
     const fetchFavoriteVideos = React.useCallback(async (pageTokenValue: string | undefined = undefined) => {
         try {
             const playlistItemsResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).list({
@@ -93,16 +98,6 @@ const useFetchAdjustFavorites = () => {
         }
     }, [dispatch, filteredChannelIds, state.youtubeState.credential.accessToken, state.youtubeState.userProfile.favoritePlaylistId]);
 
-    React.useEffect(() => {
-        fetchFavoriteVideos();
-    }, [fetchFavoriteVideos]);
-
-    React.useEffect(() => {
-        if (pageToken) {
-            fetchFavoriteVideos(pageToken);
-        }
-    }, [fetchFavoriteVideos, pageToken]);
-
     const replace = React.useCallback(async (searchResult: SearchResult, adjustableVideo: IAdjustableVideo) => {
         try {
             const insertVideoResponse = await new PlaylistItems(state.youtubeState.credential.accessToken).insert({
@@ -131,6 +126,19 @@ const useFetchAdjustFavorites = () => {
             dispatch(pushYoutubeErrorNotification(error));
         }
     }, [dispatch, state.youtubeState.credential.accessToken, state.youtubeState.userProfile.favoritePlaylistId]);
+
+    /// ####### ///
+    /// EFFECTS ///
+    /// ####### ///
+    React.useEffect(() => {
+        fetchFavoriteVideos();
+    }, [fetchFavoriteVideos]);
+
+    React.useEffect(() => {
+        if (pageToken) {
+            fetchFavoriteVideos(pageToken);
+        }
+    }, [fetchFavoriteVideos, pageToken]);
 
     return { adjustableVideos, progress, loaded, replace };
 }

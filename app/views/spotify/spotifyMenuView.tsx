@@ -10,10 +10,15 @@ type IProps = ISpotifyNavigationProps
 const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
     const { selectedView, setSelectedView } = props;
 
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const isSelected = React.useCallback((view: SpotifyViewType) => selectedView === view, [selectedView]);
+
     return (
         <>
             {
-                selectedView === SpotifyViewType.MENU &&
+                isSelected(SpotifyViewType.MENU) &&
                 <Content>
                     <View style={styles.containerStyle}>
                         <Button rounded success style={styles.buttonStyle} onPress={() => props.setSelectedView(SpotifyViewType.PLAYLISTS)}>
@@ -26,14 +31,14 @@ const SpotifyMenuView: React.FunctionComponent<IProps> = (props: IProps) => {
                 </Content>
             }
             {
-                selectedView !== SpotifyViewType.MENU &&
+                !isSelected(SpotifyViewType.MENU) &&
                 <>
                     {
-                        (selectedView === SpotifyViewType.PLAYLISTS || selectedView === SpotifyViewType.PLAYLIST) &&
+                        (isSelected(SpotifyViewType.PLAYLISTS) || isSelected(SpotifyViewType.PLAYLIST)) &&
                         <PlaylistsView selectedView={selectedView} setSelectedView={setSelectedView} />
                     }
                     {
-                        (selectedView === SpotifyViewType.ARTISTS || selectedView === SpotifyViewType.ARTIST) &&
+                        (isSelected(SpotifyViewType.ARTISTS) || isSelected(SpotifyViewType.ARTIST)) &&
                         <ArtistsView selectedView={selectedView} setSelectedView={setSelectedView} />
                     }
                 </>

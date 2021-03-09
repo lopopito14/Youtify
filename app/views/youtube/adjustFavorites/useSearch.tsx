@@ -6,11 +6,17 @@ import { Search } from '../../../youtubeApi/youtube-api-search';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const useSearch = () => {
-    const { state, dispatch } = React.useContext(Context);
 
+    /// ###### ///
+    /// STATES ///
+    /// ###### ///
+    const { state, dispatch } = React.useContext(Context);
     const [searchResults, setSearchResults] = React.useState<SearchResult[] | undefined>(undefined);
 
-    const openSearch = async (query: string | undefined) => {
+    /// ######### ///
+    /// CALLBACKS ///
+    /// ######### ///
+    const openSearch = React.useCallback(async (query: string | undefined) => {
         if (!query) {
             setSearchResults(undefined);
             return;
@@ -44,7 +50,7 @@ const useSearch = () => {
         } catch (error) {
             dispatch(pushYoutubeErrorNotification(error));
         }
-    }
+    }, [dispatch, state.youtubeState.credential.accessToken]);
 
     return { searchResults, openSearch };
 }
