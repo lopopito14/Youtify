@@ -3,6 +3,7 @@ import { Body, Button, Content, Header, Left, Text, Title } from 'native-base';
 import { ScrollView, StyleSheet } from 'react-native';
 import { AuthConfiguration } from 'react-native-app-auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Config from "react-native-config";
 import { settingsTheme } from './theme';
 import SpotifyOAuth2 from './auth/spotifyOAuth2';
 import YoutubeOAuth2 from './auth/youtubeOAuth2';
@@ -15,7 +16,7 @@ const SettingsView: React.VoidFunctionComponent = () => {
 	/// ###### ///
 	const { log, error } = logger();
 	const [youtubeAuthorizeConfiguration] = React.useState<AuthConfiguration>({
-		clientId: '904141401363-at0un0uitf1igb4d2krdk76ebsq62kmo.apps.googleusercontent.com',
+		clientId: Config.YOUTUBE_CLIENT_ID,
 		redirectUrl: 'com.youtify:/youtubeoauth2callback',
 		scopes: [
 			'https://www.googleapis.com/auth/youtube.readonly',
@@ -27,7 +28,7 @@ const SettingsView: React.VoidFunctionComponent = () => {
 		},
 	});
 	const [spotifyAuthorizeConfiguration] = React.useState<AuthConfiguration>({
-		clientId: 'f215a46cd2624bdf93203ab0e584350a',
+		clientId: Config.SPOTIFY_CLIENT_ID,
 		redirectUrl: 'com.youtify:/spotifyoauth2callback',
 		scopes: [
 			'user-read-email',
@@ -42,6 +43,11 @@ const SettingsView: React.VoidFunctionComponent = () => {
 			tokenEndpoint: 'https://accounts.spotify.com/api/token',
 		},
 	});
+
+	React.useEffect(() => {
+		log(Config.YOUTUBE_CLIENT_ID);
+		log(Config.SPOTIFY_CLIENT_ID);
+	}, [log]);
 
 	/// ######### ///
 	/// CALLBACKS ///
