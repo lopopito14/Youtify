@@ -64,3 +64,6 @@ buck-out/
 
 # Environment Variables files
 *.env
+
+# App center config file
+*/appcenter-config.json

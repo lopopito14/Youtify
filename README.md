@@ -1,8 +1,6 @@
 # Youtify
 
-<p align="center">
-<img src="https://img.shields.io/badge/build status-ok-success" alt="Build status" />
-</p>
+[![Build status](https://build.appcenter.ms/v0.1/apps/9968ae44-015c-4bba-8d92-73b5c7406747/branches/master/badge)](https://appcenter.ms)
 
 ---
 
