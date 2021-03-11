@@ -66,4 +66,4 @@ buck-out/
 *.env
 
 # App center config file
-*/appcenter-config.json
+appcenter-config.json
