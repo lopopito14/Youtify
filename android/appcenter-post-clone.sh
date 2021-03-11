@@ -2,7 +2,7 @@
 
 # Create .env file with Youtube and Spotify Client ID
 
-echo 'Post clone...'
+echo 'Android Post clone...'
 echo '${APPCENTER_SOURCE_DIRECTORY}'
 echo 'Creating .env file'
 
