@@ -1,6 +1,13 @@
 # Youtify
 
-[![Build status](https://build.appcenter.ms/v0.1/apps/9968ae44-015c-4bba-8d92-73b5c7406747/branches/master/badge)](https://appcenter.ms)
+<p align="center">
+  <a href="https://github.com/lopopito14/Youtify/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Youtify is released under the MIT license." />
+  </a>
+  <a href="https://appcenter.ms">
+    <img src="https://build.appcenter.ms/v0.1/apps/9968ae44-015c-4bba-8d92-73b5c7406747/branches/master/badge" alt="Build status." />
+  </a>
+</p>
 
 ---
 
@@ -71,3 +78,7 @@ Create a **.env** file at project root and add the next 2 following lines into i
 <p align="center">
     <img src="docs/Screenshot_6.jpg" alt="Build status" width="45%"/>
 </p>
+
+### &#9989; License
+
+Youtify is MIT licensed, as found in the [LICENSE](https://github.com/lopopito14/Youtify/blob/master/LICENSE) file.
